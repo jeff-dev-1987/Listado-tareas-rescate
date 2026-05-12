@@ -15,23 +15,31 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { chinalco: '#8b0000', chinalcoDark: '#660000' }
+                    colors: { 
+                        chinalco: '#8b0000', 
+                        chinalcoDark: '#660000',
+                        ejecutivoBg: '#f8f9fa'
+                    }
                 }
             }
         }
     </script>
     <style>
         .hidden-view { display: none !important; }
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #8b0000; border-radius: 4px; }
+        .dropzone { min-height: 100px; transition: background 0.3s; }
+        .dropzone.dragover { background: #fee2e2; border: 2px dashed #8b0000; }
+        .task-card { cursor: grab; }
+        .task-card:active { cursor: grabbing; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 h-screen overflow-hidden font-sans">
+<body class="bg-ejecutivoBg text-gray-800 h-screen overflow-hidden font-sans relative">
 
     <!-- PANTALLA DE LOGIN / REGISTRO -->
-    <div id="auth-screen" class="flex h-screen justify-center items-center bg-gray-200">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border-t-4 border-chinalco">
+    <div id="auth-screen" class="flex h-screen justify-center items-center bg-gray-200 p-4 relative z-50">
+        <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-md border-t-4 border-chinalco">
             <div class="text-center mb-6">
                 <i class="fa-solid fa-helmet-safety text-4xl text-chinalco mb-2"></i>
                 <h2 class="text-2xl font-bold text-gray-800">Servicio de Emergencias</h2>
@@ -42,139 +50,271 @@
             <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                    <input type="email" id="login-email" class="mt-1 w-full p-2 border rounded focus:ring-chinalco focus:border-chinalco" required>
+                    <input type="email" id="login-email" class="mt-1 w-full p-2 border rounded focus:ring-chinalco outline-none" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Contraseña</label>
                     <div class="relative">
-                        <input type="password" id="login-password" class="mt-1 w-full p-2 border rounded focus:ring-chinalco focus:border-chinalco" required>
+                        <input type="password" id="login-password" class="mt-1 w-full p-2 border rounded focus:ring-chinalco outline-none" required>
                         <button type="button" onclick="togglePassword('login-password', 'icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">
                             <i id="icon-login" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-chinalco text-white p-2 rounded hover:bg-chinalcoDark transition font-bold">Ingresar</button>
-                <p class="text-sm text-center mt-4">¿No tienes acceso? <a href="#" onclick="toggleAuthForms()" class="text-chinalco font-bold">Solicitar Cuenta</a></p>
+                <button type="submit" class="w-full bg-chinalco text-white p-2 rounded hover:bg-chinalcoDark transition font-bold shadow">Ingresar</button>
+                <p class="text-sm text-center mt-4">¿No tienes acceso? <a href="#" onclick="toggleAuthForms()" class="text-chinalco font-bold hover:underline">Solicitar Cuenta</a></p>
             </form>
 
             <!-- Formulario Registro -->
             <form id="register-form" class="space-y-4 hidden-view">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                    <input type="text" id="reg-name" class="mt-1 w-full p-2 border rounded" required>
+                    <input type="text" id="reg-name" class="mt-1 w-full p-2 border rounded outline-none" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                    <input type="email" id="reg-email" class="mt-1 w-full p-2 border rounded" required>
+                    <input type="email" id="reg-email" class="mt-1 w-full p-2 border rounded outline-none" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Contraseña</label>
                     <div class="relative">
-                        <input type="password" id="reg-password" class="mt-1 w-full p-2 border rounded" required minlength="6">
+                        <input type="password" id="reg-password" class="mt-1 w-full p-2 border rounded outline-none" required minlength="6">
                         <button type="button" onclick="togglePassword('reg-password', 'icon-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">
                             <i id="icon-reg" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-900 transition font-bold">Enviar Solicitud</button>
-                <p class="text-sm text-center mt-4"><a href="#" onclick="toggleAuthForms()" class="text-chinalco font-bold">Volver al Login</a></p>
+                <button type="submit" class="w-full bg-gray-800 text-white p-2 rounded hover:bg-gray-900 transition font-bold shadow">Enviar Solicitud</button>
+                <p class="text-sm text-center mt-4"><a href="#" onclick="toggleAuthForms()" class="text-chinalco font-bold hover:underline">Volver al Login</a></p>
             </form>
         </div>
     </div>
 
     <!-- APLICACIÓN PRINCIPAL -->
-    <div id="app-screen" class="hidden-view h-screen flex flex-col">
+    <div id="app-screen" class="hidden-view h-screen flex flex-col relative">
+        
+        <!-- Overlay para Sidebar Móvil -->
+        <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onclick="toggleSidebar()"></div>
+
         <!-- Header -->
-        <header class="bg-chinalco text-white p-4 flex justify-between items-center shadow-md z-10">
+        <header class="bg-chinalco text-white p-4 flex justify-between items-center shadow-md z-20">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-list-check text-xl"></i>
-                <h1 class="text-lg font-bold hidden md:block">Seguimiento de Pendientes - Emergencias</h1>
+                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-gray-200 transition">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <i class="fa-solid fa-list-check text-xl hidden sm:block"></i>
+                <h1 class="text-base sm:text-lg font-bold tracking-wide truncate">Gestión de Pendientes <span class="hidden sm:inline">- Emergencias</span></h1>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="text-sm bg-chinalcoDark px-3 py-1 rounded-full flex items-center gap-2">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="text-xs sm:text-sm bg-chinalcoDark px-2 sm:px-3 py-1 rounded-full flex items-center gap-2 shadow-inner border border-red-800">
                     <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span id="online-count">1</span> en línea
+                    <span id="online-count">1</span> <span class="hidden sm:inline">en línea</span>
                 </div>
                 <div class="text-sm text-right hidden md:block">
                     <div id="user-display-name" class="font-bold">Usuario</div>
-                    <div id="user-role-badge" class="text-xs text-gray-300">Rol</div>
+                    <div id="user-role-badge" class="text-xs text-gray-200">Rol</div>
                 </div>
-                <button id="btn-logout" class="bg-white text-chinalco p-2 rounded-full hover:bg-gray-200 transition" title="Cerrar Sesión">
+                <button id="btn-logout" class="bg-white text-chinalco p-2 rounded hover:bg-gray-200 transition shadow" title="Cerrar Sesión">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden">
-            <!-- Sidebar / Navegación -->
-            <aside class="w-64 bg-white border-r shadow-sm flex flex-col">
-                <nav class="flex-1 p-4 space-y-2">
-                    <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded bg-red-50 text-chinalco font-bold hover:bg-red-100 transition" id="tab-tasks">
-                        <i class="fa-solid fa-clipboard-list"></i> Tareas y Pendientes
+        <div class="flex flex-1 overflow-hidden relative">
+            <!-- Sidebar / Navegación (Responsive: Fixed on Mobile, Relative on Desktop) -->
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r shadow-md flex flex-col transition-transform duration-300 ease-in-out h-full">
+                <!-- Info de usuario móvil -->
+                <div class="p-4 border-b bg-gray-50 md:hidden">
+                    <div id="user-display-name-mobile" class="font-bold text-gray-800">Usuario</div>
+                    <div id="user-role-badge-mobile" class="text-xs text-gray-500 uppercase">Rol</div>
+                </div>
+                <nav class="flex-1 p-4 space-y-2 mt-2">
+                    <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded bg-red-50 text-chinalco font-bold border-l-4 border-chinalco transition" id="tab-tasks">
+                        <i class="fa-solid fa-list-ul w-5"></i> Tareas y Pendientes
                     </button>
-                    <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded text-gray-600 hover:bg-gray-100 transition hidden-view" id="tab-users">
-                        <i class="fa-solid fa-users-gear"></i> Gestión de Usuarios
+                    <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded text-gray-600 hover:bg-gray-100 border-l-4 border-transparent transition" id="tab-matrix">
+                        <i class="fa-solid fa-table-cells-large w-5"></i> Matriz Eisenhower
+                    </button>
+                    <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded text-gray-600 hover:bg-gray-100 border-l-4 border-transparent transition hidden-view" id="tab-users">
+                        <i class="fa-solid fa-users-gear w-5"></i> Gestión de Usuarios
                     </button>
                 </nav>
             </aside>
 
             <!-- Contenido Principal -->
-            <main class="flex-1 bg-gray-50 flex flex-col relative">
+            <main class="flex-1 flex flex-col relative overflow-hidden bg-gray-50 w-full">
                 
-                <!-- VISTA DE TAREAS -->
-                <div id="view-tasks" class="flex-1 p-6 flex flex-col h-full overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Lista de Pendientes</h2>
-                        <button onclick="exportToExcel('tasks')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i> Exportar a Excel
-                        </button>
+                <!-- ================= VISTA DE TAREAS ================= -->
+                <div id="view-tasks" class="flex-1 p-4 sm:p-6 flex flex-col h-full overflow-y-auto">
+                    
+                    <!-- Barra de Controles y Filtros -->
+                    <div class="bg-white p-4 rounded-lg shadow-sm border mb-4 sm:mb-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-800 border-l-4 border-chinalco pl-2">Lista de Pendientes</h2>
+                            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 shadow flex justify-center items-center gap-2 transition">
+                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
+                                </button>
+                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 shadow flex justify-center items-center gap-2 transition">
+                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filtros -->
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm border-t pt-4">
+                            <div class="col-span-2 md:col-span-1">
+                                <label class="text-xs text-gray-500 font-bold uppercase">Orden</label>
+                                <select id="f-orden" class="w-full p-2 border rounded outline-none" onchange="renderLists()">
+                                    <option value="desc">Más Nuevos</option>
+                                    <option value="asc">Más Antiguos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold uppercase">Creador</label>
+                                <input type="text" id="f-creador" class="w-full p-2 border rounded outline-none" placeholder="Buscar..." oninput="renderLists()">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold uppercase">Fecha Límite</label>
+                                <input type="date" id="f-fecha" class="w-full p-2 border rounded outline-none text-gray-600" onchange="renderLists()">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold uppercase">Criticidad</label>
+                                <select id="f-crit" class="w-full p-2 border rounded outline-none" onchange="renderLists()">
+                                    <option value="">Todas</option>
+                                    <option value="ALTA">Alta</option>
+                                    <option value="MEDIA">Media</option>
+                                    <option value="BAJA">Baja</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 font-bold uppercase">Categoría</label>
+                                <select id="f-cat" class="w-full p-2 border rounded outline-none" onchange="renderLists()">
+                                    <option value="">Todas</option>
+                                    <option value="Operativa">Operativa</option>
+                                    <option value="Administrativa">Administrativa</option>
+                                    <option value="Logística">Logística</option>
+                                    <option value="Entrenamiento">Entrenamiento</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Input Nueva Tarea -->
-                    <form id="task-form" class="mb-6 flex gap-2 hidden-view">
-                        <input type="text" id="new-task-text" placeholder="Añadir una nueva tarea..." class="flex-1 p-3 border rounded shadow-sm focus:ring-2 focus:ring-chinalco outline-none text-lg" required>
-                        <select id="new-task-category" class="p-3 border rounded shadow-sm bg-white">
-                            <option value="Operativa">Operativa</option>
-                            <option value="Administrativa">Administrativa</option>
-                            <option value="Logística">Logística</option>
-                            <option value="Entrenamiento">Entrenamiento</option>
-                        </select>
-                        <button type="submit" class="bg-chinalco text-white px-6 py-3 rounded shadow hover:bg-chinalcoDark transition font-bold">
-                            <i class="fa-solid fa-plus"></i> Añadir
+                    <form id="task-form" class="mb-6 flex flex-col md:flex-row gap-3 hidden-view bg-white p-4 rounded-lg shadow-sm border border-l-4 border-l-blue-500 items-start md:items-end w-full">
+                        <div class="w-full md:flex-1">
+                            <label class="text-xs text-gray-500 font-bold">Nuevo Pendiente</label>
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos SCBA..." class="w-full p-2 border-b-2 border-gray-300 focus:border-chinalco outline-none text-gray-800 bg-transparent transition" required>
+                        </div>
+                        <div class="flex gap-3 w-full md:w-auto flex-wrap sm:flex-nowrap">
+                            <div class="flex-1 md:w-32">
+                                <label class="text-xs text-gray-500 font-bold">F. Límite</label>
+                                <input type="date" id="new-task-date" class="w-full p-2 border rounded outline-none text-sm bg-gray-50" required>
+                            </div>
+                            <div class="flex-1 md:w-28">
+                                <label class="text-xs text-gray-500 font-bold">Criticidad</label>
+                                <select id="new-task-crit" class="w-full p-2 border rounded outline-none text-sm font-bold bg-gray-50">
+                                    <option value="ALTA" class="text-red-600">ALTA</option>
+                                    <option value="MEDIA" class="text-orange-500" selected>MEDIA</option>
+                                    <option value="BAJA" class="text-green-600">BAJA</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 md:w-36">
+                                <label class="text-xs text-gray-500 font-bold">Categoría</label>
+                                <select id="new-task-category" class="w-full p-2 border rounded outline-none text-sm bg-gray-50">
+                                    <option value="Operativa">Operativa</option>
+                                    <option value="Administrativa">Admin</option>
+                                    <option value="Logística">Logística</option>
+                                    <option value="Entrenamiento">Entrenamiento</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full md:w-auto bg-chinalco text-white px-5 py-2 rounded hover:bg-chinalcoDark transition font-bold shadow md:h-[42px] mt-2 md:mt-0 flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Guardar
                         </button>
                     </form>
 
-                    <!-- Lista de Tareas -->
-                    <div class="bg-white rounded-lg shadow-sm border p-4 flex-1 overflow-y-auto">
-                        <ul id="task-list" class="space-y-2">
-                            <!-- Tareas renderizadas por JS -->
-                        </ul>
+                    <!-- Listas -->
+                    <div class="flex-1 overflow-y-auto flex flex-col gap-6 pb-6">
+                        <!-- Pendientes Activos -->
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-500 uppercase mb-2 flex items-center gap-2"><i class="fa-regular fa-clock"></i> Pendientes Activos</h3>
+                            <div class="bg-white rounded-lg shadow-sm border p-2">
+                                <ul id="task-list-active" class="space-y-1"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Pendientes Completados -->
+                        <div>
+                            <h3 class="text-sm font-bold text-green-600 uppercase mb-2 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Realizados</h3>
+                            <div class="bg-gray-50 rounded-lg shadow-inner border p-2 opacity-80">
+                                <ul id="task-list-completed" class="space-y-1"></ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- VISTA DE USUARIOS (Solo Admin) -->
-                <div id="view-users" class="hidden-view flex-1 p-6 h-full overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Control de Accesos</h2>
-                        <button onclick="exportToExcel('users')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i> Exportar
-                        </button>
+                <!-- ================= VISTA: MATRIZ DE EISENHOWER ================= -->
+                <!-- Mobile: flex-col with overflow-auto. Desktop: flex-row with overflow-hidden -->
+                <div id="view-matrix" class="hidden-view flex-1 flex flex-col md:flex-row h-full overflow-y-auto md:overflow-hidden bg-gray-100 pb-6 md:pb-0">
+                    
+                    <!-- Lateral: Banco de Tareas -->
+                    <div class="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r shadow-md flex flex-col z-10 shrink-0 h-64 md:h-full">
+                        <div class="p-3 md:p-4 bg-gray-800 text-white font-bold text-center text-sm shadow">
+                            Bandeja General
+                        </div>
+                        <div class="flex-1 p-3 overflow-y-auto dropzone bg-gray-50" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
+                            <!-- Tareas no asignadas a un cuadrante -->
+                        </div>
                     </div>
 
-                    <div class="bg-white rounded-lg shadow border overflow-hidden">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-700 uppercase text-xs">
-                                    <th class="p-4 border-b">Nombre / Correo</th>
-                                    <th class="p-4 border-b">Fecha Solicitud</th>
-                                    <th class="p-4 border-b">Estado / Rol</th>
-                                    <th class="p-4 border-b">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-list" class="text-sm">
-                                <!-- Usuarios renderizados por JS -->
-                            </tbody>
-                        </table>
+                    <!-- Cuadrantes -->
+                    <div class="flex-1 p-4 grid grid-cols-1 sm:grid-cols-2 grid-rows-none sm:grid-rows-2 gap-4 h-auto md:h-full overflow-y-auto">
+                        <!-- Q1 -->
+                        <div class="bg-white rounded-lg shadow border-t-4 border-t-red-600 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="bg-red-50 p-2 text-center border-b font-bold text-red-800 text-sm">Urgente e Importante <span class="text-xs font-normal text-gray-500 block">Hacer Ahora</span></div>
+                            <div class="flex-1 p-2 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
+                        </div>
+                        <!-- Q2 -->
+                        <div class="bg-white rounded-lg shadow border-t-4 border-t-blue-600 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="bg-blue-50 p-2 text-center border-b font-bold text-blue-800 text-sm">Importante, No Urgente <span class="text-xs font-normal text-gray-500 block">Planificar</span></div>
+                            <div class="flex-1 p-2 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
+                        </div>
+                        <!-- Q3 -->
+                        <div class="bg-white rounded-lg shadow border-t-4 border-t-orange-500 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="bg-orange-50 p-2 text-center border-b font-bold text-orange-800 text-sm">Urgente, No Importante <span class="text-xs font-normal text-gray-500 block">Delegar</span></div>
+                            <div class="flex-1 p-2 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
+                        </div>
+                        <!-- Q4 -->
+                        <div class="bg-white rounded-lg shadow border-t-4 border-t-gray-500 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="bg-gray-100 p-2 text-center border-b font-bold text-gray-700 text-sm">No Urgente, No Importante <span class="text-xs font-normal text-gray-500 block">Eliminar / Posponer</span></div>
+                            <div class="flex-1 p-2 overflow-y-auto dropzone" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= VISTA DE USUARIOS ================= -->
+                <div id="view-users" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-800 border-l-4 border-chinalco pl-2">Control de Accesos</h2>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse min-w-[600px]">
+                                <thead>
+                                    <tr class="bg-gray-800 text-white uppercase text-xs">
+                                        <th class="p-4 border-b font-semibold">Nombre / Correo</th>
+                                        <th class="p-4 border-b font-semibold">Fecha Solicitud</th>
+                                        <th class="p-4 border-b font-semibold">Estado / Rol</th>
+                                        <th class="p-4 border-b font-semibold text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-list" class="text-sm divide-y">
+                                    <!-- Usuarios renderizados por JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -191,16 +331,15 @@
         /* =========================================
            1. CONFIGURACIÓN DE SERVICIOS
         ========================================= */
-        // ¡IMPORTANTE! Reemplaza esto con tus datos de Firebase
         const firebaseConfig = {
-  apiKey: "AIzaSyBjv44fEAHKH-W2onNB6pPW1nHZwTTnnb0",
-  authDomain: "tareas-pendientes-emergencias.firebaseapp.com",
-  projectId: "tareas-pendientes-emergencias",
-  storageBucket: "tareas-pendientes-emergencias.firebasestorage.app",
-  messagingSenderId: "96277630087",
-  appId: "1:96277630087:web:928479563d98880fdcbc22",
-  measurementId: "G-1KZN5N5RMB"
-};
+            apiKey: "AIzaSyBjv44fEAHKH-W2onNB6pPW1nHZwTTnnb0",
+            authDomain: "tareas-pendientes-emergencias.firebaseapp.com",
+            projectId: "tareas-pendientes-emergencias",
+            storageBucket: "tareas-pendientes-emergencias.firebasestorage.app",
+            messagingSenderId: "96277630087",
+            appId: "1:96277630087:web:928479563d98880fdcbc22",
+            measurementId: "G-1KZN5N5RMB"
+        };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -210,7 +349,7 @@
            2. ESTADO GLOBAL
         ========================================= */
         let currentUserData = null;
-        let tasksData = [];
+        let allTasksData = [];
         let usersData = [];
         let heartbeatInterval;
 
@@ -234,19 +373,46 @@
             document.getElementById('register-form').classList.toggle('hidden-view');
         }
 
+        // Sidebar Toggle for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
         function switchTab(tab) {
             document.getElementById('view-tasks').classList.add('hidden-view');
+            document.getElementById('view-matrix').classList.add('hidden-view');
             document.getElementById('view-users').classList.add('hidden-view');
             
-            document.getElementById('tab-tasks').classList.remove('bg-red-50', 'text-chinalco');
-            document.getElementById('tab-users').classList.remove('bg-red-50', 'text-chinalco');
+            document.getElementById('tab-tasks').classList.remove('bg-red-50', 'text-chinalco', 'border-chinalco');
+            document.getElementById('tab-tasks').classList.add('border-transparent');
+            
+            document.getElementById('tab-matrix').classList.remove('bg-red-50', 'text-chinalco', 'border-chinalco');
+            document.getElementById('tab-matrix').classList.add('border-transparent');
+            
+            document.getElementById('tab-users').classList.remove('bg-red-50', 'text-chinalco', 'border-chinalco');
+            document.getElementById('tab-users').classList.add('border-transparent');
 
             if(tab === 'tasks') {
                 document.getElementById('view-tasks').classList.remove('hidden-view');
-                document.getElementById('tab-tasks').classList.add('bg-red-50', 'text-chinalco');
+                document.getElementById('tab-tasks').classList.add('bg-red-50', 'text-chinalco', 'border-chinalco');
+                document.getElementById('tab-tasks').classList.remove('border-transparent');
+            } else if (tab === 'matrix') {
+                document.getElementById('view-matrix').classList.remove('hidden-view');
+                document.getElementById('tab-matrix').classList.add('bg-red-50', 'text-chinalco', 'border-chinalco');
+                document.getElementById('tab-matrix').classList.remove('border-transparent');
             } else {
                 document.getElementById('view-users').classList.remove('hidden-view');
-                document.getElementById('tab-users').classList.add('bg-red-50', 'text-chinalco');
+                document.getElementById('tab-users').classList.add('bg-red-50', 'text-chinalco', 'border-chinalco');
+                document.getElementById('tab-users').classList.remove('border-transparent');
+            }
+
+            // Close sidebar on mobile after clicking a tab
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
             }
         }
 
@@ -274,49 +440,44 @@
                 const userRef = db.collection("usuarios").doc(user.uid);
                 let doc = await userRef.get();
 
-                // CORRECCIÓN: Autenticación automática como Admin para este correo específico
                 if (user.email === "supervision.rescate@gmail.com") {
                     if (!doc.exists) {
-                        // Si no existe el documento en Firestore, lo crea como admin
                         await userRef.set({
-                            nombre: "Administrador Principal",
-                            email: user.email,
-                            rol: 'admin',
-                            estado: 'aprobado',
+                            nombre: "Administrador Principal", email: user.email,
+                            rol: 'admin', estado: 'aprobado',
                             fechaSolicitud: new Date().toLocaleString('es-PE'),
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     } else if (doc.data().rol !== 'admin' || doc.data().estado !== 'aprobado') {
-                        // Si existe pero no es admin o no está aprobado, lo fuerza
                         await userRef.update({ rol: 'admin', estado: 'aprobado' });
                     }
-                    // Volver a leer el documento actualizado
                     doc = await userRef.get();
                 }
 
-                // Verificación estándar para todos los usuarios
                 if (doc.exists) {
                     currentUserData = { id: user.uid, ...doc.data() };
                     
                     if (currentUserData.estado !== 'aprobado') {
-                        alert("Tu cuenta aún está pendiente de aprobación por el administrador.");
-                        auth.signOut();
-                        return;
+                        alert("Cuenta pendiente de aprobación.");
+                        auth.signOut(); return;
                     }
 
                     document.getElementById('auth-screen').classList.add('hidden-view');
                     document.getElementById('app-screen').classList.remove('hidden-view');
                     
+                    // Desktop names
                     document.getElementById('user-display-name').innerText = currentUserData.nombre;
                     document.getElementById('user-role-badge').innerText = currentUserData.rol.toUpperCase();
+                    // Mobile names
+                    document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
+                    document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol.toUpperCase();
                     
                     applyRolePermissions(currentUserData.rol);
                     loadTasks();
                     if(currentUserData.rol === 'admin') loadUsers();
                     startPresenceSystem();
                 } else {
-                    // Si llega aquí, es un correo nuevo que no se registró por el formulario
-                    alert("Tu usuario no está registrado en la base de datos de este sistema. Solicita una cuenta primero.");
+                    alert("Solicita una cuenta primero.");
                     auth.signOut();
                 }
             } else {
@@ -326,7 +487,6 @@
             }
         });
 
-        // LOGIN
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -334,146 +494,252 @@
             try {
                 await auth.signInWithEmailAndPassword(email, pass);
             } catch (error) {
-                console.error(error);
-                alert("Error al ingresar: Verifique que su correo y contraseña sean correctos.");
+                if (email === "supervision.rescate@gmail.com") {
+                    try { await auth.createUserWithEmailAndPassword(email, pass); return; } catch (e) {}
+                }
+                alert("Verifique credenciales.");
             }
         });
 
-        // SOLICITAR CUENTA (REGISTRO)
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-password').value;
-
             try {
                 const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-                const fechaActual = new Date();
-                
                 await db.collection("usuarios").doc(userCred.user.uid).set({
-                    nombre: name,
-                    email: email,
-                    rol: 'lector',
-                    estado: 'pendiente',
-                    fechaSolicitud: fechaActual.toLocaleString('es-PE'),
+                    nombre: name, email: email, rol: 'lector', estado: 'pendiente',
+                    fechaSolicitud: new Date().toLocaleString('es-PE'),
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
-                alert("Solicitud enviada correctamente. Por favor, solicite la autorización para poder ingresar.");
-                auth.signOut();
-                toggleAuthForms();
-
+                alert("Solicitud enviada. Espere autorización.");
+                auth.signOut(); toggleAuthForms();
             } catch (error) {
-                if(error.code === 'auth/email-already-in-use') {
-                    alert("Este correo ya está registrado en el sistema. Intente iniciar sesión.");
-                } else {
-                    alert("Error al solicitar cuenta: " + error.message);
-                }
+                alert("Error: " + error.message);
             }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
 
         /* =========================================
-           5. GESTIÓN DE TAREAS
+           5. GESTIÓN DE TAREAS Y MATRIZ
         ========================================= */
+        function getCritColor(crit) {
+            if(crit === 'ALTA') return 'text-red-600 bg-red-100 border-red-200';
+            if(crit === 'MEDIA') return 'text-orange-600 bg-orange-100 border-orange-200';
+            if(crit === 'BAJA') return 'text-green-600 bg-green-100 border-green-200';
+            return 'text-gray-600 bg-gray-100';
+        }
+
+        // Listener Global
         function loadTasks() {
-            db.collection("tareas").orderBy("creadoEn", "desc").onSnapshot(snapshot => {
-                tasksData = [];
-                const taskList = document.getElementById('task-list');
-                taskList.innerHTML = '';
-
-                snapshot.forEach(doc => {
-                    const t = { id: doc.id, ...doc.data() };
-                    tasksData.push(t);
-                    
-                    const isChecked = t.completado ? 'checked' : '';
-                    const textClass = t.completado ? 'line-through text-gray-400' : 'text-gray-800';
-                    
-                    const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
-                    const deleteBtn = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
-                        ? `<button onclick="deleteTask('${t.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded transition"><i class="fa-solid fa-trash"></i></button>`
-                        : '';
-
-                    taskList.innerHTML += `
-                        <li class="flex items-center justify-between p-3 border-b hover:bg-gray-50 transition group">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-5 h-5 text-chinalco rounded focus:ring-chinalco cursor-pointer">
-                                <div class="${textClass} font-medium">${t.texto}</div>
-                                <span class="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600 ml-2">${t.categoria}</span>
-                            </div>
-                            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
-                                <span class="text-xs text-gray-400 italic">Por: ${t.creador}</span>
-                                ${deleteBtn}
-                            </div>
-                        </li>
-                    `;
-                });
+            db.collection("tareas").onSnapshot(snapshot => {
+                allTasksData = [];
+                snapshot.forEach(doc => allTasksData.push({ id: doc.id, ...doc.data() }));
+                renderLists();
             });
         }
 
+        // Renderizado Combinado (Lista y Matriz con Filtros)
+        function renderLists() {
+            // Recoger valores de filtros
+            const sortOrder = document.getElementById('f-orden').value;
+            const fCreator = document.getElementById('f-creador').value.toLowerCase();
+            const fDate = document.getElementById('f-fecha').value;
+            const fCrit = document.getElementById('f-crit').value;
+            const fCat = document.getElementById('f-cat').value;
+
+            // Filtrar y Ordenar
+            let filtered = allTasksData.filter(t => {
+                let match = true;
+                if(fCreator && !t.creador.toLowerCase().includes(fCreator)) match = false;
+                if(fDate && t.fechaLimite !== fDate) match = false;
+                if(fCrit && t.criticidad !== fCrit) match = false;
+                if(fCat && t.categoria !== fCat) match = false;
+                return match;
+            });
+
+            filtered.sort((a, b) => {
+                let dA = a.creadoEn ? a.creadoEn.toMillis() : 0;
+                let dB = b.creadoEn ? b.creadoEn.toMillis() : 0;
+                return sortOrder === 'desc' ? dB - dA : dA - dB;
+            });
+
+            // Preparar UI
+            const activeList = document.getElementById('task-list-active');
+            const completedList = document.getElementById('task-list-completed');
+            
+            const mBandeja = document.getElementById('cuad-bandeja');
+            const mQ1 = document.getElementById('cuad-q1');
+            const mQ2 = document.getElementById('cuad-q2');
+            const mQ3 = document.getElementById('cuad-q3');
+            const mQ4 = document.getElementById('cuad-q4');
+
+            activeList.innerHTML = ''; completedList.innerHTML = '';
+            mBandeja.innerHTML = ''; mQ1.innerHTML = ''; mQ2.innerHTML = ''; mQ3.innerHTML = ''; mQ4.innerHTML = '';
+
+            filtered.forEach(t => {
+                const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '...';
+                const fLimStr = t.fechaLimite ? t.fechaLimite : 'Sin límite';
+                const isChecked = t.completado ? 'checked' : '';
+                const txtClass = t.completado ? 'line-through text-gray-400' : 'text-gray-800 font-medium';
+                const critClass = getCritColor(t.criticidad);
+                
+                const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
+                const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
+                const deleteBtn = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
+                    ? `<button onclick="deleteTask('${t.id}')" class="text-red-400 hover:text-red-600 transition p-1" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
+
+                // Tarjeta HTML para las Listas (Responsive classes added)
+                const htmlList = `
+                    <li class="flex flex-col md:flex-row md:items-center justify-between p-3 border-b hover:bg-blue-50 transition group bg-white rounded gap-3 md:gap-0">
+                        <div class="flex items-start md:items-center gap-3 w-full md:w-3/4">
+                            <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-5 h-5 mt-1 md:mt-0 text-chinalco cursor-pointer rounded shrink-0">
+                            <div class="flex flex-col w-full pr-2">
+                                <span class="${txtClass} break-words">${t.texto}</span>
+                                <div class="text-xs text-gray-400 flex flex-wrap gap-x-2 gap-y-1 mt-1">
+                                    <span>Gen: ${dateStr}</span> <span class="hidden sm:inline">|</span> 
+                                    <span class="font-bold text-chinalcoDark">Límite: ${fLimStr}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-2 border-t md:border-t-0 pt-2 md:pt-0 border-gray-100">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] border px-2 py-0.5 rounded font-bold ${critClass}">${t.criticidad || '-'}</span>
+                                <span class="text-[10px] bg-gray-200 border px-2 py-0.5 rounded text-gray-600 truncate max-w-[90px]">${t.categoria}</span>
+                            </div>
+                            <div class="flex items-center gap-3 md:opacity-30 group-hover:opacity-100 transition">
+                                <span class="text-[10px] text-gray-500 italic"><i class="fa-solid fa-user-pen"></i> ${t.creador.split(' ')[0]}</span>
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                    </li>
+                `;
+
+                // Agregar a Listas
+                if(t.completado) {
+                    completedList.innerHTML += htmlList;
+                } else {
+                    activeList.innerHTML += htmlList;
+
+                    // Construir Tarjeta para Matriz (Solo activas)
+                    const htmlMatrix = `
+                        <div class="bg-white p-2 rounded shadow-sm border border-l-4 border-l-gray-400 mb-2 task-card hover:shadow-md transition text-sm relative" data-id="${t.id}" ${dragAttr}>
+                            <div class="font-medium text-gray-800 leading-tight mb-1 pr-6">${t.texto}</div>
+                            <div class="text-[10px] text-gray-500 mb-1">Vence: <strong class="text-gray-700">${fLimStr}</strong></div>
+                            <div class="flex justify-between items-center mt-2 border-t pt-1">
+                                <span class="text-[9px] border px-1 rounded ${critClass}">${t.criticidad}</span>
+                                <span class="text-[9px] text-gray-400 truncate w-16 text-right">${t.creador.split(' ')[0]}</span>
+                            </div>
+                            <button ${disableCheck} onclick="toggleTaskStatus('${t.id}', true)" class="absolute top-2 right-2 text-gray-300 hover:text-green-500 transition" title="Marcar Realizado"><i class="fa-solid fa-circle-check"></i></button>
+                        </div>
+                    `;
+
+                    // Asignar al Cuadrante
+                    let c = t.cuadrante || 'bandeja';
+                    if(c === 'q1') mQ1.innerHTML += htmlMatrix;
+                    else if(c === 'q2') mQ2.innerHTML += htmlMatrix;
+                    else if(c === 'q3') mQ3.innerHTML += htmlMatrix;
+                    else if(c === 'q4') mQ4.innerHTML += htmlMatrix;
+                    else mBandeja.innerHTML += htmlMatrix;
+                }
+            });
+        }
+
+        // Nueva Tarea
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = document.getElementById('new-task-text').value;
+            const date = document.getElementById('new-task-date').value;
+            const crit = document.getElementById('new-task-crit').value;
             const cat = document.getElementById('new-task-category').value;
             
             await db.collection("tareas").add({
                 texto: text,
+                fechaLimite: date,
+                criticidad: crit,
                 categoria: cat,
                 completado: false,
+                cuadrante: 'bandeja',
                 creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                 creador: currentUserData.nombre
             });
-            document.getElementById('new-task-text').value = '';
+            e.target.reset();
         });
 
+        // Completar/Descompletar
         window.toggleTaskStatus = async (id, status) => {
             await db.collection("tareas").doc(id).update({ completado: status });
         };
 
+        // Eliminar con Auditoría
         window.deleteTask = async (id) => {
-            if(confirm("¿Eliminar esta tarea?")) {
+            if(confirm("¿Eliminar permanentemente este pendiente?")) {
+                const task = allTasksData.find(t => t.id === id);
+                if(task) {
+                    await db.collection("log_eliminados").add({
+                        textoOriginal: task.texto,
+                        creadoOriginalmentePor: task.creador,
+                        eliminadoPor: currentUserData.nombre,
+                        fechaEliminacion: new Date().toLocaleString('es-PE')
+                    });
+                }
                 await db.collection("tareas").doc(id).delete();
             }
         };
 
+        /* --- Lógica Drag & Drop --- */
+        window.drag = (ev) => {
+            ev.dataTransfer.setData("taskId", ev.target.dataset.id);
+            ev.dataTransfer.effectAllowed = "move";
+        }
+        window.allowDrop = (ev) => {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = "move";
+        }
+        window.drop = async (ev, cuadrante) => {
+            ev.preventDefault();
+            if (currentUserData.rol === 'lector') return;
+            const id = ev.dataTransfer.getData("taskId");
+            if(id) {
+                await db.collection("tareas").doc(id).update({ cuadrante: cuadrante });
+            }
+        }
+
         /* =========================================
-           6. GESTIÓN DE USUARIOS (ADMIN)
+           6. GESTIÓN DE USUARIOS
         ========================================= */
         function loadUsers() {
             db.collection("usuarios").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-                usersData = [];
                 const usersList = document.getElementById('users-list');
                 usersList.innerHTML = '';
-
                 snapshot.forEach(doc => {
                     const u = { id: doc.id, ...doc.data() };
-                    usersData.push(u);
-
-                    const statusColor = u.estado === 'aprobado' ? 'text-green-600 bg-green-50' : 'text-orange-600 bg-orange-50';
+                    const statusColor = u.estado === 'aprobado' ? 'text-green-700 bg-green-50 border-green-200' : 'text-orange-700 bg-orange-50 border-orange-200';
                     
                     usersList.innerHTML += `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-4">
-                                <div class="font-bold text-gray-800">${u.nombre}</div>
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-3 sm:p-4 whitespace-nowrap">
+                                <div class="font-bold text-gray-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre}</div>
                                 <div class="text-xs text-gray-500">${u.email}</div>
                             </td>
-                            <td class="p-4 text-sm text-gray-600">${u.fechaSolicitud || '-'}</td>
-                            <td class="p-4">
-                                <div class="flex flex-col gap-1">
-                                    <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-xs p-1 rounded border ${statusColor}">
+                            <td class="p-3 sm:p-4 text-sm text-gray-600 whitespace-nowrap">${u.fechaSolicitud || '-'}</td>
+                            <td class="p-3 sm:p-4 whitespace-nowrap">
+                                <div class="flex flex-col gap-2 w-28 sm:w-32">
+                                    <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-xs p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
                                         <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
                                         <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
                                     </select>
-                                    <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-xs p-1 rounded border bg-gray-50">
+                                    <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-xs p-1.5 rounded border bg-gray-50 outline-none shadow-sm">
                                         <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
                                         <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
                                         <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Admin</option>
                                     </select>
                                 </div>
                             </td>
-                            <td class="p-4">
-                                <button onclick="deleteUserRecord('${u.id}')" class="text-red-500 hover:text-red-700" title="Eliminar Registro">
+                            <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+                                <button onclick="deleteUserRecord('${u.id}')" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
                                     <i class="fa-solid fa-user-xmark"></i>
                                 </button>
                             </td>
@@ -484,75 +750,66 @@
         }
 
         window.updateUser = async (id, field, value) => {
-            const updateObj = {};
-            updateObj[field] = value;
+            const updateObj = {}; updateObj[field] = value;
             await db.collection("usuarios").doc(id).update(updateObj);
         };
-
         window.deleteUserRecord = async (id) => {
-            if(confirm("Al eliminar este registro el usuario ya no podrá ingresar. ¿Continuar?")) {
-                await db.collection("usuarios").doc(id).delete();
-            }
+            if(confirm("¿Eliminar usuario? Ya no podrá ingresar.")) await db.collection("usuarios").doc(id).delete();
         };
 
         /* =========================================
-           7. USUARIOS EN LÍNEA (PRESENCIA)
+           7. USUARIOS EN LÍNEA
         ========================================= */
         function startPresenceSystem() {
             const updatePresence = () => {
-                if(currentUserData) {
-                    db.collection("presencia").doc(currentUserData.id).set({
-                        ultimaVez: Date.now()
-                    });
-                }
+                if(currentUserData) db.collection("presencia").doc(currentUserData.id).set({ ultimaVez: Date.now() });
             };
-            updatePresence();
-            heartbeatInterval = setInterval(updatePresence, 60000);
-
+            updatePresence(); heartbeatInterval = setInterval(updatePresence, 60000);
             db.collection("presencia").onSnapshot(snapshot => {
-                const now = Date.now();
-                let count = 0;
-                snapshot.forEach(doc => {
-                    if (now - doc.data().ultimaVez < 120000) count++;
-                });
+                const now = Date.now(); let count = 0;
+                snapshot.forEach(doc => { if (now - doc.data().ultimaVez < 120000) count++; });
                 document.getElementById('online-count').innerText = count;
             });
         }
-
-        function stopPresenceSystem() {
-            clearInterval(heartbeatInterval);
-        }
+        function stopPresenceSystem() { clearInterval(heartbeatInterval); }
 
         /* =========================================
-           8. EXPORTAR A EXCEL (SHEETJS)
+           8. EXPORTAR A EXCEL
         ========================================= */
-        window.exportToExcel = (type) => {
-            let data = [];
-            let filename = '';
+        window.exportToExcel = (mode) => {
+            let sourceData = allTasksData;
 
-            if (type === 'tasks') {
-                data = tasksData.map(t => ({
-                    Tarea: t.texto,
-                    Categoría: t.categoria,
-                    Estado: t.completado ? 'Completado' : 'Pendiente',
-                    Creado_Por: t.creador
-                }));
-                filename = 'Lista_Pendientes_Emergencias.xlsx';
-            } else if (type === 'users') {
-                data = usersData.map(u => ({
-                    Nombre: u.nombre,
-                    Correo: u.email,
-                    Rol: u.rol.toUpperCase(),
-                    Estado: u.estado.toUpperCase(),
-                    Fecha_Solicitud: u.fechaSolicitud
-                }));
-                filename = 'Registro_Usuarios_Sistema.xlsx';
+            if (mode === 'filtered') {
+                const fCreator = document.getElementById('f-creador').value.toLowerCase();
+                const fDate = document.getElementById('f-fecha').value;
+                const fCrit = document.getElementById('f-crit').value;
+                const fCat = document.getElementById('f-cat').value;
+                
+                sourceData = allTasksData.filter(t => {
+                    let match = true;
+                    if(fCreator && !t.creador.toLowerCase().includes(fCreator)) match = false;
+                    if(fDate && t.fechaLimite !== fDate) match = false;
+                    if(fCrit && t.criticidad !== fCrit) match = false;
+                    if(fCat && t.categoria !== fCat) match = false;
+                    return match;
+                });
             }
 
-            const worksheet = XLSX.utils.json_to_sheet(data);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Hoja1");
-            XLSX.writeFile(workbook, filename);
+            const dataToExport = sourceData.map(t => ({
+                Pendiente: t.texto,
+                Fecha_Creacion: t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '',
+                Fecha_Limite: t.fechaLimite || 'No definida',
+                Criticidad: t.criticidad || '-',
+                Categoria: t.categoria,
+                Estado: t.completado ? 'Realizado' : 'Activo',
+                Creador: t.creador,
+                Cuadrante_Matriz: (t.cuadrante || 'Bandeja').toUpperCase()
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Pendientes");
+            XLSX.writeFile(wb, `Reporte_Pendientes_${mode === 'all' ? 'Completo' : 'Filtrado'}.xlsx`);
         };
     </script>
 </body>
