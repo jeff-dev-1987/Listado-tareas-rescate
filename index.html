@@ -32,9 +32,53 @@
         .dropzone.dragover { background: #e0e7ff; border: 2px dashed #1e3a8a; }
         .task-card { cursor: grab; }
         .task-card:active { cursor: grabbing; }
+        
+        /* Prevenir scroll horizontal en móviles */
+        body { max-width: 100vw; overflow-x: hidden; }
     </style>
 </head>
 <body class="bg-ejecutivoBg text-slate-800 h-screen overflow-hidden font-sans relative">
+
+    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
+            <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-primary mb-4 border-b pb-2"><i class="fa-solid fa-pen-to-square mr-2"></i>Editar Pendiente</h3>
+            
+            <form id="edit-form" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Descripción de la tarea</label>
+                    <textarea id="edit-task-text" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm resize-none" rows="3" required></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">F. Límite</label>
+                        <input type="date" id="edit-task-date" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Criticidad</label>
+                        <select id="edit-task-crit" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm font-semibold">
+                            <option value="ALTA" class="text-rose-600">ALTA</option>
+                            <option value="MEDIA" class="text-amber-500">MEDIA</option>
+                            <option value="BAJA" class="text-emerald-600">BAJA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Categoría</label>
+                        <select id="edit-task-category" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm">
+                            <option value="Operativa">Operativa</option>
+                            <option value="Administrativa">Administrativa</option>
+                            <option value="Logística">Logística</option>
+                            <option value="Entrenamiento">Entrenamiento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div id="auth-screen" class="flex h-screen justify-center items-center bg-slate-200 p-4 relative z-50">
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary">
@@ -42,8 +86,8 @@
                 <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">Servicio de Emergencias</h2>
-                <p class="text-sm text-slate-500 font-semibold tracking-wide mt-1">MINERA CHINALCO PERÚ</p>
+                <h2 class="text-2xl font-bold text-slate-800 leading-tight">Gestión de Tareas<br>y Pendientes</h2>
+                <p class="text-[11px] text-primary font-bold tracking-widest mt-2 bg-blue-50 py-1 rounded">SERVICIO DE EMERGENCIAS MCP</p>
             </div>
 
             <form id="login-form" class="space-y-4">
@@ -88,102 +132,104 @@
         </div>
     </div>
 
-    <div id="app-screen" class="hidden-view h-screen flex flex-col relative">
+    <div id="app-screen" class="hidden-view h-screen flex flex-col relative w-full overflow-hidden">
         
         <div id="sidebar-overlay" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
-        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-200 transition">
+        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20 shrink-0">
+            <div class="flex items-center gap-3 md:gap-4 min-w-0">
+                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-200 transition shrink-0">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <div class="bg-white text-primary w-9 h-9 rounded-full flex items-center justify-center hidden sm:flex shadow">
+                <div class="bg-white text-primary w-9 h-9 rounded-full items-center justify-center hidden sm:flex shadow shrink-0">
                     <i class="fa-solid fa-list-check"></i>
                 </div>
-                <div class="flex flex-col">
+                <div class="flex flex-col min-w-0">
                     <span class="text-base sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de Tareas y Pendientes</span>
-                    <span class="text-[10px] sm:text-[11px] font-medium text-blue-200 tracking-wider">SERVICIO DE EMERGENCIAS MCP</span>
+                    <span class="text-[9px] sm:text-[11px] font-medium text-blue-200 tracking-widest uppercase">Servicio de Emergencias MCP</span>
                 </div>
             </div>
-            <div class="flex items-center gap-3 sm:gap-4">
-                <div class="text-[11px] sm:text-sm bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-2 shadow-inner border border-blue-800">
-                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
-                    <span id="online-count">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
+                <div class="text-[10px] sm:text-[12px] bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5 shadow-inner border border-blue-800">
+                    <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
+                    <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
                 </div>
                 <div class="text-sm text-right hidden md:block">
-                    <div id="user-display-name" class="font-bold text-white">Usuario</div>
-                    <div id="user-role-badge" class="text-[11px] text-blue-200 font-semibold tracking-wider">Rol</div>
+                    <div id="user-display-name" class="font-bold text-white truncate max-w-[150px]">Usuario</div>
+                    <div id="user-role-badge" class="text-[10px] text-blue-200 font-semibold tracking-wider uppercase">Rol</div>
                 </div>
-                <button id="btn-logout" class="bg-white text-primary p-2 rounded hover:bg-slate-100 transition shadow" title="Cerrar Sesión">
+                <button id="btn-logout" class="bg-white text-primary p-2 sm:px-3 sm:py-2 rounded hover:bg-slate-100 transition shadow text-sm" title="Cerrar Sesión">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
             </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden relative">
-            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-lg md:shadow-none flex flex-col transition-transform duration-300 ease-in-out h-full">
+        <div class="flex flex-1 overflow-hidden relative w-full">
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-transform duration-300 ease-in-out h-full shrink-0">
                 <div class="p-4 border-b border-slate-100 bg-slate-50 md:hidden flex flex-col items-center">
                     <div class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow">
                         <i class="fa-solid fa-user"></i>
                     </div>
-                    <div id="user-display-name-mobile" class="font-bold text-slate-800 text-center">Usuario</div>
-                    <div id="user-role-badge-mobile" class="text-xs text-primary font-bold uppercase mt-1">Rol</div>
+                    <div id="user-display-name-mobile" class="font-bold text-slate-800 text-center break-words w-full">Usuario</div>
+                    <div id="user-role-badge-mobile" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase mt-1">Rol</div>
                 </div>
-                <nav class="flex-1 p-4 space-y-1 mt-2 overflow-y-auto">
+                <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
                     <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks">
-                        <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Tareas y Pendientes
+                        <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Pendientes
                     </button>
                     <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix">
                         <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Matriz Eisenhower
                     </button>
                     
-                    <div class="my-4 border-t border-slate-100 hidden-view" id="admin-divider"></div> <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
-                        <i class="fa-solid fa-trash-can-arrow-up w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Eliminados
+                    <div class="my-4 border-t border-slate-100 hidden-view" id="admin-divider"></div> 
+
+                    <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
+                        <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Auditoría
                     </button>
                     <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
-                        <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Gestión de Usuarios
+                        <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Accesos
                     </button>
                 </nav>
             </aside>
 
-            <main class="flex-1 flex flex-col relative overflow-hidden bg-slate-50 w-full shadow-inner">
+            <main class="flex-1 flex flex-col relative overflow-hidden bg-slate-50 w-full min-w-0 shadow-inner">
                 
-                <div id="view-tasks" class="flex-1 p-4 sm:p-6 flex flex-col h-full overflow-y-auto">
+                <div id="view-tasks" class="flex-1 p-3 sm:p-5 flex flex-col h-full overflow-y-auto w-full">
                     
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4 sm:mb-6">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
-                            <h2 class="text-lg sm:text-xl font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
-                            <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4 sm:mb-5">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
+                            <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
                                     <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
                                 </button>
-                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
+                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
                                     <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
                                 </button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm border-t border-slate-100 pt-4">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 text-sm border-t border-slate-100 pt-3">
                             <div class="col-span-2 md:col-span-1">
-                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
-                                <select id="f-orden" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1" onchange="renderLists()">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
+                                <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="desc">Más Nuevos</option>
                                     <option value="asc">Más Antiguos</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
-                                <select id="f-creador" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1" onchange="renderLists()">
-                                    <option value="">Todos los usuarios</option>
-                                    </select>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
+                                <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+                                    <option value="">Todos</option>
+                                </select>
                             </div>
                             <div>
-                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">F. Límite (Menor o Igual)</label>
-                                <input type="date" id="f-fecha" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1 text-slate-600" onchange="renderLists()">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (Menor o Igual)</label>
+                                <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
                             </div>
                             <div>
-                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
-                                <select id="f-crit" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1" onchange="renderLists()">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
+                                <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="ALTA">Alta</option>
                                     <option value="MEDIA">Media</option>
@@ -191,8 +237,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="f-cat" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1" onchange="renderLists()">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
+                                <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="Operativa">Operativa</option>
                                     <option value="Administrativa">Administrativa</option>
@@ -203,27 +249,27 @@
                         </div>
                     </div>
 
-                    <form id="task-form" class="mb-6 flex flex-col md:flex-row gap-3 hidden-view bg-white p-5 rounded-xl shadow-sm border border-l-4 border-l-accent items-start md:items-end w-full transition-all">
-                        <div class="w-full md:flex-1">
+                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent items-start lg:items-end w-full transition-all">
+                        <div class="w-full lg:flex-1">
                             <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-2 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition" required>
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-2 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
                         </div>
-                        <div class="flex gap-3 w-full md:w-auto flex-wrap sm:flex-nowrap">
-                            <div class="flex-1 md:w-32">
+                        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto">
+                            <div class="flex-1 min-w-[100px]">
                                 <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
-                                <input type="date" id="new-task-date" class="w-full p-2 mt-1 border border-slate-300 rounded outline-none text-sm bg-slate-50 focus:bg-white transition" required>
+                                <input type="date" id="new-task-date" class="w-full p-2 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition" required>
                             </div>
-                            <div class="flex-1 md:w-28">
+                            <div class="flex-1 min-w-[90px]">
                                 <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
-                                <select id="new-task-crit" class="w-full p-2 mt-1 border border-slate-300 rounded outline-none text-sm font-bold bg-slate-50 focus:bg-white transition">
+                                <select id="new-task-crit" class="w-full p-2 mt-1 border border-slate-300 rounded outline-none text-xs font-bold bg-slate-50 focus:bg-white transition">
                                     <option value="ALTA" class="text-rose-600">ALTA</option>
                                     <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
                                     <option value="BAJA" class="text-emerald-600">BAJA</option>
                                 </select>
                             </div>
-                            <div class="flex-1 md:w-36">
+                            <div class="flex-1 min-w-[110px]">
                                 <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="new-task-category" class="w-full p-2 mt-1 border border-slate-300 rounded outline-none text-sm bg-slate-50 focus:bg-white transition">
+                                <select id="new-task-category" class="w-full p-2 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition">
                                     <option value="Operativa">Operativa</option>
                                     <option value="Administrativa">Admin</option>
                                     <option value="Logística">Logística</option>
@@ -231,72 +277,73 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="w-full md:w-auto bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md md:h-[42px] mt-2 md:mt-0 flex justify-center items-center gap-2">
+                        <button type="submit" class="w-full lg:w-auto bg-primary text-white px-4 py-2 rounded-lg hover:bg-primaryDark transition font-bold shadow-md lg:h-[36px] mt-1 flex justify-center items-center gap-2 text-sm shrink-0">
                             <i class="fa-solid fa-plus"></i> Guardar
                         </button>
                     </form>
 
-                    <div class="flex-1 overflow-y-auto flex flex-col gap-6 pb-6">
-                        <div>
-                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
-                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-2">
-                                <ul id="task-list-active" class="space-y-1"></ul>
+                    <div class="flex-1 overflow-y-auto flex flex-col gap-5 pb-6 w-full">
+                        <div class="w-full min-w-0">
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
+                                <ul id="task-list-active" class="space-y-1.5 w-full min-w-0"></ul>
                             </div>
                         </div>
 
-                        <div>
-                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
-                            <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-2 opacity-80">
-                                <ul id="task-list-completed" class="space-y-1"></ul>
+                        <div class="w-full min-w-0">
+                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
+                            <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-1.5 opacity-85 w-full">
+                                <ul id="task-list-completed" class="space-y-1.5 w-full min-w-0"></ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-matrix" class="hidden-view flex-1 flex flex-col md:flex-row h-full overflow-y-auto md:overflow-hidden bg-slate-100 pb-6 md:pb-0">
+                <div id="view-matrix" class="hidden-view flex-1 flex flex-col lg:flex-row h-full overflow-y-auto lg:overflow-hidden bg-slate-100 pb-6 lg:pb-0">
                     
-                    <div class="w-full md:w-72 bg-white border-b border-slate-200 md:border-b-0 md:border-r shadow-md flex flex-col z-10 shrink-0 h-64 md:h-full">
-                        <div class="p-3 md:p-4 bg-slate-800 text-white font-bold text-center text-sm shadow">
-                            Bandeja General
+                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 h-64 lg:h-full">
+                        <div class="p-3 bg-slate-800 text-white font-bold text-center text-sm shadow flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-inbox opacity-70"></i> Bandeja General
                         </div>
                         <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
-                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex-1 p-4 grid grid-cols-1 sm:grid-cols-2 grid-rows-none sm:grid-rows-2 gap-4 h-auto md:h-full overflow-y-auto">
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-rose-600 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="p-2 text-center border-b border-slate-100 font-bold text-rose-700 text-sm bg-white">Urgente e Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Hacer Ahora</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
+                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 h-auto lg:h-full overflow-y-auto">
+                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-rose-500 border border-slate-200 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2.5 text-center border-b border-slate-200 font-bold text-rose-700 text-sm bg-slate-100">Urgente e Importante <span class="text-[9px] font-medium text-slate-500 block uppercase tracking-widest mt-0.5">Hacer Ahora</span></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-emerald-600 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="p-2 text-center border-b border-slate-100 font-bold text-emerald-700 text-sm bg-white">Importante, No Urgente <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Planificar</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
+                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-emerald-500 border border-slate-200 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2.5 text-center border-b border-slate-200 font-bold text-emerald-700 text-sm bg-slate-100">Importante, No Urgente <span class="text-[9px] font-medium text-slate-500 block uppercase tracking-widest mt-0.5">Planificar</span></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-amber-500 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="p-2 text-center border-b border-slate-100 font-bold text-amber-600 text-sm bg-white">Urgente, No Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Delegar</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
+                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-amber-500 border border-slate-200 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2.5 text-center border-b border-slate-200 font-bold text-amber-600 text-sm bg-slate-100">Urgente, No Importante <span class="text-[9px] font-medium text-slate-500 block uppercase tracking-widest mt-0.5">Delegar</span></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-slate-800 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="p-2 text-center border-b border-slate-100 font-bold text-slate-800 text-sm bg-white">No Urgente, No Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Eliminar / Posponer</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
+                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-800 border border-slate-200 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2.5 text-center border-b border-slate-200 font-bold text-slate-800 text-sm bg-slate-100">No Urgente, No Importante <span class="text-[9px] font-medium text-slate-500 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-audit" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Pendientes Eliminados</h2>
+                <div id="view-audit" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto w-full">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-2">
+                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-xs font-normal text-slate-500">(Eliminados y Editados)</span></h2>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
                         <div class="overflow-x-auto w-full">
                             <table class="w-full text-left border-collapse min-w-[700px]">
                                 <thead>
-                                    <tr class="bg-slate-100 text-slate-600 uppercase text-[11px] tracking-wider border-b border-slate-200">
-                                        <th class="p-4 font-bold">Tarea Original</th>
-                                        <th class="p-4 font-bold">Creado Por</th>
-                                        <th class="p-4 font-bold text-rose-600">Eliminado Por</th>
-                                        <th class="p-4 font-bold">Fecha Eliminación</th>
+                                    <tr class="bg-slate-100 text-slate-600 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                        <th class="p-3 sm:p-4 font-bold w-20">Acción</th>
+                                        <th class="p-3 sm:p-4 font-bold">Detalle del Registro</th>
+                                        <th class="p-3 sm:p-4 font-bold">Autor Original</th>
+                                        <th class="p-3 sm:p-4 font-bold text-primary">Acción Por</th>
+                                        <th class="p-3 sm:p-4 font-bold">Fecha</th>
                                     </tr>
                                 </thead>
                                 <tbody id="audit-list" class="text-sm divide-y divide-slate-100">
@@ -306,16 +353,16 @@
                     </div>
                 </div>
 
-                <div id="view-users" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
+                <div id="view-users" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto w-full">
+                    <div class="flex justify-between items-center mb-5">
+                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
                         <div class="overflow-x-auto w-full">
                             <table class="w-full text-left border-collapse min-w-[600px]">
                                 <thead>
-                                    <tr class="bg-slate-800 text-white uppercase text-[11px] tracking-wider">
+                                    <tr class="bg-slate-800 text-white uppercase text-[10px] tracking-wider">
                                         <th class="p-4 font-bold">Nombre / Correo</th>
                                         <th class="p-4 font-bold">Fecha Solicitud</th>
                                         <th class="p-4 font-bold">Estado / Rol</th>
@@ -361,6 +408,7 @@
         let currentUserData = null;
         let allTasksData = [];
         let heartbeatInterval;
+        let currentEditId = null;
 
         /* =========================================
            3. LÓGICA DE INTERFAZ (UI)
@@ -442,6 +490,23 @@
             }
         }
 
+        /* Modal Edición */
+        window.openEditModal = (id) => {
+            const t = allTasksData.find(x => x.id === id);
+            if(!t) return;
+            currentEditId = id;
+            document.getElementById('edit-task-text').value = t.texto;
+            document.getElementById('edit-task-date').value = t.fechaLimite || '';
+            document.getElementById('edit-task-crit').value = t.criticidad || 'MEDIA';
+            document.getElementById('edit-task-category').value = t.categoria || 'Operativa';
+            document.getElementById('edit-modal').classList.remove('hidden');
+        };
+
+        window.closeEditModal = () => {
+            document.getElementById('edit-modal').classList.add('hidden');
+            currentEditId = null;
+        };
+
         /* =========================================
            4. LÓGICA DE AUTENTICACIÓN
         ========================================= */
@@ -466,27 +531,24 @@
 
                 if (doc.exists) {
                     currentUserData = { id: user.uid, ...doc.data() };
-                    
                     if (currentUserData.estado !== 'aprobado') {
-                        alert("Cuenta pendiente de aprobación.");
-                        auth.signOut(); return;
+                        alert("Cuenta pendiente de aprobación."); auth.signOut(); return;
                     }
 
                     document.getElementById('auth-screen').classList.add('hidden-view');
                     document.getElementById('app-screen').classList.remove('hidden-view');
                     
                     document.getElementById('user-display-name').innerText = currentUserData.nombre;
-                    document.getElementById('user-role-badge').innerText = currentUserData.rol.toUpperCase();
+                    document.getElementById('user-role-badge').innerText = currentUserData.rol;
                     document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
-                    document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol.toUpperCase();
+                    document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
                     
                     applyRolePermissions(currentUserData.rol);
                     loadTasks();
                     if(currentUserData.rol === 'admin') loadUsers();
                     startPresenceSystem();
                 } else {
-                    alert("Solicita una cuenta primero.");
-                    auth.signOut();
+                    alert("Solicita una cuenta primero."); auth.signOut();
                 }
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden-view');
@@ -499,9 +561,8 @@
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            try {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } catch (error) {
+            try { await auth.signInWithEmailAndPassword(email, pass); } 
+            catch (error) {
                 if (email === "supervision.rescate@gmail.com") {
                     try { await auth.createUserWithEmailAndPassword(email, pass); return; } catch (e) {}
                 }
@@ -523,9 +584,7 @@
                 });
                 alert("Solicitud enviada. Espere autorización.");
                 auth.signOut(); toggleAuthForms();
-            } catch (error) {
-                alert("Error: " + error.message);
-            }
+            } catch (error) { alert("Error: " + error.message); }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
@@ -540,7 +599,6 @@
             return 'text-slate-600 bg-slate-100 border-slate-200';
         }
 
-        // Listener Global
         function loadTasks() {
             db.collection("tareas").onSnapshot(snapshot => {
                 allTasksData = [];
@@ -554,10 +612,8 @@
             const select = document.getElementById('f-creador');
             const currentVal = select.value;
             const creators = [...new Set(allTasksData.map(t => t.creador))].sort();
-            let options = '<option value="">Todos los usuarios</option>';
-            creators.forEach(c => {
-                options += `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c}</option>`;
-            });
+            let options = '<option value="">Todos</option>';
+            creators.forEach(c => { options += `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c.split(' ')[0]}</option>`; });
             select.innerHTML = options;
         }
 
@@ -571,10 +627,7 @@
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 if(fCreator && t.creador !== fCreator) match = false;
-                if(fDate) { 
-                    // Muestra si la fecha límite existe y es menor o igual a la seleccionada
-                    if(!t.fechaLimite || t.fechaLimite > fDate) match = false; 
-                }
+                if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
                 if(fCrit && t.criticidad !== fCrit) match = false;
                 if(fCat && t.categoria !== fCat) match = false;
                 return match;
@@ -598,7 +651,7 @@
             mBandeja.innerHTML = ''; mQ1.innerHTML = ''; mQ2.innerHTML = ''; mQ3.innerHTML = ''; mQ4.innerHTML = '';
 
             filtered.forEach(t => {
-                const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '...';
+                const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE').split(',')[0] : '...';
                 const fLimStr = t.fechaLimite ? t.fechaLimite : 'Sin límite';
                 const isChecked = t.completado ? 'checked' : '';
                 const txtClass = t.completado ? 'line-through text-slate-400' : 'text-slate-700 font-medium';
@@ -606,30 +659,33 @@
                 
                 const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
                 const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
-                const deleteBtn = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
-                    ? `<button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
+                
+                // Botones Edición/Eliminación
+                const actionBtns = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
+                    ? ` <button onclick="openEditModal('${t.id}')" class="text-blue-400 hover:text-blue-600 transition p-1.5 rounded hover:bg-blue-50" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
 
-                // Tarjeta HTML Listas
+                // HTML Listas (Mobile Optimized w-full min-w-0 flex-wrap)
                 const htmlList = `
-                    <li class="flex flex-col md:flex-row md:items-center justify-between p-3.5 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-3 md:gap-0 mb-1">
-                        <div class="flex items-start md:items-center gap-3 w-full md:w-3/4">
-                            <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-5 h-5 mt-1 md:mt-0 text-primary border-slate-300 rounded focus:ring-primary cursor-pointer shrink-0 transition">
-                            <div class="flex flex-col w-full pr-2">
-                                <span class="${txtClass} break-words leading-tight">${t.texto}</span>
-                                <div class="text-[11px] text-slate-400 flex flex-wrap gap-x-2 gap-y-1 mt-1.5">
+                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0">
+                        <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
+                            <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
+                            <div class="flex flex-col w-full min-w-0">
+                                <span class="${txtClass} break-words leading-tight text-sm">${t.texto}</span>
+                                <div class="text-[10px] text-slate-400 flex flex-wrap gap-x-2 mt-1">
                                     <span>Gen: ${dateStr}</span> <span class="hidden sm:inline text-slate-300">|</span> 
                                     <span class="font-bold ${t.completado ? 'text-slate-400' : 'text-primary'}">Límite: ${fLimStr}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-2 border-t md:border-t-0 pt-2.5 md:pt-0 border-slate-100">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] border px-2 py-0.5 rounded font-bold ${critClass}">${t.criticidad || '-'}</span>
-                                <span class="text-[10px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 truncate max-w-[90px] font-medium">${t.categoria}</span>
+                        <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 pt-2 sm:pt-0 shrink-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad || '-'}</span>
+                                <span class="text-[9px] bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 truncate max-w-[80px] font-medium">${t.categoria}</span>
                             </div>
-                            <div class="flex items-center gap-3 md:opacity-0 group-hover:opacity-100 transition duration-300">
-                                <span class="text-[10px] text-slate-400 italic bg-slate-50 px-2 py-0.5 rounded border border-slate-100"><i class="fa-solid fa-user-pen"></i> ${t.creador.split(' ')[0]}</span>
-                                ${deleteBtn}
+                            <div class="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition duration-300">
+                                <span class="text-[9px] text-slate-400 italic mr-1"><i class="fa-solid fa-user-pen"></i> ${t.creador.split(' ')[0]}</span>
+                                ${actionBtns}
                             </div>
                         </div>
                     </li>
@@ -640,24 +696,28 @@
                 } else {
                     activeList.innerHTML += htmlList;
 
-                    // Tarjeta Matriz con estilo de bordes de colores por cuadrante
+                    // Tarjeta Matriz con Colores de Borde
                     let c = t.cuadrante || 'bandeja';
-                    let cardColorClass = "bg-white border-l-4 border-slate-300"; // Default (Bandeja)
-                    if(c === 'q1') cardColorClass = "bg-white border-l-4 border-rose-600";
-                    else if(c === 'q2') cardColorClass = "bg-white border-l-4 border-emerald-600";
-                    else if(c === 'q3') cardColorClass = "bg-white border-l-4 border-amber-500";
-                    else if(c === 'q4') cardColorClass = "bg-white border-l-4 border-slate-800 opacity-80";
+                    let cardColorClass = "bg-white border-l-4 border-slate-300"; // Bandeja
+                    if(c === 'q1') cardColorClass = "bg-white border-l-4 border-rose-500"; // Rojo
+                    else if(c === 'q2') cardColorClass = "bg-white border-l-4 border-emerald-500"; // Verde
+                    else if(c === 'q3') cardColorClass = "bg-white border-l-4 border-amber-500"; // Naranja
+                    else if(c === 'q4') cardColorClass = "bg-white border-l-4 border-slate-800"; // Negro
+
+                    const editBtnMatrix = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
+                        ? `<button onclick="openEditModal('${t.id}')" class="absolute top-2 right-8 text-slate-300 hover:text-blue-500 transition-colors" title="Editar"><i class="fa-solid fa-pen text-sm"></i></button>` : '';
 
                     const htmlMatrix = `
-                        <div class="${cardColorClass} p-3 rounded-lg shadow-sm border-y border-r mb-2 task-card hover:shadow-md transition relative" data-id="${t.id}" ${dragAttr}>
-                            <div class="font-medium text-slate-800 leading-snug mb-2 pr-6">${t.texto}</div>
+                        <div class="${cardColorClass} p-2.5 rounded shadow-sm border-y border-r mb-2 task-card hover:shadow transition relative w-full min-w-0" data-id="${t.id}" ${dragAttr}>
+                            <div class="font-medium text-slate-800 text-sm leading-snug mb-1.5 pr-10 break-words w-full min-w-0">${t.texto}</div>
                             <div class="text-[10px] text-slate-500 mb-1">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
-                            <div class="flex justify-between items-center mt-2 border-t border-black/5 pt-1.5">
+                            <div class="flex justify-between items-center mt-1.5 border-t border-black/5 pt-1.5">
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded ${critClass}">${t.criticidad}</span>
-                                <span class="text-[9px] text-slate-400 truncate w-16 text-right">${t.creador.split(' ')[0]}</span>
+                                <span class="text-[9px] text-slate-400 truncate w-14 text-right">${t.creador.split(' ')[0]}</span>
                             </div>
+                            ${editBtnMatrix}
                             <button ${disableCheck} onclick="toggleTaskStatus('${t.id}', true)" class="absolute top-2 right-2 text-slate-300 hover:text-emerald-500 transition-colors" title="Marcar Realizado">
-                                <i class="fa-solid fa-circle-check text-lg"></i>
+                                <i class="fa-solid fa-circle-check text-base"></i>
                             </button>
                         </div>
                     `;
@@ -671,6 +731,7 @@
             });
         }
 
+        // Formulario Creación
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = document.getElementById('new-task-text').value;
@@ -687,6 +748,36 @@
             e.target.reset();
         });
 
+        // Formulario Edición
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentEditId) return;
+            const t = allTasksData.find(x => x.id === currentEditId);
+            const nText = document.getElementById('edit-task-text').value;
+            const nDate = document.getElementById('edit-task-date').value;
+            const nCrit = document.getElementById('edit-task-crit').value;
+            const nCat = document.getElementById('edit-task-category').value;
+
+            // Auditoría de Edición
+            if (t.texto !== nText || t.fechaLimite !== nDate || t.criticidad !== nCrit || t.categoria !== nCat) {
+                await db.collection("log_eliminados").add({
+                    tipo: 'Edición',
+                    textoOriginal: t.texto,
+                    textoNuevo: nText,
+                    creadoOriginalmentePor: t.creador,
+                    accionPor: currentUserData.nombre,
+                    fechaAccion: new Date().toLocaleString('es-PE'),
+                    timestamp: Date.now()
+                });
+            }
+
+            // Actualizar DB
+            await db.collection("tareas").doc(currentEditId).update({
+                texto: nText, fechaLimite: nDate, criticidad: nCrit, categoria: nCat
+            });
+            closeEditModal();
+        });
+
         window.toggleTaskStatus = async (id, status) => {
             await db.collection("tareas").doc(id).update({ completado: status });
         };
@@ -696,10 +787,11 @@
                 const task = allTasksData.find(t => t.id === id);
                 if(task) {
                     await db.collection("log_eliminados").add({
+                        tipo: 'Eliminación',
                         textoOriginal: task.texto,
                         creadoOriginalmentePor: task.creador,
-                        eliminadoPor: currentUserData.nombre,
-                        fechaEliminacion: new Date().toLocaleString('es-PE'),
+                        accionPor: currentUserData.nombre,
+                        fechaAccion: new Date().toLocaleString('es-PE'),
                         timestamp: Date.now()
                     });
                 }
@@ -709,7 +801,7 @@
 
         /* --- Lógica Drag & Drop --- */
         window.drag = (ev) => {
-            ev.dataTransfer.setData("taskId", ev.target.dataset.id);
+            ev.dataTransfer.setData("taskId", ev.target.closest('.task-card').dataset.id);
             ev.dataTransfer.effectAllowed = "move";
         }
         window.allowDrop = (ev) => { ev.preventDefault(); ev.dataTransfer.dropEffect = "move"; }
@@ -721,7 +813,7 @@
         }
 
         /* =========================================
-           6. AUDITORÍA (REGISTRO ELIMINADOS)
+           6. AUDITORÍA (REGISTRO EDICIÓN/ELIMINADOS)
         ========================================= */
         function loadAuditLogs() {
             db.collection("log_eliminados").orderBy("timestamp", "desc").onSnapshot(snapshot => {
@@ -729,12 +821,20 @@
                 list.innerHTML = '';
                 snapshot.forEach(doc => {
                     const l = doc.data();
+                    const isEdit = l.tipo === 'Edición';
+                    const actionBadge = isEdit ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">EDICIÓN</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[10px] font-bold">ELIMINADO</span>';
+                    
+                    const detailStr = isEdit 
+                        ? `<div class="text-[11px] leading-tight"><span class="line-through text-slate-400">${l.textoOriginal}</span> <i class="fa-solid fa-arrow-right text-slate-300 mx-1"></i> <span class="text-blue-700 font-medium">${l.textoNuevo}</span></div>`
+                        : `<div class="text-[11px] text-slate-600 leading-tight">${l.textoOriginal}</div>`;
+
                     list.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                            <td class="p-4 text-sm text-slate-800 font-medium break-words">${l.textoOriginal}</td>
-                            <td class="p-4 text-sm text-slate-500">${l.creadoOriginalmentePor}</td>
-                            <td class="p-4 text-sm text-rose-600 font-bold">${l.eliminadoPor}</td>
-                            <td class="p-4 text-sm text-slate-500 whitespace-nowrap">${l.fechaEliminacion}</td>
+                            <td class="p-3 whitespace-nowrap">${actionBadge}</td>
+                            <td class="p-3 w-full min-w-[200px] break-words">${detailStr}</td>
+                            <td class="p-3 text-[11px] text-slate-500 whitespace-nowrap">${l.creadoOriginalmentePor || '-'}</td>
+                            <td class="p-3 text-xs ${isEdit ? 'text-blue-600' : 'text-rose-600'} font-bold whitespace-nowrap">${l.accionPor}</td>
+                            <td class="p-3 text-[11px] text-slate-500 whitespace-nowrap">${l.fechaAccion}</td>
                         </tr>
                     `;
                 });
@@ -754,25 +854,25 @@
                     
                     usersList.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                            <td class="p-3 sm:p-4 whitespace-nowrap">
+                            <td class="p-3 whitespace-nowrap">
                                 <div class="font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre}</div>
-                                <div class="text-xs text-slate-500">${u.email}</div>
+                                <div class="text-[11px] text-slate-500">${u.email}</div>
                             </td>
-                            <td class="p-3 sm:p-4 text-sm text-slate-600 whitespace-nowrap">${u.fechaSolicitud || '-'}</td>
-                            <td class="p-3 sm:p-4 whitespace-nowrap">
-                                <div class="flex flex-col gap-2 w-28 sm:w-32">
-                                    <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[11px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
+                            <td class="p-3 text-[11px] text-slate-600 whitespace-nowrap">${u.fechaSolicitud || '-'}</td>
+                            <td class="p-3 whitespace-nowrap">
+                                <div class="flex flex-col gap-1.5 w-24 sm:w-28">
+                                    <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
                                         <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
                                         <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
                                     </select>
-                                    <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[11px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
+                                    <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[10px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
                                         <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
                                         <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
                                         <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Admin</option>
                                     </select>
                                 </div>
                             </td>
-                            <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+                            <td class="p-3 text-center whitespace-nowrap">
                                 <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
                                     <i class="fa-solid fa-user-xmark"></i>
                                 </button>
