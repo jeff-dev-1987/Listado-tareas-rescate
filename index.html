@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Tareas - Servicio de Emergencias</title>
-    <!-- Tailwind CSS -->
+    <title>Gestión de Tareas - Servicio de Emergencias MCP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS (Excel) -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <script>
@@ -16,10 +13,10 @@
             theme: {
                 extend: {
                     colors: { 
-                        primary: '#1e3a8a', /* Azul Marino Corporativo */
+                        primary: '#1e3a8a', /* Azul Marino Ejecutivo */
                         primaryDark: '#1e40af', 
                         accent: '#3b82f6',
-                        ejecutivoBg: '#f1f5f9' /* Gris Pizarra Muy Claro */
+                        ejecutivoBg: '#f8fafc' /* Gris/Azulado muy claro */
                     }
                 }
             }
@@ -28,7 +25,7 @@
     <style>
         .hidden-view { display: none !important; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         .dropzone { min-height: 100px; transition: background 0.3s; }
@@ -39,18 +36,16 @@
 </head>
 <body class="bg-ejecutivoBg text-slate-800 h-screen overflow-hidden font-sans relative">
 
-    <!-- PANTALLA DE LOGIN / REGISTRO -->
     <div id="auth-screen" class="flex h-screen justify-center items-center bg-slate-200 p-4 relative z-50">
-        <div class="bg-white p-6 md:p-8 rounded-lg shadow-2xl w-full max-w-md border-t-4 border-primary">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary">
             <div class="text-center mb-6">
                 <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
-                    <i class="fa-solid fa-helmet-safety text-3xl"></i>
+                    <i class="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">Servicio de Emergencias</h2>
-                <p class="text-sm text-slate-500">Minera Chinalco Perú</p>
+                <p class="text-sm text-slate-500 font-semibold tracking-wide mt-1">MINERA CHINALCO PERÚ</p>
             </div>
 
-            <!-- Formulario Login -->
             <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
@@ -69,7 +64,6 @@
                 <p class="text-sm text-center mt-4 text-slate-600">¿No tienes acceso? <a href="#" onclick="toggleAuthForms()" class="text-accent font-bold hover:underline">Solicitar Cuenta</a></p>
             </form>
 
-            <!-- Formulario Registro -->
             <form id="register-form" class="space-y-4 hidden-view">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Nombre Completo</label>
@@ -94,25 +88,25 @@
         </div>
     </div>
 
-    <!-- APLICACIÓN PRINCIPAL -->
     <div id="app-screen" class="hidden-view h-screen flex flex-col relative">
         
-        <!-- Overlay para Sidebar Móvil -->
         <div id="sidebar-overlay" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
-        <!-- Header -->
-        <header class="bg-primary text-white p-4 flex justify-between items-center shadow-md z-20">
+        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20">
             <div class="flex items-center gap-4">
                 <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-200 transition">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <div class="bg-white text-primary w-8 h-8 rounded-full flex items-center justify-center hidden sm:flex shadow">
+                <div class="bg-white text-primary w-9 h-9 rounded-full flex items-center justify-center hidden sm:flex shadow">
                     <i class="fa-solid fa-list-check"></i>
                 </div>
-                <h1 class="text-base sm:text-lg font-bold tracking-wide truncate">Gestión de Pendientes <span class="hidden sm:inline font-light opacity-80">- Emergencias</span></h1>
+                <div class="flex flex-col">
+                    <span class="text-base sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de Tareas y Pendientes</span>
+                    <span class="text-[10px] sm:text-[11px] font-medium text-blue-200 tracking-wider">SERVICIO DE EMERGENCIAS MCP</span>
+                </div>
             </div>
             <div class="flex items-center gap-3 sm:gap-4">
-                <div class="text-xs sm:text-sm bg-primaryDark px-2 sm:px-3 py-1.5 rounded-full flex items-center gap-2 shadow-inner border border-blue-800">
+                <div class="text-[11px] sm:text-sm bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-2 shadow-inner border border-blue-800">
                     <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
                     <span id="online-count">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
                 </div>
@@ -127,9 +121,7 @@
         </header>
 
         <div class="flex flex-1 overflow-hidden relative">
-            <!-- Sidebar / Navegación -->
             <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-lg md:shadow-none flex flex-col transition-transform duration-300 ease-in-out h-full">
-                <!-- Info de usuario móvil -->
                 <div class="p-4 border-b border-slate-100 bg-slate-50 md:hidden flex flex-col items-center">
                     <div class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow">
                         <i class="fa-solid fa-user"></i>
@@ -145,9 +137,7 @@
                         <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Matriz Eisenhower
                     </button>
                     
-                    <div class="my-4 border-t border-slate-100"></div> <!-- Separador -->
-
-                    <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
+                    <div class="my-4 border-t border-slate-100 hidden-view" id="admin-divider"></div> <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
                         <i class="fa-solid fa-trash-can-arrow-up w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Eliminados
                     </button>
                     <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
@@ -156,13 +146,10 @@
                 </nav>
             </aside>
 
-            <!-- Contenido Principal -->
             <main class="flex-1 flex flex-col relative overflow-hidden bg-slate-50 w-full shadow-inner">
                 
-                <!-- ================= VISTA DE TAREAS ================= -->
                 <div id="view-tasks" class="flex-1 p-4 sm:p-6 flex flex-col h-full overflow-y-auto">
                     
-                    <!-- Barra de Controles y Filtros -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4 sm:mb-6">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
                             <h2 class="text-lg sm:text-xl font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
@@ -176,7 +163,6 @@
                             </div>
                         </div>
 
-                        <!-- Filtros -->
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm border-t border-slate-100 pt-4">
                             <div class="col-span-2 md:col-span-1">
                                 <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
@@ -187,14 +173,12 @@
                             </div>
                             <div>
                                 <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
-                                <!-- CORRECCIÓN: Ahora es un select en lugar de un input text -->
                                 <select id="f-creador" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1" onchange="renderLists()">
                                     <option value="">Todos los usuarios</option>
-                                    <!-- Opciones generadas por JS -->
-                                </select>
+                                    </select>
                             </div>
                             <div>
-                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">F. Límite (Menor o igual a)</label>
+                                <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">F. Límite (Menor o Igual)</label>
                                 <input type="date" id="f-fecha" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none mt-1 text-slate-600" onchange="renderLists()">
                             </div>
                             <div>
@@ -219,11 +203,10 @@
                         </div>
                     </div>
 
-                    <!-- Input Nueva Tarea -->
                     <form id="task-form" class="mb-6 flex flex-col md:flex-row gap-3 hidden-view bg-white p-5 rounded-xl shadow-sm border border-l-4 border-l-accent items-start md:items-end w-full transition-all">
                         <div class="w-full md:flex-1">
                             <label class="text-[11px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos SCBA..." class="w-full p-2 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition" required>
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-2 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition" required>
                         </div>
                         <div class="flex gap-3 w-full md:w-auto flex-wrap sm:flex-nowrap">
                             <div class="flex-1 md:w-32">
@@ -253,9 +236,7 @@
                         </button>
                     </form>
 
-                    <!-- Listas -->
                     <div class="flex-1 overflow-y-auto flex flex-col gap-6 pb-6">
-                        <!-- Pendientes Activos -->
                         <div>
                             <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-2">
@@ -263,7 +244,6 @@
                             </div>
                         </div>
 
-                        <!-- Pendientes Completados -->
                         <div>
                             <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
                             <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-2 opacity-80">
@@ -273,45 +253,36 @@
                     </div>
                 </div>
 
-                <!-- ================= VISTA: MATRIZ DE EISENHOWER ================= -->
                 <div id="view-matrix" class="hidden-view flex-1 flex flex-col md:flex-row h-full overflow-y-auto md:overflow-hidden bg-slate-100 pb-6 md:pb-0">
                     
-                    <!-- Lateral: Banco de Tareas -->
                     <div class="w-full md:w-72 bg-white border-b border-slate-200 md:border-b-0 md:border-r shadow-md flex flex-col z-10 shrink-0 h-64 md:h-full">
                         <div class="p-3 md:p-4 bg-slate-800 text-white font-bold text-center text-sm shadow">
                             Bandeja General
                         </div>
                         <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
-                            <!-- Tareas no asignadas a un cuadrante -->
-                        </div>
+                            </div>
                     </div>
 
-                    <!-- Cuadrantes -->
                     <div class="flex-1 p-4 grid grid-cols-1 sm:grid-cols-2 grid-rows-none sm:grid-rows-2 gap-4 h-auto md:h-full overflow-y-auto">
-                        <!-- Q1 -->
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-rose-500 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="bg-rose-50 p-2 text-center border-b border-rose-100 font-bold text-rose-800 text-sm">Urgente e Importante <span class="text-[10px] font-normal text-rose-600 block uppercase tracking-wide mt-0.5">Hacer Ahora</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
+                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-rose-600 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2 text-center border-b border-slate-100 font-bold text-rose-700 text-sm bg-white">Urgente e Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Hacer Ahora</span></div>
+                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <!-- Q2 -->
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-accent flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="bg-blue-50 p-2 text-center border-b border-blue-100 font-bold text-blue-800 text-sm">Importante, No Urgente <span class="text-[10px] font-normal text-blue-600 block uppercase tracking-wide mt-0.5">Planificar</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
+                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-emerald-600 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2 text-center border-b border-slate-100 font-bold text-emerald-700 text-sm bg-white">Importante, No Urgente <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Planificar</span></div>
+                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <!-- Q3 -->
                         <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-amber-500 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="bg-amber-50 p-2 text-center border-b border-amber-100 font-bold text-amber-800 text-sm">Urgente, No Importante <span class="text-[10px] font-normal text-amber-600 block uppercase tracking-wide mt-0.5">Delegar</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
+                            <div class="p-2 text-center border-b border-slate-100 font-bold text-amber-600 text-sm bg-white">Urgente, No Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Delegar</span></div>
+                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <!-- Q4 -->
-                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-slate-400 flex flex-col overflow-hidden min-h-[200px]">
-                            <div class="bg-slate-100 p-2 text-center border-b border-slate-200 font-bold text-slate-700 text-sm">No Urgente, No Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Eliminar / Posponer</span></div>
-                            <div class="flex-1 p-3 overflow-y-auto dropzone" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
+                        <div class="bg-white rounded-xl shadow-sm border-t-4 border-t-slate-800 flex flex-col overflow-hidden min-h-[200px]">
+                            <div class="p-2 text-center border-b border-slate-100 font-bold text-slate-800 text-sm bg-white">No Urgente, No Importante <span class="text-[10px] font-normal text-slate-500 block uppercase tracking-wide mt-0.5">Eliminar / Posponer</span></div>
+                            <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50/50" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ================= VISTA DE AUDITORÍA (NUEVA) ================= -->
                 <div id="view-audit" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-lg sm:text-xl font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Pendientes Eliminados</h2>
@@ -329,14 +300,12 @@
                                     </tr>
                                 </thead>
                                 <tbody id="audit-list" class="text-sm divide-y divide-slate-100">
-                                    <!-- Registros renderizados por JS -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- ================= VISTA DE USUARIOS ================= -->
                 <div id="view-users" class="hidden-view flex-1 p-4 sm:p-6 h-full overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-lg sm:text-xl font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
@@ -354,8 +323,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="users-list" class="text-sm divide-y divide-slate-100">
-                                    <!-- Usuarios renderizados por JS -->
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
@@ -365,7 +333,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -393,7 +360,6 @@
         ========================================= */
         let currentUserData = null;
         let allTasksData = [];
-        let usersData = [];
         let heartbeatInterval;
 
         /* =========================================
@@ -431,7 +397,6 @@
                 if (btn) {
                     btn.classList.remove('bg-blue-50', 'text-primary', 'border-primary');
                     btn.classList.add('border-transparent', 'text-slate-600');
-                    // Restaurar iconos a grises
                     const icon = btn.querySelector('i');
                     if(icon) { icon.classList.remove('text-primary'); icon.classList.add('text-slate-400'); }
                 }
@@ -456,20 +421,24 @@
             const taskForm = document.getElementById('task-form');
             const tabUsers = document.getElementById('tab-users');
             const tabAudit = document.getElementById('tab-audit');
+            const adminDivider = document.getElementById('admin-divider');
             
             if (role === 'lector') {
                 taskForm.classList.add('hidden-view');
                 tabUsers.classList.add('hidden-view');
                 tabAudit.classList.add('hidden-view');
+                adminDivider.classList.add('hidden-view');
             } else if (role === 'editor') {
                 taskForm.classList.remove('hidden-view');
                 tabUsers.classList.add('hidden-view');
                 tabAudit.classList.add('hidden-view');
+                adminDivider.classList.add('hidden-view');
             } else if (role === 'admin') {
                 taskForm.classList.remove('hidden-view');
                 tabUsers.classList.remove('hidden-view');
                 tabAudit.classList.remove('hidden-view');
-                loadAuditLogs(); // Cargar la tabla de eliminados si es admin
+                adminDivider.classList.remove('hidden-view');
+                loadAuditLogs();
             }
         }
 
@@ -571,7 +540,7 @@
             return 'text-slate-600 bg-slate-100 border-slate-200';
         }
 
-        // Listener Global de Tareas
+        // Listener Global
         function loadTasks() {
             db.collection("tareas").onSnapshot(snapshot => {
                 allTasksData = [];
@@ -581,7 +550,6 @@
             });
         }
 
-        // CORRECCIÓN: Actualizar dinámicamente el select de creadores
         function updateCreatorDropdown() {
             const select = document.getElementById('f-creador');
             const currentVal = select.value;
@@ -593,7 +561,6 @@
             select.innerHTML = options;
         }
 
-        // Renderizado Combinado (Lista y Matriz con Filtros)
         function renderLists() {
             const sortOrder = document.getElementById('f-orden').value;
             const fCreator = document.getElementById('f-creador').value;
@@ -601,27 +568,24 @@
             const fCrit = document.getElementById('f-crit').value;
             const fCat = document.getElementById('f-cat').value;
 
-            // Filtrar
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 if(fCreator && t.creador !== fCreator) match = false;
-                // CORRECCIÓN: Filtra tareas que TIENEN límite y el límite es menor o igual al filtro
-                if(fDate) {
-                    if(!t.fechaLimite || t.fechaLimite > fDate) match = false;
+                if(fDate) { 
+                    // Muestra si la fecha límite existe y es menor o igual a la seleccionada
+                    if(!t.fechaLimite || t.fechaLimite > fDate) match = false; 
                 }
                 if(fCrit && t.criticidad !== fCrit) match = false;
                 if(fCat && t.categoria !== fCat) match = false;
                 return match;
             });
 
-            // Ordenar
             filtered.sort((a, b) => {
                 let dA = a.creadoEn ? a.creadoEn.toMillis() : 0;
                 let dB = b.creadoEn ? b.creadoEn.toMillis() : 0;
                 return sortOrder === 'desc' ? dB - dA : dA - dB;
             });
 
-            // Preparar UI
             const activeList = document.getElementById('task-list-active');
             const completedList = document.getElementById('task-list-completed');
             const mBandeja = document.getElementById('cuad-bandeja');
@@ -645,7 +609,7 @@
                 const deleteBtn = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
                     ? `<button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
 
-                // Tarjeta HTML para la Lista Principal
+                // Tarjeta HTML Listas
                 const htmlList = `
                     <li class="flex flex-col md:flex-row md:items-center justify-between p-3.5 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-3 md:gap-0 mb-1">
                         <div class="flex items-start md:items-center gap-3 w-full md:w-3/4">
@@ -676,18 +640,18 @@
                 } else {
                     activeList.innerHTML += htmlList;
 
-                    // CORRECCIÓN: Colores dinámicos para la Matriz según Cuadrante
+                    // Tarjeta Matriz con estilo de bordes de colores por cuadrante
                     let c = t.cuadrante || 'bandeja';
-                    let cardColorClass = "bg-white border-slate-200"; // Bandeja
-                    if(c === 'q1') cardColorClass = "bg-rose-50 border-rose-300";
-                    else if(c === 'q2') cardColorClass = "bg-blue-50 border-blue-300";
-                    else if(c === 'q3') cardColorClass = "bg-amber-50 border-amber-300";
-                    else if(c === 'q4') cardColorClass = "bg-slate-100 border-slate-300 text-slate-500 opacity-90";
+                    let cardColorClass = "bg-white border-l-4 border-slate-300"; // Default (Bandeja)
+                    if(c === 'q1') cardColorClass = "bg-white border-l-4 border-rose-600";
+                    else if(c === 'q2') cardColorClass = "bg-white border-l-4 border-emerald-600";
+                    else if(c === 'q3') cardColorClass = "bg-white border-l-4 border-amber-500";
+                    else if(c === 'q4') cardColorClass = "bg-white border-l-4 border-slate-800 opacity-80";
 
                     const htmlMatrix = `
-                        <div class="${cardColorClass} p-3 rounded-lg shadow-sm border mb-2 task-card hover:shadow-md transition text-sm relative" data-id="${t.id}" ${dragAttr}>
-                            <div class="font-medium ${c==='q4' ? 'text-slate-600' : 'text-slate-800'} leading-snug mb-2 pr-6">${t.texto}</div>
-                            <div class="text-[10px] text-slate-500 mb-1">Vence: <strong class="${c==='q4' ? 'text-slate-500' : 'text-slate-700'}">${fLimStr}</strong></div>
+                        <div class="${cardColorClass} p-3 rounded-lg shadow-sm border-y border-r mb-2 task-card hover:shadow-md transition relative" data-id="${t.id}" ${dragAttr}>
+                            <div class="font-medium text-slate-800 leading-snug mb-2 pr-6">${t.texto}</div>
+                            <div class="text-[10px] text-slate-500 mb-1">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
                             <div class="flex justify-between items-center mt-2 border-t border-black/5 pt-1.5">
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded ${critClass}">${t.criticidad}</span>
                                 <span class="text-[9px] text-slate-400 truncate w-16 text-right">${t.creador.split(' ')[0]}</span>
@@ -707,7 +671,6 @@
             });
         }
 
-        // Nueva Tarea
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = document.getElementById('new-task-text').value;
@@ -724,12 +687,10 @@
             e.target.reset();
         });
 
-        // Completar/Descompletar
         window.toggleTaskStatus = async (id, status) => {
             await db.collection("tareas").doc(id).update({ completado: status });
         };
 
-        // Eliminar con Auditoría (Registro)
         window.deleteTask = async (id) => {
             if(confirm("¿Eliminar permanentemente este pendiente?")) {
                 const task = allTasksData.find(t => t.id === id);
@@ -739,7 +700,7 @@
                         creadoOriginalmentePor: task.creador,
                         eliminadoPor: currentUserData.nombre,
                         fechaEliminacion: new Date().toLocaleString('es-PE'),
-                        timestamp: Date.now() // Para ordenar
+                        timestamp: Date.now()
                     });
                 }
                 await db.collection("tareas").doc(id).delete();
@@ -770,10 +731,10 @@
                     const l = doc.data();
                     list.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                            <td class="p-4 text-sm text-slate-800 font-medium">${l.textoOriginal}</td>
+                            <td class="p-4 text-sm text-slate-800 font-medium break-words">${l.textoOriginal}</td>
                             <td class="p-4 text-sm text-slate-500">${l.creadoOriginalmentePor}</td>
                             <td class="p-4 text-sm text-rose-600 font-bold">${l.eliminadoPor}</td>
-                            <td class="p-4 text-sm text-slate-500">${l.fechaEliminacion}</td>
+                            <td class="p-4 text-sm text-slate-500 whitespace-nowrap">${l.fechaEliminacion}</td>
                         </tr>
                     `;
                 });
