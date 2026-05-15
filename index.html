@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestión de Tareas - Servicio de Emergencias MCP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,20 +24,20 @@
     </script>
     <style>
         .hidden-view { display: none !important; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dropzone { min-height: 100px; transition: background 0.3s; }
         .dropzone.dragover { background: #e0e7ff; border: 2px dashed #1e3a8a; }
         .task-card { cursor: grab; }
         .task-card:active { cursor: grabbing; }
         
-        /* Prevenir scroll overflow global en móviles */
-        html, body { height: 100%; max-width: 100vw; overflow: hidden; }
+        /* Prevenir scroll overflow global y arreglar rebote en iOS */
+        html, body { height: 100%; max-width: 100vw; overflow: hidden; position: fixed; w-full; }
     </style>
 </head>
-<body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
+<body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col w-full h-full">
 
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
@@ -74,23 +74,76 @@
                 </div>
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="auth-screen" class="flex h-full justify-center items-center bg-slate-200 p-4 relative z-50">
-        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary overflow-y-auto max-h-full">
+    <div id="add-user-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-emerald-500 p-5 relative overflow-y-auto max-h-full">
+            <button onclick="closeAddUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-plus mr-2 text-emerald-500"></i>Nuevo Usuario</h3>
+            
+            <form id="add-user-form" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
+                    <input type="text" id="new-user-name" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Correo Electrónico</label>
+                    <input type="email" id="new-user-email" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Contraseña Inicial</label>
+                    <input type="text" id="new-user-pass" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required minlength="6">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Rol a Asignar</label>
+                    <select id="new-user-role" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm font-semibold">
+                        <option value="lector">Lector</option>
+                        <option value="editor">Editor</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-check"></i> Crear Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-accent p-5 relative">
+            <button onclick="closeEditUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-pen mr-2 text-accent"></i>Editar Nombre</h3>
+            
+            <form id="edit-user-form" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
+                    <input type="text" id="edit-user-name" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm" required>
+                </div>
+                <p class="text-[10px] text-slate-400 italic mt-1">* El rol y el estado se modifican directamente en la tabla.</p>
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="auth-screen" class="flex h-full w-full justify-center items-center bg-slate-200 p-4 relative z-50 overflow-y-auto">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary">
             <div class="text-center mb-6">
                 <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de tareas<br>y pendientes</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de Tareas<br>y Pendientes</h2>
                 <p class="text-[10px] sm:text-[11px] text-primary font-bold tracking-widest mt-2 bg-blue-50 py-1 rounded uppercase">SERVICIO DE EMERGENCIAS MCP</p>
             </div>
 
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
                     <input type="email" id="login-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" required>
@@ -104,30 +157,7 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md">Ingresar</button>
-                <p class="text-sm text-center mt-4 text-slate-600">¿No tienes acceso? <a href="#" onclick="toggleAuthForms()" class="text-accent font-bold hover:underline">Solicitar Cuenta</a></p>
-            </form>
-
-            <form id="register-form" class="space-y-4 hidden-view">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Nombre Completo</label>
-                    <input type="text" id="reg-name" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
-                    <input type="email" id="reg-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700">Contraseña</label>
-                    <div class="relative">
-                        <input type="password" id="reg-password" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none" required minlength="6">
-                        <button type="button" onclick="togglePassword('reg-password', 'icon-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition">
-                            <i id="icon-reg" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-slate-800 text-white p-2.5 rounded hover:bg-slate-900 transition font-bold shadow-md">Enviar Solicitud</button>
-                <p class="text-sm text-center mt-4 text-slate-600"><a href="#" onclick="toggleAuthForms()" class="text-accent font-bold hover:underline">Volver al Login</a></p>
+                <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md mt-6 text-lg">Ingresar al Sistema</button>
             </form>
         </div>
     </div>
@@ -136,44 +166,32 @@
         
         <div id="sidebar-overlay" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
-        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20 shrink-0">
+        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20 shrink-0 w-full">
             <div class="flex items-center gap-3 md:gap-4 min-w-0">
-                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-200 transition shrink-0">
+                <button onclick="toggleSidebar()" class="text-white hover:text-blue-200 transition shrink-0 p-1">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
                 <div class="bg-white text-primary w-9 h-9 rounded-full items-center justify-center hidden sm:flex shadow shrink-0">
                     <i class="fa-solid fa-list-check"></i>
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <span class="text-base sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de tareas y pendientes</span>
+                    <span class="text-sm sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de Tareas y Pendientes</span>
                     <span class="text-[9px] sm:text-[10px] font-medium text-blue-200 tracking-widest uppercase mt-0.5">SERVICIO DE EMERGENCIAS MCP</span>
                 </div>
             </div>
-            <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
+            <div class="flex items-center shrink-0 pl-2">
                 <div class="text-[10px] sm:text-[12px] bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5 shadow-inner border border-blue-800">
                     <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
                     <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
                 </div>
-                <div class="text-sm text-right hidden md:block">
-                    <div id="user-display-name" class="font-bold text-white truncate max-w-[150px]">Usuario</div>
-                    <div id="user-role-badge" class="text-[10px] text-blue-200 font-semibold tracking-wider uppercase">Rol</div>
-                </div>
-                <button id="btn-logout" class="bg-white text-primary p-2 sm:px-3 sm:py-2 rounded hover:bg-slate-100 transition shadow text-sm" title="Cerrar Sesión">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
             </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden relative w-full min-h-0">
-            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-transform duration-300 ease-in-out h-full shrink-0">
-                <div class="p-4 border-b border-slate-100 bg-slate-50 md:hidden flex flex-col items-center shrink-0">
-                    <div class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                    <div id="user-display-name-mobile" class="font-bold text-slate-800 text-center break-words w-full">Usuario</div>
-                    <div id="user-role-badge-mobile" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase mt-1">Rol</div>
-                </div>
-                <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <div class="flex flex-1 overflow-hidden relative w-full">
+            
+            <aside id="sidebar" class="absolute z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-2xl md:shadow-md flex flex-col transition-all duration-300 ease-in-out h-full shrink-0">
+                
+                <nav class="flex-1 p-4 space-y-1 overflow-y-auto mt-2">
                     <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks">
                         <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Pendientes
                     </button>
@@ -190,21 +208,36 @@
                         <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Accesos
                     </button>
                 </nav>
+
+                <div class="p-4 border-t border-slate-200 bg-slate-50 mt-auto shrink-0">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center shadow shrink-0">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div class="flex flex-col min-w-0 overflow-hidden">
+                            <span id="sidebar-user-name" class="font-bold text-slate-800 text-sm truncate">Usuario</span>
+                            <span id="sidebar-user-role" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5">Rol</span>
+                        </div>
+                    </div>
+                    <button id="btn-logout" class="w-full bg-white border border-slate-300 text-slate-700 p-2 rounded-lg hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center justify-center gap-2 text-sm font-bold shadow-sm">
+                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                    </button>
+                </div>
             </aside>
 
-            <main class="flex-1 relative overflow-hidden bg-slate-50 w-full min-w-0 shadow-inner">
+            <main class="flex-1 relative bg-slate-50 w-full min-w-0 shadow-inner">
                 
-                <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
+                <div id="view-tasks" class="absolute inset-0 overflow-y-auto flex flex-col p-3 sm:p-5 w-full">
                     
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-slate-200 mb-4 shrink-0 w-full">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
                             <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
                             <div class="flex gap-2 w-full md:w-auto">
                                 <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
-                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
+                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar Filtrado</span>
                                 </button>
                                 <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
-                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
+                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar Todo</span>
                                 </button>
                             </div>
                         </div>
@@ -224,7 +257,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (Menor o Igual)</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (&le; Fecha)</label>
                                 <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
                             </div>
                             <div>
@@ -249,12 +282,12 @@
                         </div>
                     </div>
 
-                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full">
+                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-l-4 border-l-accent items-start lg:items-end w-full shrink-0">
                         <div class="w-full lg:flex-1">
                             <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
                         </div>
-                        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto mt-2 lg:mt-0 items-end">
+                        <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full lg:w-auto mt-1 lg:mt-0 items-end">
                             <div class="flex-1 min-w-[100px]">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
                                 <input type="date" id="new-task-date" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition" required>
@@ -282,16 +315,16 @@
                         </div>
                     </form>
 
-                    <div class="flex flex-col gap-5 w-full">
+                    <div class="flex flex-col gap-5 w-full shrink-0 pb-16">
                         <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
                                 <ul id="task-list-active" class="space-y-1.5 w-full"></ul>
                             </div>
                         </div>
 
                         <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
+                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
                             <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-1.5 opacity-85 w-full">
                                 <ul id="task-list-completed" class="space-y-1.5 w-full"></ul>
                             </div>
@@ -299,9 +332,9 @@
                     </div>
                 </div>
 
-                <div id="view-matrix" class="hidden-view flex-col lg:flex-row h-full overflow-y-auto lg:overflow-hidden bg-slate-100 pb-6 w-full">
+                <div id="view-matrix" class="absolute inset-0 flex-col lg:flex-row bg-slate-100 hidden-view w-full overflow-hidden">
                     
-                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 lg:h-full min-h-[250px] lg:min-h-0">
+                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 h-[250px] lg:h-full">
                         <div class="p-3 bg-slate-800 text-white font-bold text-center text-sm shadow flex items-center justify-center gap-2 shrink-0">
                             <i class="fa-solid fa-inbox opacity-70"></i> Bandeja General (<span id="count-bandeja">0</span>)
                         </div>
@@ -309,30 +342,30 @@
                         </div>
                     </div>
 
-                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 h-auto lg:h-full">
+                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-4 w-full h-auto lg:h-full">
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-rose-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Urgente e Importante (<span id="count-q1">0</span>)</span>
                                 <span class="text-[9px] font-bold text-rose-600 block uppercase tracking-widest mt-0.5">Hacer Ahora</span>
                             </div>
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-emerald-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Importante, No Urgente (<span id="count-q2">0</span>)</span>
                                 <span class="text-[9px] font-bold text-emerald-600 block uppercase tracking-widest mt-0.5">Planificar</span>
                             </div>
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-amber-500 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Urgente, No Importante (<span id="count-q3">0</span>)</span>
                                 <span class="text-[9px] font-bold text-amber-600 block uppercase tracking-widest mt-0.5">Delegar</span>
                             </div>
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-900 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">No Urgente, No Importante (<span id="count-q4">0</span>)</span>
                                 <span class="text-[9px] font-bold text-slate-600 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span>
                             </div>
@@ -341,7 +374,7 @@
                     </div>
                 </div>
 
-                <div id="view-audit" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
+                <div id="view-audit" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Eliminados y Editados)</span></h2>
                     </div>
@@ -365,9 +398,12 @@
                     </div>
                 </div>
 
-                <div id="view-users" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
+                <div id="view-users" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
                     <div class="flex justify-between items-center mb-5">
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
+                        <button onclick="openAddUserModal()" class="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-primaryDark transition font-bold shadow-md text-xs sm:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i> Nuevo
+                        </button>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
@@ -421,6 +457,7 @@
         let allTasksData = [];
         let heartbeatInterval;
         let currentEditId = null;
+        let currentEditUserId = null;
 
         /* =========================================
            3. LÓGICA DE INTERFAZ (UI)
@@ -437,16 +474,17 @@
             }
         }
 
-        function toggleAuthForms() {
-            document.getElementById('login-form').classList.toggle('hidden-view');
-            document.getElementById('register-form').classList.toggle('hidden-view');
-        }
-
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
+            // Mobile toggle
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            } else {
+                // PC Toggle: Mover la barra con un margen negativo
+                sidebar.classList.toggle('md:-ml-64');
+            }
         }
 
         function switchTab(tab) {
@@ -455,10 +493,7 @@
                 const el = document.getElementById(`view-${v}`);
                 if (el) {
                     el.classList.add('hidden-view');
-                    // Remover clases de display que puedan interferir
-                    if(v === 'tasks') el.classList.remove('block');
                     if(v === 'matrix') el.classList.remove('flex');
-                    if(v === 'audit' || v === 'users') el.classList.remove('block');
                 }
 
                 const btn = document.getElementById(`tab-${v}`);
@@ -472,10 +507,10 @@
 
             const activeEl = document.getElementById(`view-${tab}`);
             activeEl.classList.remove('hidden-view');
-            // Restaurar layout correcto según el tab
-            if(tab === 'tasks') activeEl.classList.add('block');
-            else if(tab === 'matrix') activeEl.classList.add('flex');
-            else activeEl.classList.add('block');
+            
+            if(tab === 'matrix') {
+                activeEl.classList.add('flex');
+            }
 
             const activeBtn = document.getElementById(`tab-${tab}`);
             if(activeBtn) {
@@ -516,7 +551,7 @@
             }
         }
 
-        /* Modal Edición */
+        /* Modales de Tareas */
         window.openEditModal = (id) => {
             const t = allTasksData.find(x => x.id === id);
             if(!t) return;
@@ -531,6 +566,25 @@
         window.closeEditModal = () => {
             document.getElementById('edit-modal').classList.add('hidden');
             currentEditId = null;
+        };
+
+        /* Modales de Usuarios */
+        window.openAddUserModal = () => {
+            document.getElementById('add-user-modal').classList.remove('hidden');
+        };
+        window.closeAddUserModal = () => {
+            document.getElementById('add-user-modal').classList.add('hidden');
+            document.getElementById('add-user-form').reset();
+        };
+
+        window.openEditUserModal = (id, currentName) => {
+            currentEditUserId = id;
+            document.getElementById('edit-user-name').value = currentName;
+            document.getElementById('edit-user-modal').classList.remove('hidden');
+        };
+        window.closeEditUserModal = () => {
+            document.getElementById('edit-user-modal').classList.add('hidden');
+            currentEditUserId = null;
         };
 
         /* =========================================
@@ -564,8 +618,9 @@
                     document.getElementById('auth-screen').classList.add('hidden-view');
                     document.getElementById('app-screen').classList.remove('hidden-view');
                     
-                    document.getElementById('user-display-name').innerText = currentUserData.nombre;
-                    document.getElementById('user-role-badge').innerText = currentUserData.rol;
+                    // Llenar datos en el sidebar bottom y en móvil
+                    document.getElementById('sidebar-user-name').innerText = currentUserData.nombre;
+                    document.getElementById('sidebar-user-role').innerText = currentUserData.rol;
                     document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
                     document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
                     
@@ -573,7 +628,7 @@
                     loadTasks();
                     if(currentUserData.rol === 'admin') loadUsers();
                     startPresenceSystem();
-                    switchTab('tasks'); // Default view
+                    switchTab('tasks'); 
                 } else {
                     alert("Solicita una cuenta primero."); auth.signOut();
                 }
@@ -595,23 +650,6 @@
                 }
                 alert("Verifique credenciales.");
             }
-        });
-
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-password').value;
-            try {
-                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
-                await db.collection("usuarios").doc(userCred.user.uid).set({
-                    nombre: name, email: email, rol: 'lector', estado: 'pendiente',
-                    fechaSolicitud: new Date().toLocaleString('es-PE'),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("Solicitud enviada. Espere autorización.");
-                auth.signOut(); toggleAuthForms();
-            } catch (error) { alert("Error: " + error.message); }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
@@ -697,7 +735,7 @@
 
                 // Lista Normal
                 const htmlList = `
-                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0">
+                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0 mb-1">
                         <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
                             <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
                             <div class="flex flex-col w-full min-w-0">
@@ -734,16 +772,16 @@
 
                     if(c === 'q1') {
                         cardBorderColor = "border-rose-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-rose-100 text-rose-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q1}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-rose-100 text-rose-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q1}</span>`;
                     } else if(c === 'q2') {
                         cardBorderColor = "border-emerald-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q2}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q2}</span>`;
                     } else if(c === 'q3') {
                         cardBorderColor = "border-amber-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-amber-100 text-amber-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q3}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-amber-100 text-amber-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q3}</span>`;
                     } else if(c === 'q4') {
                         cardBorderColor = "border-slate-800";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-slate-200 text-slate-800 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q4}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-slate-200 text-slate-800 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q4}</span>`;
                     }
 
                     const editBtnMatrix = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
@@ -753,10 +791,10 @@
                         <div class="bg-white border-l-4 ${cardBorderColor} p-3 rounded-lg shadow-sm border-y border-r border-slate-200 mb-2 task-card hover:shadow transition relative w-full min-w-0" data-id="${t.id}" ${dragAttr}>
                             <div class="flex items-start mb-1.5 pr-10 w-full min-w-0">
                                 ${numberBadge}
-                                <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[1px]">${t.texto}</div>
+                                <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[2px]">${t.texto}</div>
                             </div>
-                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-6':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
-                            <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-6':'ml-0'}">
+                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-7':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
+                            <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-7':'ml-0'}">
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad}</span>
                                 <span class="text-[9px] text-slate-400 truncate w-14 text-right">${t.creador.split(' ')[0]}</span>
                             </div>
@@ -775,7 +813,7 @@
                 }
             });
 
-            // Update Counts in UI
+            // Update Counts in UI Matrix Titles
             document.getElementById('count-bandeja').innerText = counts.bandeja;
             document.getElementById('count-q1').innerText = counts.q1;
             document.getElementById('count-q2').innerText = counts.q2;
@@ -887,6 +925,41 @@
         /* =========================================
            7. GESTIÓN DE USUARIOS
         ========================================= */
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('new-user-name').value;
+            const email = document.getElementById('new-user-email').value;
+            const pass = document.getElementById('new-user-pass').value;
+            const role = document.getElementById('new-user-role').value;
+
+            try {
+                // Secondary App workaround to create user without logging out the admin
+                let secApp = firebase.apps.find(a => a.name === "Secondary");
+                if(!secApp) secApp = firebase.initializeApp(firebaseConfig, "Secondary");
+                
+                const userCred = await secApp.auth().createUserWithEmailAndPassword(email, pass);
+                
+                await db.collection("usuarios").doc(userCred.user.uid).set({
+                    nombre: name, email: email, rol: role, estado: 'aprobado',
+                    fechaSolicitud: new Date().toLocaleString('es-PE'),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await secApp.auth().signOut();
+                closeAddUserModal();
+            } catch (error) { alert("Error al crear usuario: " + error.message); }
+        });
+
+        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentEditUserId) return;
+            const newName = document.getElementById('edit-user-name').value;
+            try {
+                await db.collection("usuarios").doc(currentEditUserId).update({ nombre: newName });
+                closeEditUserModal();
+            } catch (error) { alert("Error al actualizar usuario: " + error.message); }
+        });
+
         function loadUsers() {
             db.collection("usuarios").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 const usersList = document.getElementById('users-list');
@@ -916,6 +989,9 @@
                                 </div>
                             </td>
                             <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+                                <button onclick="openEditUserModal('${u.id}', '${u.nombre}')" class="text-accent hover:text-blue-700 bg-blue-50 p-2 rounded-full shadow-sm transition mr-1" title="Editar Nombre">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
                                 <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
                                     <i class="fa-solid fa-user-xmark"></i>
                                 </button>
