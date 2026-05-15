@@ -1,1092 +1,1985 @@
 <!DOCTYPE html>
+
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Gestión de Tareas - Servicio de Emergencias MCP</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
+
+
     <script>
+
         tailwind.config = {
+
             theme: {
+
                 extend: {
+
                     colors: { 
+
                         primary: '#1e3a8a', /* Azul Marino Ejecutivo */
+
                         primaryDark: '#1e40af', 
+
                         accent: '#3b82f6',
+
                         ejecutivoBg: '#f8fafc' /* Gris/Azulado muy claro */
+
                     }
+
                 }
+
             }
+
         }
+
     </script>
+
     <style>
+
         .hidden-view { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
         .dropzone { min-height: 100px; transition: background 0.3s; }
+
         .dropzone.dragover { background: #e0e7ff; border: 2px dashed #1e3a8a; }
+
         .task-card { cursor: grab; }
+
         .task-card:active { cursor: grabbing; }
+
         
-        /* Prevenir scroll overflow global y arreglar rebote en iOS */
-        html, body { height: 100%; max-width: 100vw; overflow: hidden; position: fixed; w-full; }
+
+        /* Prevenir scroll overflow global en móviles */
+
+        html, body { height: 100%; max-width: 100vw; overflow: hidden; }
+
     </style>
+
 </head>
-<body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col w-full h-full">
+
+<body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
+
+
 
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
+
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+
             <h3 class="text-lg font-bold text-primary mb-4 border-b pb-2"><i class="fa-solid fa-pen-to-square mr-2"></i>Editar Pendiente</h3>
+
             
+
             <form id="edit-form" class="space-y-4">
+
                 <div>
+
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Descripción de la tarea</label>
+
                     <textarea id="edit-task-text" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm resize-none" rows="3" required></textarea>
+
                 </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
                     <div>
+
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">F. Límite</label>
+
                         <input type="date" id="edit-task-date" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm">
+
                     </div>
+
                     <div>
+
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Criticidad</label>
+
                         <select id="edit-task-crit" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm font-semibold">
+
                             <option value="ALTA" class="text-rose-600">ALTA</option>
+
                             <option value="MEDIA" class="text-amber-500">MEDIA</option>
+
                             <option value="BAJA" class="text-emerald-600">BAJA</option>
+
                         </select>
+
                     </div>
+
                     <div>
+
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Categoría</label>
+
                         <select id="edit-task-category" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm">
+
                             <option value="Operativa">Operativa</option>
+
                             <option value="Administrativa">Administrativa</option>
+
                             <option value="Logística">Logística</option>
+
                             <option value="Entrenamiento">Entrenamiento</option>
+
                         </select>
+
                     </div>
+
                 </div>
+
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+
                     <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+
                 </div>
+
             </form>
+
         </div>
+
     </div>
 
-    <div id="add-user-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-emerald-500 p-5 relative overflow-y-auto max-h-full">
-            <button onclick="closeAddUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-plus mr-2 text-emerald-500"></i>Nuevo Usuario</h3>
-            
-            <form id="add-user-form" class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
-                    <input type="text" id="new-user-name" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Correo Electrónico</label>
-                    <input type="email" id="new-user-email" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Contraseña Inicial</label>
-                    <input type="text" id="new-user-pass" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required minlength="6">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Rol a Asignar</label>
-                    <select id="new-user-role" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm font-semibold">
-                        <option value="lector">Lector</option>
-                        <option value="editor">Editor</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-                    <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-check"></i> Crear Usuario</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <div id="edit-user-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-accent p-5 relative">
-            <button onclick="closeEditUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-pen mr-2 text-accent"></i>Editar Nombre</h3>
-            
-            <form id="edit-user-form" class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
-                    <input type="text" id="edit-user-name" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm" required>
-                </div>
-                <p class="text-[10px] text-slate-400 italic mt-1">* El rol y el estado se modifican directamente en la tabla.</p>
-                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-                    <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <div id="auth-screen" class="flex h-full w-full justify-center items-center bg-slate-200 p-4 relative z-50 overflow-y-auto">
-        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary">
+    <div id="auth-screen" class="flex h-full justify-center items-center bg-slate-200 p-4 relative z-50">
+
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary overflow-y-auto max-h-full">
+
             <div class="text-center mb-6">
+
                 <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
+
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
+
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de Tareas<br>y Pendientes</h2>
+
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de tareas<br>y pendientes</h2>
+
                 <p class="text-[10px] sm:text-[11px] text-primary font-bold tracking-widest mt-2 bg-blue-50 py-1 rounded uppercase">SERVICIO DE EMERGENCIAS MCP</p>
+
             </div>
 
-            <form id="login-form" class="space-y-5">
+
+
+            <form id="login-form" class="space-y-4">
+
                 <div>
+
                     <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
+
                     <input type="email" id="login-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" required>
+
                 </div>
+
                 <div>
+
                     <label class="block text-sm font-medium text-slate-700">Contraseña</label>
+
                     <div class="relative">
+
                         <input type="password" id="login-password" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" required>
+
                         <button type="button" onclick="togglePassword('login-password', 'icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition">
+
                             <i id="icon-login" class="fa-solid fa-eye"></i>
+
                         </button>
+
                     </div>
+
                 </div>
-                <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md mt-6 text-lg">Ingresar al Sistema</button>
+
+                <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md">Ingresar</button>
+
+                <p class="text-sm text-center mt-4 text-slate-600">¿No tienes acceso? <a href="#" onclick="toggleAuthForms()" class="text-accent font-bold hover:underline">Solicitar Cuenta</a></p>
+
             </form>
+
+
+
+            <form id="register-form" class="space-y-4 hidden-view">
+
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700">Nombre Completo</label>
+
+                    <input type="text" id="reg-name" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none" required>
+
+                </div>
+
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
+
+                    <input type="email" id="reg-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none" required>
+
+                </div>
+
+                <div>
+
+                    <label class="block text-sm font-medium text-slate-700">Contraseña</label>
+
+                    <div class="relative">
+
+                        <input type="password" id="reg-password" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none" required minlength="6">
+
+                        <button type="button" onclick="togglePassword('reg-password', 'icon-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition">
+
+                            <i id="icon-reg" class="fa-solid fa-eye"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <button type="submit" class="w-full bg-slate-800 text-white p-2.5 rounded hover:bg-slate-900 transition font-bold shadow-md">Enviar Solicitud</button>
+
+                <p class="text-sm text-center mt-4 text-slate-600"><a href="#" onclick="toggleAuthForms()" class="text-accent font-bold hover:underline">Volver al Login</a></p>
+
+            </form>
+
         </div>
+
     </div>
+
+
 
     <div id="app-screen" class="hidden-view h-full flex flex-col relative w-full overflow-hidden">
+
         
+
         <div id="sidebar-overlay" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
-        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20 shrink-0 w-full">
+
+
+        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20 shrink-0">
+
             <div class="flex items-center gap-3 md:gap-4 min-w-0">
-                <button onclick="toggleSidebar()" class="text-white hover:text-blue-200 transition shrink-0 p-1">
+
+                <button onclick="toggleSidebar()" class="md:hidden text-white hover:text-blue-200 transition shrink-0">
+
                     <i class="fa-solid fa-bars text-xl"></i>
+
                 </button>
+
                 <div class="bg-white text-primary w-9 h-9 rounded-full items-center justify-center hidden sm:flex shadow shrink-0">
+
                     <i class="fa-solid fa-list-check"></i>
+
                 </div>
+
                 <div class="flex flex-col min-w-0">
-                    <span class="text-sm sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de Tareas y Pendientes</span>
+
+                    <span class="text-base sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de tareas y pendientes</span>
+
                     <span class="text-[9px] sm:text-[10px] font-medium text-blue-200 tracking-widest uppercase mt-0.5">SERVICIO DE EMERGENCIAS MCP</span>
+
                 </div>
+
             </div>
+
             <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
+
                 <div class="text-[10px] sm:text-[12px] bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5 shadow-inner border border-blue-800">
+
                     <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
+
                     <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
+
                 </div>
+
+                <div class="text-sm text-right hidden md:block">
+
+                    <div id="user-display-name" class="font-bold text-white truncate max-w-[150px]">Usuario</div>
+
+                    <div id="user-role-badge" class="text-[10px] text-blue-200 font-semibold tracking-wider uppercase">Rol</div>
+
+                </div>
+
+                <button id="btn-logout" class="bg-white text-primary p-2 sm:px-3 sm:py-2 rounded hover:bg-slate-100 transition shadow text-sm" title="Cerrar Sesión">
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                </button>
+
             </div>
+
         </header>
 
-        <div class="flex flex-1 overflow-hidden relative w-full">
-            
-            <aside id="sidebar" class="absolute z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:w-64 w-64 bg-white border-r border-slate-200 shadow-2xl md:shadow-none flex flex-col transition-all duration-300 ease-in-out h-full shrink-0">
-                
-                <nav class="flex-1 p-3 space-y-2 overflow-y-auto mt-2">
-                    <button onclick="switchTab('tasks')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks" title="Pendientes">
-                        <i class="fa-solid fa-list-ul w-6 text-center text-primary group-hover:scale-110 transition-transform shrink-0"></i> 
-                        <span class="sidebar-text truncate">Pendientes</span>
+
+
+        <div class="flex flex-1 overflow-hidden relative w-full min-h-0">
+
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-transform duration-300 ease-in-out h-full shrink-0">
+
+                <div class="p-4 border-b border-slate-100 bg-slate-50 md:hidden flex flex-col items-center shrink-0">
+
+                    <div class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow">
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </div>
+
+                    <div id="user-display-name-mobile" class="font-bold text-slate-800 text-center break-words w-full">Usuario</div>
+
+                    <div id="user-role-badge-mobile" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase mt-1">Rol</div>
+
+                </div>
+
+                <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+
+                    <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks">
+
+                        <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Pendientes
+
                     </button>
-                    <button onclick="switchTab('matrix')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix" title="Matriz Eisenhower">
-                        <i class="fa-solid fa-table-cells-large w-6 text-center text-slate-400 group-hover:text-primary transition-colors shrink-0"></i> 
-                        <span class="sidebar-text truncate">Matriz Eisenhower</span>
+
+                    <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix">
+
+                        <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Matriz Eisenhower
+
                     </button>
+
                     
+
                     <div class="my-4 border-t border-slate-100 hidden-view" id="admin-divider"></div> 
 
-                    <button onclick="switchTab('audit')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit" title="Registro Auditoría">
-                        <i class="fa-solid fa-clock-rotate-left w-6 text-center text-slate-400 group-hover:text-primary transition-colors shrink-0"></i> 
-                        <span class="sidebar-text truncate">Registro Auditoría</span>
+
+
+                    <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
+
+                        <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Auditoría
+
                     </button>
-                    <button onclick="switchTab('users')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users" title="Accesos">
-                        <i class="fa-solid fa-users-gear w-6 text-center text-slate-400 group-hover:text-primary transition-colors shrink-0"></i> 
-                        <span class="sidebar-text truncate">Accesos</span>
+
+                    <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
+
+                        <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Accesos
+
                     </button>
+
                 </nav>
 
-                <div class="p-3 sm:p-4 border-t border-slate-200 bg-slate-50 flex flex-col gap-3 shrink-0 overflow-hidden">
-                    <div class="flex items-center justify-start gap-3">
-                        <div class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center shadow shrink-0">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div class="flex flex-col min-w-0 overflow-hidden sidebar-text">
-                            <span id="sidebar-user-name" class="font-bold text-slate-800 text-sm truncate">Usuario</span>
-                            <span id="sidebar-user-role" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5">Rol</span>
-                        </div>
-                    </div>
-                    <button id="btn-logout" class="nav-btn w-full bg-white border border-slate-300 text-slate-700 p-2 rounded-lg hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center justify-start sm:justify-center gap-3 sm:gap-2 text-sm font-bold shadow-sm" title="Cerrar Sesión">
-                        <i class="fa-solid fa-right-from-bracket w-6 text-center sm:w-auto shrink-0"></i> <span class="sidebar-text">Cerrar Sesión</span>
-                    </button>
-                </div>
             </aside>
 
-            <main class="flex-1 relative bg-slate-50 w-full min-w-0 shadow-inner">
+
+
+            <main class="flex-1 relative overflow-hidden bg-slate-50 w-full min-w-0 shadow-inner">
+
                 
-                <div id="view-tasks" class="absolute inset-0 overflow-y-auto flex flex-col p-3 sm:p-5 w-full">
+
+                <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
+
                     
-                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-slate-200 mb-4 shrink-0 w-full">
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
+
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
+
                             <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
+
                             <div class="flex gap-2 w-full md:w-auto">
+
                                 <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
-                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar Filtrado</span>
+
+                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
+
                                 </button>
+
                                 <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
-                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar Todo</span>
+
+                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
+
                                 </button>
+
                             </div>
+
                         </div>
+
+
 
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 text-sm border-t border-slate-100 pt-3">
+
                             <div class="col-span-2 md:col-span-1">
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
+
                                 <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+
                                     <option value="desc">Más Nuevos</option>
+
                                     <option value="asc">Más Antiguos</option>
+
                                 </select>
+
                             </div>
+
                             <div>
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
+
                                 <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate" onchange="renderLists()">
+
                                     <option value="">Todos</option>
+
                                 </select>
+
                             </div>
+
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (&le; Fecha)</label>
+
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (Menor o Igual)</label>
+
                                 <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
+
                             </div>
+
                             <div>
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
+
                                 <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+
                                     <option value="">Todas</option>
+
                                     <option value="ALTA">Alta</option>
+
                                     <option value="MEDIA">Media</option>
+
                                     <option value="BAJA">Baja</option>
+
                                 </select>
+
                             </div>
+
                             <div>
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
+
                                 <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+
                                     <option value="">Todas</option>
+
                                     <option value="Operativa">Operativa</option>
+
                                     <option value="Administrativa">Administrativa</option>
+
                                     <option value="Logística">Logística</option>
+
                                     <option value="Entrenamiento">Entrenamiento</option>
+
                                 </select>
+
                             </div>
+
                         </div>
+
                     </div>
 
-                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-l-4 border-l-accent items-start lg:items-end w-full shrink-0">
+
+
+                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full">
+
                         <div class="w-full lg:flex-1">
+
                             <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
+
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
+
                         </div>
-                        <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full lg:w-auto mt-1 lg:mt-0 items-end">
+
+                        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto mt-2 lg:mt-0 items-end">
+
                             <div class="flex-1 min-w-[100px]">
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
+
                                 <input type="date" id="new-task-date" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition" required>
+
                             </div>
+
                             <div class="flex-1 min-w-[90px]">
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
+
                                 <select id="new-task-crit" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs font-bold bg-slate-50 focus:bg-white transition">
+
                                     <option value="ALTA" class="text-rose-600">ALTA</option>
+
                                     <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
+
                                     <option value="BAJA" class="text-emerald-600">BAJA</option>
+
                                 </select>
+
                             </div>
+
                             <div class="flex-1 min-w-[110px]">
+
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
+
                                 <select id="new-task-category" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition">
+
                                     <option value="Operativa">Operativa</option>
+
                                     <option value="Administrativa">Admin</option>
+
                                     <option value="Logística">Logística</option>
+
                                     <option value="Entrenamiento">Entrenamiento</option>
+
                                 </select>
+
                             </div>
+
                             <button type="submit" class="w-full sm:w-auto bg-primary text-white px-4 py-1.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md h-[32px] flex justify-center items-center gap-2 text-xs">
+
                                 <i class="fa-solid fa-plus"></i> Guardar
+
                             </button>
+
                         </div>
+
                     </form>
 
-                    <div class="flex flex-col gap-5 w-full shrink-0 pb-16">
+
+
+                    <div class="flex flex-col gap-5 w-full">
+
                         <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
+
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
+
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
+
                                 <ul id="task-list-active" class="space-y-1.5 w-full"></ul>
+
                             </div>
+
                         </div>
+
+
 
                         <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
+
+                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
+
                             <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-1.5 opacity-85 w-full">
+
                                 <ul id="task-list-completed" class="space-y-1.5 w-full"></ul>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
 
-                <div id="view-matrix" class="absolute inset-0 flex-col lg:flex-row bg-slate-100 hidden-view w-full overflow-hidden">
+
+
+                <div id="view-matrix" class="hidden-view flex-col lg:flex-row h-full overflow-y-auto lg:overflow-hidden bg-slate-100 pb-6 w-full">
+
                     
-                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 h-[250px] lg:h-full">
+
+                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 lg:h-full min-h-[250px] lg:min-h-0">
+
                         <div class="p-3 bg-slate-800 text-white font-bold text-center text-sm shadow flex items-center justify-center gap-2 shrink-0">
+
                             <i class="fa-solid fa-inbox opacity-70"></i> Bandeja General (<span id="count-bandeja">0</span>)
+
                         </div>
+
                         <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
+
                         </div>
+
                     </div>
 
-                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-4 w-full h-auto lg:h-full">
+
+
+                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 h-auto lg:h-full">
+
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-rose-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+
                                 <span class="font-bold text-slate-700 text-sm">Urgente e Importante (<span id="count-q1">0</span>)</span>
+
                                 <span class="text-[9px] font-bold text-rose-600 block uppercase tracking-widest mt-0.5">Hacer Ahora</span>
+
                             </div>
+
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
+
                         </div>
+
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-emerald-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+
                                 <span class="font-bold text-slate-700 text-sm">Importante, No Urgente (<span id="count-q2">0</span>)</span>
+
                                 <span class="text-[9px] font-bold text-emerald-600 block uppercase tracking-widest mt-0.5">Planificar</span>
+
                             </div>
+
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
+
                         </div>
+
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-amber-500 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+
                                 <span class="font-bold text-slate-700 text-sm">Urgente, No Importante (<span id="count-q3">0</span>)</span>
+
                                 <span class="text-[9px] font-bold text-amber-600 block uppercase tracking-widest mt-0.5">Delegar</span>
+
                             </div>
+
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
+
                         </div>
+
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-900 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
+
                                 <span class="font-bold text-slate-700 text-sm">No Urgente, No Importante (<span id="count-q4">0</span>)</span>
+
                                 <span class="text-[9px] font-bold text-slate-600 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span>
+
                             </div>
+
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
+
                         </div>
+
                     </div>
+
                 </div>
 
-                <div id="view-audit" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
+
+
+                <div id="view-audit" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
+
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Eliminados y Editados)</span></h2>
+
                     </div>
 
+
+
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
+
                         <div class="overflow-x-auto w-full">
+
                             <table class="w-full text-left border-collapse min-w-[700px]">
+
                                 <thead>
+
                                     <tr class="bg-slate-100 text-slate-600 uppercase text-[10px] tracking-wider border-b border-slate-200">
+
                                         <th class="p-3 sm:p-4 font-bold w-20">Acción</th>
+
                                         <th class="p-3 sm:p-4 font-bold">Detalle del Registro</th>
+
                                         <th class="p-3 sm:p-4 font-bold">Autor Orig.</th>
+
                                         <th class="p-3 sm:p-4 font-bold text-primary">Modificado Por</th>
+
                                         <th class="p-3 sm:p-4 font-bold">Fecha</th>
+
                                     </tr>
+
                                 </thead>
+
                                 <tbody id="audit-list" class="text-sm divide-y divide-slate-100">
+
                                     </tbody>
+
                             </table>
+
                         </div>
+
                     </div>
+
                 </div>
 
-                <div id="view-users" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
+
+
+                <div id="view-users" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
+
                     <div class="flex justify-between items-center mb-5">
+
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
-                        <button onclick="openAddUserModal()" class="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-primaryDark transition font-bold shadow-md text-xs sm:text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i> Nuevo
-                        </button>
+
                     </div>
+
+
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
+
                         <div class="overflow-x-auto w-full">
+
                             <table class="w-full text-left border-collapse min-w-[600px]">
+
                                 <thead>
+
                                     <tr class="bg-slate-800 text-white uppercase text-[10px] tracking-wider">
+
                                         <th class="p-4 font-bold">Nombre / Correo</th>
+
                                         <th class="p-4 font-bold">Fecha Solicitud</th>
+
                                         <th class="p-4 font-bold">Estado / Rol</th>
+
                                         <th class="p-4 font-bold text-center">Acciones</th>
+
                                     </tr>
+
                                 </thead>
+
                                 <tbody id="users-list" class="text-sm divide-y divide-slate-100">
+
                                     </tbody>
+
                             </table>
+
                         </div>
+
                     </div>
+
                 </div>
+
+
 
             </main>
+
         </div>
+
     </div>
 
+
+
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
+
+
     <script>
+
         /* =========================================
+
            1. CONFIGURACIÓN DE SERVICIOS
+
         ========================================= */
+
         const firebaseConfig = {
+
             apiKey: "AIzaSyBjv44fEAHKH-W2onNB6pPW1nHZwTTnnb0",
+
             authDomain: "tareas-pendientes-emergencias.firebaseapp.com",
+
             projectId: "tareas-pendientes-emergencias",
+
             storageBucket: "tareas-pendientes-emergencias.firebasestorage.app",
+
             messagingSenderId: "96277630087",
+
             appId: "1:96277630087:web:928479563d98880fdcbc22",
+
             measurementId: "G-1KZN5N5RMB"
+
         };
+
         
+
         firebase.initializeApp(firebaseConfig);
+
         const db = firebase.firestore();
+
         const auth = firebase.auth();
 
-        /* =========================================
-           2. ESTADO GLOBAL
-        ========================================= */
-        let currentUserData = null;
-        let allTasksData = [];
-        let heartbeatInterval;
-        let currentEditId = null;
-        let currentEditUserId = null;
+
 
         /* =========================================
-           3. LÓGICA DE INTERFAZ (UI)
+
+           2. ESTADO GLOBAL
+
         ========================================= */
+
+        let currentUserData = null;
+
+        let allTasksData = [];
+
+        let heartbeatInterval;
+
+        let currentEditId = null;
+
+
+
+        /* =========================================
+
+           3. LÓGICA DE INTERFAZ (UI)
+
+        ========================================= */
+
         function togglePassword(inputId, iconId) {
+
             const input = document.getElementById(inputId);
+
             const icon = document.getElementById(iconId);
+
             if (input.type === "password") {
+
                 input.type = "text";
+
                 icon.classList.replace("fa-eye", "fa-eye-slash");
+
             } else {
+
                 input.type = "password";
+
                 icon.classList.replace("fa-eye-slash", "fa-eye");
+
             }
+
         }
+
+
+
+        function toggleAuthForms() {
+
+            document.getElementById('login-form').classList.toggle('hidden-view');
+
+            document.getElementById('register-form').classList.toggle('hidden-view');
+
+        }
+
+
 
         function toggleSidebar() {
+
             const sidebar = document.getElementById('sidebar');
+
             const overlay = document.getElementById('sidebar-overlay');
-            const texts = document.querySelectorAll('.sidebar-text');
-            const navBtns = document.querySelectorAll('.nav-btn');
-            
-            if (window.innerWidth < 768) {
-                // Modo Móvil
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('hidden');
-                sidebar.classList.remove('w-16');
-                sidebar.classList.add('w-64');
-                texts.forEach(t => t.classList.remove('hidden'));
-                navBtns.forEach(b => { b.classList.remove('justify-center', 'px-2'); b.classList.add('justify-start', 'p-3'); });
-            } else {
-                // Modo PC: Colapsar a barra de iconos
-                if(sidebar.classList.contains('md:w-64')) {
-                    sidebar.classList.replace('md:w-64', 'md:w-16');
-                    texts.forEach(t => t.classList.add('hidden'));
-                    navBtns.forEach(b => { b.classList.replace('justify-start', 'justify-center'); b.classList.replace('p-3', 'p-2'); });
-                } else {
-                    sidebar.classList.replace('md:w-16', 'md:w-64');
-                    texts.forEach(t => t.classList.remove('hidden'));
-                    navBtns.forEach(b => { b.classList.replace('justify-center', 'justify-start'); b.classList.replace('p-2', 'p-3'); });
-                }
-            }
+
+            sidebar.classList.toggle('-translate-x-full');
+
+            overlay.classList.toggle('hidden');
+
         }
+
+
 
         function switchTab(tab) {
+
             const views = ['tasks', 'matrix', 'audit', 'users'];
+
             views.forEach(v => {
+
                 const el = document.getElementById(`view-${v}`);
+
                 if (el) {
+
                     el.classList.add('hidden-view');
+
+                    // Remover clases de display que puedan interferir
+
+                    if(v === 'tasks') el.classList.remove('block');
+
                     if(v === 'matrix') el.classList.remove('flex');
+
+                    if(v === 'audit' || v === 'users') el.classList.remove('block');
+
                 }
+
+
 
                 const btn = document.getElementById(`tab-${v}`);
+
                 if (btn) {
+
                     btn.classList.remove('bg-blue-50', 'text-primary', 'border-primary');
+
                     btn.classList.add('border-transparent', 'text-slate-600');
+
                     const icon = btn.querySelector('i');
+
                     if(icon) { icon.classList.remove('text-primary'); icon.classList.add('text-slate-400'); }
+
                 }
+
             });
 
+
+
             const activeEl = document.getElementById(`view-${tab}`);
+
             activeEl.classList.remove('hidden-view');
-            
-            if(tab === 'matrix') {
-                activeEl.classList.add('flex');
-            }
+
+            // Restaurar layout correcto según el tab
+
+            if(tab === 'tasks') activeEl.classList.add('block');
+
+            else if(tab === 'matrix') activeEl.classList.add('flex');
+
+            else activeEl.classList.add('block');
+
+
 
             const activeBtn = document.getElementById(`tab-${tab}`);
+
             if(activeBtn) {
+
                 activeBtn.classList.remove('border-transparent', 'text-slate-600');
+
                 activeBtn.classList.add('bg-blue-50', 'text-primary', 'border-primary');
+
                 const activeIcon = activeBtn.querySelector('i');
+
                 if(activeIcon) { activeIcon.classList.remove('text-slate-400'); activeIcon.classList.add('text-primary'); }
+
             }
+
+
 
             if (window.innerWidth < 768) {
+
                 document.getElementById('sidebar').classList.add('-translate-x-full');
+
                 document.getElementById('sidebar-overlay').classList.add('hidden');
-                // Restaurar tamaño para proxima apertura en móvil
-                const sidebar = document.getElementById('sidebar');
-                sidebar.classList.remove('w-16'); sidebar.classList.add('w-64');
-                document.querySelectorAll('.sidebar-text').forEach(t => t.classList.remove('hidden'));
+
             }
+
         }
+
+
 
         function applyRolePermissions(role) {
+
             const taskForm = document.getElementById('task-form');
+
             const tabUsers = document.getElementById('tab-users');
+
             const tabAudit = document.getElementById('tab-audit');
+
             const adminDivider = document.getElementById('admin-divider');
+
             
+
             if (role === 'lector') {
+
                 taskForm.classList.add('hidden-view');
+
                 tabUsers.classList.add('hidden-view');
+
                 tabAudit.classList.add('hidden-view');
+
                 adminDivider.classList.add('hidden-view');
+
             } else if (role === 'editor') {
+
                 taskForm.classList.remove('hidden-view');
+
                 tabUsers.classList.add('hidden-view');
+
                 tabAudit.classList.add('hidden-view');
+
                 adminDivider.classList.add('hidden-view');
+
             } else if (role === 'admin') {
+
                 taskForm.classList.remove('hidden-view');
+
                 tabUsers.classList.remove('hidden-view');
+
                 tabAudit.classList.remove('hidden-view');
+
                 adminDivider.classList.remove('hidden-view');
+
                 loadAuditLogs();
+
             }
+
         }
 
-        /* Modales de Tareas */
+
+
+        /* Modal Edición */
+
         window.openEditModal = (id) => {
+
             const t = allTasksData.find(x => x.id === id);
+
             if(!t) return;
+
             currentEditId = id;
+
             document.getElementById('edit-task-text').value = t.texto;
+
             document.getElementById('edit-task-date').value = t.fechaLimite || '';
+
             document.getElementById('edit-task-crit').value = t.criticidad || 'MEDIA';
+
             document.getElementById('edit-task-category').value = t.categoria || 'Operativa';
+
             document.getElementById('edit-modal').classList.remove('hidden');
+
         };
+
+
 
         window.closeEditModal = () => {
+
             document.getElementById('edit-modal').classList.add('hidden');
+
             currentEditId = null;
+
         };
 
-        /* Modales de Usuarios */
-        window.openAddUserModal = () => {
-            document.getElementById('add-user-modal').classList.remove('hidden');
-        };
-        window.closeAddUserModal = () => {
-            document.getElementById('add-user-modal').classList.add('hidden');
-            document.getElementById('add-user-form').reset();
-        };
 
-        window.openEditUserModal = (id, currentName) => {
-            currentEditUserId = id;
-            document.getElementById('edit-user-name').value = currentName;
-            document.getElementById('edit-user-modal').classList.remove('hidden');
-        };
-        window.closeEditUserModal = () => {
-            document.getElementById('edit-user-modal').classList.add('hidden');
-            currentEditUserId = null;
-        };
 
         /* =========================================
+
            4. LÓGICA DE AUTENTICACIÓN
+
         ========================================= */
+
         auth.onAuthStateChanged(async (user) => {
+
             if (user) {
+
                 const userRef = db.collection("usuarios").doc(user.uid);
+
                 let doc = await userRef.get();
 
+
+
                 if (user.email === "supervision.rescate@gmail.com") {
+
                     if (!doc.exists) {
+
                         await userRef.set({
+
                             nombre: "Administrador Principal", email: user.email,
+
                             rol: 'admin', estado: 'aprobado',
+
                             fechaSolicitud: new Date().toLocaleString('es-PE'),
+
                             timestamp: firebase.firestore.FieldValue.serverTimestamp()
+
                         });
+
                     } else if (doc.data().rol !== 'admin' || doc.data().estado !== 'aprobado') {
+
                         await userRef.update({ rol: 'admin', estado: 'aprobado' });
+
                     }
+
                     doc = await userRef.get();
+
                 }
+
+
 
                 if (doc.exists) {
+
                     currentUserData = { id: user.uid, ...doc.data() };
+
                     if (currentUserData.estado !== 'aprobado') {
+
                         alert("Cuenta pendiente de aprobación."); auth.signOut(); return;
+
                     }
 
+
+
                     document.getElementById('auth-screen').classList.add('hidden-view');
+
                     document.getElementById('app-screen').classList.remove('hidden-view');
+
                     
-                    // Llenar datos en el sidebar bottom y en móvil
-                    document.getElementById('sidebar-user-name').innerText = currentUserData.nombre;
-                    document.getElementById('sidebar-user-role').innerText = currentUserData.rol;
+
+                    document.getElementById('user-display-name').innerText = currentUserData.nombre;
+
+                    document.getElementById('user-role-badge').innerText = currentUserData.rol;
+
                     document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
+
                     document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
+
                     
+
                     applyRolePermissions(currentUserData.rol);
+
                     loadTasks();
+
                     if(currentUserData.rol === 'admin') loadUsers();
+
                     startPresenceSystem();
-                    switchTab('tasks'); 
+
+                    switchTab('tasks'); // Default view
+
                 } else {
+
                     alert("Solicita una cuenta primero."); auth.signOut();
+
                 }
+
             } else {
+
                 document.getElementById('auth-screen').classList.remove('hidden-view');
+
                 document.getElementById('app-screen').classList.add('hidden-view');
+
                 stopPresenceSystem();
+
             }
+
         });
 
+
+
         document.getElementById('login-form').addEventListener('submit', async (e) => {
+
             e.preventDefault();
+
             const email = document.getElementById('login-email').value;
+
             const pass = document.getElementById('login-password').value;
+
             try { await auth.signInWithEmailAndPassword(email, pass); } 
+
             catch (error) {
+
                 if (email === "supervision.rescate@gmail.com") {
+
                     try { await auth.createUserWithEmailAndPassword(email, pass); return; } catch (e) {}
+
                 }
+
                 alert("Verifique credenciales.");
+
             }
+
         });
+
+
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+
+            const name = document.getElementById('reg-name').value;
+
+            const email = document.getElementById('reg-email').value;
+
+            const pass = document.getElementById('reg-password').value;
+
+            try {
+
+                const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+
+                await db.collection("usuarios").doc(userCred.user.uid).set({
+
+                    nombre: name, email: email, rol: 'lector', estado: 'pendiente',
+
+                    fechaSolicitud: new Date().toLocaleString('es-PE'),
+
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+
+                });
+
+                alert("Solicitud enviada. Espere autorización.");
+
+                auth.signOut(); toggleAuthForms();
+
+            } catch (error) { alert("Error: " + error.message); }
+
+        });
+
+
 
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
 
+
+
         /* =========================================
+
            5. GESTIÓN DE TAREAS Y MATRIZ
+
         ========================================= */
+
         function getCritColor(crit) {
+
             if(crit === 'ALTA') return 'text-rose-600 bg-rose-50 border-rose-200';
+
             if(crit === 'MEDIA') return 'text-amber-600 bg-amber-50 border-amber-200';
+
             if(crit === 'BAJA') return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+
             return 'text-slate-600 bg-slate-100 border-slate-200';
+
         }
+
+
 
         function loadTasks() {
+
             db.collection("tareas").onSnapshot(snapshot => {
+
                 allTasksData = [];
+
                 snapshot.forEach(doc => allTasksData.push({ id: doc.id, ...doc.data() }));
+
                 updateCreatorDropdown();
+
                 renderLists();
+
             });
+
         }
+
+
 
         function updateCreatorDropdown() {
+
             const select = document.getElementById('f-creador');
+
             const currentVal = select.value;
+
             const creators = [...new Set(allTasksData.map(t => t.creador))].sort();
+
             let options = '<option value="">Todos</option>';
+
             creators.forEach(c => { options += `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c.split(' ')[0]}</option>`; });
+
             select.innerHTML = options;
+
         }
 
+
+
         function renderLists() {
+
             const sortOrder = document.getElementById('f-orden').value;
+
             const fCreator = document.getElementById('f-creador').value;
+
             const fDate = document.getElementById('f-fecha').value;
+
             const fCrit = document.getElementById('f-crit').value;
+
             const fCat = document.getElementById('f-cat').value;
 
+
+
             let filtered = allTasksData.filter(t => {
+
                 let match = true;
+
                 if(fCreator && t.creador !== fCreator) match = false;
+
                 if(fDate) { 
+
                     if(!t.fechaLimite || t.fechaLimite > fDate) match = false; 
+
                 }
+
                 if(fCrit && t.criticidad !== fCrit) match = false;
+
                 if(fCat && t.categoria !== fCat) match = false;
+
                 return match;
+
             });
+
+
 
             filtered.sort((a, b) => {
+
                 let dA = a.creadoEn ? a.creadoEn.toMillis() : 0;
+
                 let dB = b.creadoEn ? b.creadoEn.toMillis() : 0;
+
                 return sortOrder === 'desc' ? dB - dA : dA - dB;
+
             });
 
+
+
             const activeList = document.getElementById('task-list-active');
+
             const completedList = document.getElementById('task-list-completed');
+
             const mBandeja = document.getElementById('cuad-bandeja');
+
             const mQ1 = document.getElementById('cuad-q1');
+
             const mQ2 = document.getElementById('cuad-q2');
+
             const mQ3 = document.getElementById('cuad-q3');
+
             const mQ4 = document.getElementById('cuad-q4');
 
+
+
             activeList.innerHTML = ''; completedList.innerHTML = '';
+
             mBandeja.innerHTML = ''; mQ1.innerHTML = ''; mQ2.innerHTML = ''; mQ3.innerHTML = ''; mQ4.innerHTML = '';
+
+
 
             let counts = { bandeja: 0, q1: 0, q2: 0, q3: 0, q4: 0 };
 
+
+
             filtered.forEach(t => {
+
                 const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE').split(',')[0] : '...';
+
                 const fLimStr = t.fechaLimite ? t.fechaLimite : 'Sin límite';
+
                 const isChecked = t.completado ? 'checked' : '';
+
                 const txtClass = t.completado ? 'line-through text-slate-400' : 'text-slate-700 font-medium';
+
                 const critClass = getCritColor(t.criticidad);
+
                 
+
                 const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
+
                 const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
+
                 
+
                 const actionBtns = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
+
                     ? ` <button onclick="openEditModal('${t.id}')" class="text-blue-400 hover:text-blue-600 transition p-1.5 rounded hover:bg-blue-50" title="Editar"><i class="fa-solid fa-pen"></i></button>
+
                         <button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
 
+
+
                 // Lista Normal
+
                 const htmlList = `
-                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0 mb-1">
+
+                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0">
+
                         <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
+
                             <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
+
                             <div class="flex flex-col w-full min-w-0">
+
                                 <span class="${txtClass} break-words leading-tight text-sm">${t.texto}</span>
+
                                 <div class="text-[10px] text-slate-400 flex flex-wrap gap-x-2 mt-1">
+
                                     <span>Gen: ${dateStr}</span> <span class="hidden sm:inline text-slate-300">|</span> 
+
                                     <span class="font-bold ${t.completado ? 'text-slate-400' : 'text-primary'}">Límite: ${fLimStr}</span>
+
                                 </div>
+
                             </div>
+
                         </div>
+
                         <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 pt-2 sm:pt-0 shrink-0 border-t sm:border-t-0 border-slate-100 mt-1 sm:mt-0">
+
                             <div class="flex items-center gap-1.5">
+
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad || '-'}</span>
+
                                 <span class="text-[9px] bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 truncate max-w-[80px] font-medium">${t.categoria}</span>
+
                             </div>
+
                             <div class="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition duration-300">
+
                                 <span class="text-[9px] text-slate-400 italic mr-1"><i class="fa-solid fa-user-pen"></i> ${t.creador.split(' ')[0]}</span>
+
                                 ${actionBtns}
+
                             </div>
+
                         </div>
+
                     </li>
+
                 `;
 
+
+
                 if(t.completado) {
+
                     completedList.innerHTML += htmlList;
+
                 } else {
+
                     activeList.innerHTML += htmlList;
 
+
+
                     let c = t.cuadrante || 'bandeja';
+
                     counts[c]++;
 
+
+
                     let cardBorderColor = "border-slate-300";
+
                     let numberBadge = "";
 
+
+
                     if(c === 'q1') {
+
                         cardBorderColor = "border-rose-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-rose-100 text-rose-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q1}</span>`;
+
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-rose-100 text-rose-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q1}</span>`;
+
                     } else if(c === 'q2') {
+
                         cardBorderColor = "border-emerald-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q2}</span>`;
+
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q2}</span>`;
+
                     } else if(c === 'q3') {
+
                         cardBorderColor = "border-amber-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-amber-100 text-amber-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q3}</span>`;
+
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-amber-100 text-amber-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q3}</span>`;
+
                     } else if(c === 'q4') {
+
                         cardBorderColor = "border-slate-800";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-slate-200 text-slate-800 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q4}</span>`;
+
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-slate-200 text-slate-800 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q4}</span>`;
+
                     }
 
+
+
                     const editBtnMatrix = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
+
                         ? `<button onclick="openEditModal('${t.id}')" class="absolute top-2.5 right-8 text-slate-300 hover:text-blue-500 transition-colors" title="Editar"><i class="fa-solid fa-pen text-sm"></i></button>` : '';
 
+
+
                     const htmlMatrix = `
+
                         <div class="bg-white border-l-4 ${cardBorderColor} p-3 rounded-lg shadow-sm border-y border-r border-slate-200 mb-2 task-card hover:shadow transition relative w-full min-w-0" data-id="${t.id}" ${dragAttr}>
+
                             <div class="flex items-start mb-1.5 pr-10 w-full min-w-0">
+
                                 ${numberBadge}
-                                <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[2px]">${t.texto}</div>
+
+                                <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[1px]">${t.texto}</div>
+
                             </div>
-                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-7':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
-                            <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-7':'ml-0'}">
+
+                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-6':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
+
+                            <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-6':'ml-0'}">
+
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad}</span>
+
                                 <span class="text-[9px] text-slate-400 truncate w-14 text-right">${t.creador.split(' ')[0]}</span>
+
                             </div>
+
                             ${editBtnMatrix}
+
                             <button ${disableCheck} onclick="toggleTaskStatus('${t.id}', true)" class="absolute top-2 right-2 text-slate-300 hover:text-emerald-500 transition-colors" title="Marcar Realizado">
+
                                 <i class="fa-solid fa-circle-check text-lg"></i>
+
                             </button>
+
                         </div>
+
                     `;
+
+
 
                     if(c === 'q1') mQ1.innerHTML += htmlMatrix;
+
                     else if(c === 'q2') mQ2.innerHTML += htmlMatrix;
+
                     else if(c === 'q3') mQ3.innerHTML += htmlMatrix;
+
                     else if(c === 'q4') mQ4.innerHTML += htmlMatrix;
+
                     else mBandeja.innerHTML += htmlMatrix;
+
                 }
+
             });
 
-            // Update Counts in UI Matrix Titles
+
+
+            // Update Counts in UI
+
             document.getElementById('count-bandeja').innerText = counts.bandeja;
+
             document.getElementById('count-q1').innerText = counts.q1;
+
             document.getElementById('count-q2').innerText = counts.q2;
+
             document.getElementById('count-q3').innerText = counts.q3;
+
             document.getElementById('count-q4').innerText = counts.q4;
+
         }
+
+
 
         document.getElementById('task-form').addEventListener('submit', async (e) => {
+
             e.preventDefault();
+
             const text = document.getElementById('new-task-text').value;
+
             const date = document.getElementById('new-task-date').value;
+
             const crit = document.getElementById('new-task-crit').value;
+
             const cat = document.getElementById('new-task-category').value;
+
             
+
             await db.collection("tareas").add({
+
                 texto: text, fechaLimite: date, criticidad: crit, categoria: cat,
+
                 completado: false, cuadrante: 'bandeja',
+
                 creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+
                 creador: currentUserData.nombre
+
             });
+
             e.target.reset();
+
         });
+
+
 
         document.getElementById('edit-form').addEventListener('submit', async (e) => {
+
             e.preventDefault();
+
             if(!currentEditId) return;
+
             const t = allTasksData.find(x => x.id === currentEditId);
+
             const nText = document.getElementById('edit-task-text').value;
+
             const nDate = document.getElementById('edit-task-date').value;
+
             const nCrit = document.getElementById('edit-task-crit').value;
+
             const nCat = document.getElementById('edit-task-category').value;
 
+
+
             if (t.texto !== nText || t.fechaLimite !== nDate || t.criticidad !== nCrit || t.categoria !== nCat) {
+
                 await db.collection("log_eliminados").add({
+
                     tipo: 'Edición',
+
                     textoOriginal: t.texto, textoNuevo: nText,
+
                     creadoOriginalmentePor: t.creador, accionPor: currentUserData.nombre,
+
                     fechaAccion: new Date().toLocaleString('es-PE'), timestamp: Date.now()
+
                 });
+
             }
+
+
 
             await db.collection("tareas").doc(currentEditId).update({
+
                 texto: nText, fechaLimite: nDate, criticidad: nCrit, categoria: nCat
+
             });
+
             closeEditModal();
+
         });
+
+
 
         window.toggleTaskStatus = async (id, status) => {
+
             await db.collection("tareas").doc(id).update({ completado: status });
+
         };
+
+
 
         window.deleteTask = async (id) => {
+
             if(confirm("¿Eliminar permanentemente este pendiente?")) {
+
                 const task = allTasksData.find(t => t.id === id);
+
                 if(task) {
+
                     await db.collection("log_eliminados").add({
+
                         tipo: 'Eliminación',
+
                         textoOriginal: task.texto, creadoOriginalmentePor: task.creador,
+
                         accionPor: currentUserData.nombre, fechaAccion: new Date().toLocaleString('es-PE'),
+
                         timestamp: Date.now()
+
                     });
+
                 }
+
                 await db.collection("tareas").doc(id).delete();
+
             }
+
         };
+
+
 
         /* --- Lógica Drag & Drop --- */
+
         window.drag = (ev) => {
+
             ev.dataTransfer.setData("taskId", ev.target.closest('.task-card').dataset.id);
+
             ev.dataTransfer.effectAllowed = "move";
-        }
-        window.allowDrop = (ev) => { ev.preventDefault(); ev.dataTransfer.dropEffect = "move"; }
-        window.drop = async (ev, cuadrante) => {
-            ev.preventDefault();
-            if (currentUserData.rol === 'lector') return;
-            const id = ev.dataTransfer.getData("taskId");
-            if(id) await db.collection("tareas").doc(id).update({ cuadrante: cuadrante });
+
         }
 
+        window.allowDrop = (ev) => { ev.preventDefault(); ev.dataTransfer.dropEffect = "move"; }
+
+        window.drop = async (ev, cuadrante) => {
+
+            ev.preventDefault();
+
+            if (currentUserData.rol === 'lector') return;
+
+            const id = ev.dataTransfer.getData("taskId");
+
+            if(id) await db.collection("tareas").doc(id).update({ cuadrante: cuadrante });
+
+        }
+
+
+
         /* =========================================
+
            6. AUDITORÍA (REGISTRO EDICIÓN/ELIMINADOS)
+
         ========================================= */
+
         function loadAuditLogs() {
+
             db.collection("log_eliminados").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+
                 const list = document.getElementById('audit-list');
+
                 list.innerHTML = '';
+
                 snapshot.forEach(doc => {
+
                     const l = doc.data();
+
                     const isEdit = l.tipo === 'Edición';
+
                     const actionBadge = isEdit ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Editado</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Eliminado</span>';
+
                     
+
                     const detailStr = isEdit 
+
                         ? `<div class="text-[11px] leading-relaxed"><div class="line-through text-slate-400 mb-1">${l.textoOriginal}</div><div class="text-primary font-medium border-l-2 border-primary pl-2">${l.textoNuevo}</div></div>`
+
                         : `<div class="text-[11px] text-slate-600 leading-tight">${l.textoOriginal}</div>`;
 
+
+
                     list.innerHTML += `
+
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+
                             <td class="p-3 sm:p-4 whitespace-nowrap">${actionBadge}</td>
+
                             <td class="p-3 sm:p-4 w-full min-w-[200px] max-w-[300px] break-words">${detailStr}</td>
+
                             <td class="p-3 sm:p-4 text-[11px] text-slate-500 whitespace-nowrap">${l.creadoOriginalmentePor || '-'}</td>
+
                             <td class="p-3 sm:p-4 text-xs ${isEdit ? 'text-primary' : 'text-rose-600'} font-bold whitespace-nowrap">${l.accionPor}</td>
+
                             <td class="p-3 sm:p-4 text-[10px] text-slate-500 whitespace-nowrap font-medium">${l.fechaAccion}</td>
+
                         </tr>
+
                     `;
+
                 });
+
             });
+
         }
 
+
+
         /* =========================================
+
            7. GESTIÓN DE USUARIOS
+
         ========================================= */
-        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('new-user-name').value;
-            const email = document.getElementById('new-user-email').value;
-            const pass = document.getElementById('new-user-pass').value;
-            const role = document.getElementById('new-user-role').value;
-
-            try {
-                // Secondary App workaround to create user without logging out the admin
-                let secApp = firebase.apps.find(a => a.name === "Secondary");
-                if(!secApp) secApp = firebase.initializeApp(firebaseConfig, "Secondary");
-                
-                const userCred = await secApp.auth().createUserWithEmailAndPassword(email, pass);
-                
-                await db.collection("usuarios").doc(userCred.user.uid).set({
-                    nombre: name, email: email, rol: role, estado: 'aprobado',
-                    fechaSolicitud: new Date().toLocaleString('es-PE'),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                await secApp.auth().signOut();
-                closeAddUserModal();
-            } catch (error) { alert("Error al crear usuario: " + error.message); }
-        });
-
-        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!currentEditUserId) return;
-            const newName = document.getElementById('edit-user-name').value;
-            try {
-                await db.collection("usuarios").doc(currentEditUserId).update({ nombre: newName });
-                closeEditUserModal();
-            } catch (error) { alert("Error al actualizar usuario: " + error.message); }
-        });
 
         function loadUsers() {
+
             db.collection("usuarios").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+
                 const usersList = document.getElementById('users-list');
+
                 usersList.innerHTML = '';
+
                 snapshot.forEach(doc => {
+
                     const u = { id: doc.id, ...doc.data() };
+
                     const statusColor = u.estado === 'aprobado' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
+
                     
+
                     usersList.innerHTML += `
+
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+
                             <td class="p-3 sm:p-4 whitespace-nowrap">
+
                                 <div class="font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre}</div>
+
                                 <div class="text-[10px] text-slate-500 mt-0.5">${u.email}</div>
+
                             </td>
+
                             <td class="p-3 sm:p-4 text-[11px] text-slate-600 whitespace-nowrap font-medium">${u.fechaSolicitud || '-'}</td>
+
                             <td class="p-3 sm:p-4 whitespace-nowrap">
+
                                 <div class="flex flex-col gap-1.5 w-24 sm:w-28">
+
                                     <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
+
                                         <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+
                                         <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
+
                                     </select>
+
                                     <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[10px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
+
                                         <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
+
                                         <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
+
                                         <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Admin</option>
+
                                     </select>
+
                                 </div>
+
                             </td>
+
                             <td class="p-3 sm:p-4 text-center whitespace-nowrap">
-                                <button onclick="openEditUserModal('${u.id}', '${u.nombre}')" class="text-accent hover:text-blue-700 bg-blue-50 p-2 rounded-full shadow-sm transition mr-1" title="Editar Nombre">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
+
                                 <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
+
                                     <i class="fa-solid fa-user-xmark"></i>
+
                                 </button>
+
                             </td>
+
                         </tr>
+
                     `;
+
                 });
+
             });
+
         }
+
+
 
         window.updateUser = async (id, field, value) => {
+
             const updateObj = {}; updateObj[field] = value;
+
             await db.collection("usuarios").doc(id).update(updateObj);
-        };
-        window.deleteUserRecord = async (id) => {
-            if(confirm("¿Eliminar usuario? Ya no podrá ingresar.")) await db.collection("usuarios").doc(id).delete();
+
         };
 
+        window.deleteUserRecord = async (id) => {
+
+            if(confirm("¿Eliminar usuario? Ya no podrá ingresar.")) await db.collection("usuarios").doc(id).delete();
+
+        };
+
+
+
         /* =========================================
+
            8. USUARIOS EN LÍNEA
+
         ========================================= */
+
         function startPresenceSystem() {
+
             const updatePresence = () => {
+
                 if(currentUserData) db.collection("presencia").doc(currentUserData.id).set({ ultimaVez: Date.now() });
+
             };
+
             updatePresence(); heartbeatInterval = setInterval(updatePresence, 60000);
+
             db.collection("presencia").onSnapshot(snapshot => {
+
                 const now = Date.now(); let count = 0;
+
                 snapshot.forEach(doc => { if (now - doc.data().ultimaVez < 120000) count++; });
+
                 document.getElementById('online-count').innerText = count;
+
             });
+
         }
+
         function stopPresenceSystem() { clearInterval(heartbeatInterval); }
 
+
+
         /* =========================================
+
            9. EXPORTAR A EXCEL
+
         ========================================= */
+
         window.exportToExcel = (mode) => {
+
             let sourceData = allTasksData;
 
+
+
             if (mode === 'filtered') {
+
                 const fCreator = document.getElementById('f-creador').value;
+
                 const fDate = document.getElementById('f-fecha').value;
+
                 const fCrit = document.getElementById('f-crit').value;
+
                 const fCat = document.getElementById('f-cat').value;
+
                 
+
                 sourceData = allTasksData.filter(t => {
+
                     let match = true;
+
                     if(fCreator && t.creador !== fCreator) match = false;
+
                     if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
+
                     if(fCrit && t.criticidad !== fCrit) match = false;
+
                     if(fCat && t.categoria !== fCat) match = false;
+
                     return match;
+
                 });
+
             }
 
+
+
             const dataToExport = sourceData.map(t => ({
+
                 Pendiente: t.texto,
+
                 Fecha_Creacion: t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '',
+
                 Fecha_Limite: t.fechaLimite || 'No definida',
+
                 Criticidad: t.criticidad || '-',
+
                 Categoria: t.categoria,
+
                 Estado: t.completado ? 'Realizado' : 'Activo',
+
                 Creador: t.creador,
+
                 Cuadrante_Matriz: (t.cuadrante || 'Bandeja').toUpperCase()
+
             }));
 
+
+
             const ws = XLSX.utils.json_to_sheet(dataToExport);
+
             const wb = XLSX.utils.book_new();
+
             XLSX.utils.book_append_sheet(wb, ws, "Pendientes");
+
             XLSX.writeFile(wb, `Reporte_Pendientes_${mode === 'all' ? 'Completo' : 'Filtrado'}.xlsx`);
+
         };
+
     </script>
+
 </body>
+
 </html>
