@@ -13,10 +13,10 @@
             theme: {
                 extend: {
                     colors: { 
-                        primary: '#0a2342', /* Azul Marino Estilo Inventario */
-                        primaryDark: '#07182e', 
-                        accent: '#0ea5e9',
-                        ejecutivoBg: '#f8fafc' 
+                        primary: '#1e3a8a', /* Azul Marino Ejecutivo */
+                        primaryDark: '#1e40af', 
+                        accent: '#3b82f6',
+                        ejecutivoBg: '#f8fafc' /* Gris/Azulado muy claro */
                     }
                 }
             }
@@ -29,16 +29,16 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dropzone { min-height: 100px; transition: background 0.3s; }
-        .dropzone.dragover { background: #e0e7ff; border: 2px dashed #0ea5e9; }
+        .dropzone.dragover { background: #e0e7ff; border: 2px dashed #1e3a8a; }
         .task-card { cursor: grab; }
         .task-card:active { cursor: grabbing; }
         
         /* Prevenir scroll overflow global y arreglar rebote en iOS */
         html, body { height: 100%; max-width: 100vw; overflow: hidden; position: fixed; width: 100%; }
         
-        /* Animaciones Sidebar */
+        /* Animaciones para la barra lateral */
         #sidebar { transition: width 0.3s ease, transform 0.3s ease; }
-        .sidebar-text { transition: opacity 0.2s ease; }
+        .sidebar-text { transition: opacity 0.2s ease; white-space: nowrap; }
     </style>
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col w-full h-full">
@@ -100,7 +100,12 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Contraseña Inicial</label>
-                    <input type="text" id="new-user-pass" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required minlength="6">
+                    <div class="relative">
+                        <input type="password" id="new-user-pass" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required minlength="6">
+                        <button type="button" onclick="togglePassword('new-user-pass', 'icon-new-pass')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-emerald-500 transition">
+                            <i id="icon-new-pass" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Rol a Asignar</label>
@@ -188,62 +193,56 @@
                     <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_4px_#22c55e]"></div>
                     <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline">en línea</span>
                 </div>
-                <div class="text-sm text-right hidden md:flex items-center border-l border-slate-200 pl-4 gap-3">
-                    <div class="flex flex-col items-end">
-                        <span id="header-user-name" class="font-bold text-slate-800 truncate max-w-[150px] text-sm">Usuario</span>
-                        <span id="header-user-role" class="text-[9px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold tracking-wider uppercase mt-0.5">Rol</span>
-                    </div>
-                </div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden relative w-full">
             
-            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-primary text-white shadow-2xl md:shadow-none flex flex-col h-full shrink-0">
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-primary text-white shadow-2xl md:shadow-none flex flex-col transition-all duration-300 ease-in-out h-full shrink-0">
                 
-                <div class="flex items-center justify-between p-4 border-b border-primaryDark md:hidden">
-                    <span class="font-bold tracking-widest text-sm uppercase">Menú</span>
+                <div class="flex items-center justify-between p-4 border-b border-primaryDark md:hidden shrink-0">
+                    <span class="font-bold tracking-widest text-sm uppercase sidebar-text">Menú</span>
                     <button onclick="toggleSidebar()" class="text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-
-                <button onclick="toggleSidebar()" class="hidden md:block w-full text-right p-3 text-blue-200 hover:text-white transition">
-                    <i class="fa-solid fa-compress text-xl pr-2"></i>
+                <button onclick="toggleSidebar()" class="hidden md:block w-full text-right p-3 text-blue-200 hover:text-white transition shrink-0" title="Colapsar menú">
+                    <i id="sidebar-toggle-icon" class="fa-solid fa-compress text-xl pr-2"></i>
                 </button>
 
-                <nav class="flex-1 p-3 space-y-2 overflow-y-auto mt-2">
-                    <button onclick="switchTab('tasks')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg bg-accent text-white font-bold border-l-4 border-white transition group overflow-hidden" id="tab-tasks" title="Pendientes">
+                <nav class="flex-1 p-3 space-y-2 overflow-y-auto mt-1">
+                    <button onclick="switchTab('tasks')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg bg-accent text-white font-bold border-l-4 border-white transition group overflow-hidden" id="tab-tasks" title="Pendientes">
                         <i class="fa-solid fa-list-ul w-6 text-center text-white group-hover:scale-110 transition-transform shrink-0"></i> 
                         <span class="sidebar-text truncate">Pendientes</span>
                     </button>
-                    <button onclick="switchTab('matrix')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition group overflow-hidden" id="tab-matrix" title="Matriz Eisenhower">
+                    <button onclick="switchTab('matrix')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition group overflow-hidden" id="tab-matrix" title="Matriz Eisenhower">
                         <i class="fa-solid fa-table-cells-large w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
                         <span class="sidebar-text truncate">Matriz Eisenhower</span>
                     </button>
                     
                     <div class="my-4 border-t border-primaryDark hidden-view" id="admin-divider"></div> 
 
-                    <button onclick="switchTab('audit')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-audit" title="Registro Auditoría">
+                    <button onclick="switchTab('audit')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-audit" title="Registro Auditoría">
                         <i class="fa-solid fa-clock-rotate-left w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
                         <span class="sidebar-text truncate">Registro Auditoría</span>
                     </button>
-                    <button onclick="switchTab('users')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-users" title="Administrar Accesos">
+                    <button onclick="switchTab('users')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-users" title="Administrar Accesos">
                         <i class="fa-solid fa-users-gear w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
                         <span class="sidebar-text truncate">Adm. Usuarios</span>
                     </button>
                 </nav>
 
-                <div class="p-3 sm:p-4 border-t border-primaryDark bg-primaryDark flex flex-col gap-4 shrink-0 overflow-hidden">
+                <div class="p-3 sm:p-4 border-t border-primaryDark bg-primaryDark flex flex-col gap-4 shrink-0 overflow-hidden mt-auto">
                     <div class="flex items-center justify-start gap-3">
                         <div class="bg-white text-primary w-10 h-10 rounded-full flex items-center justify-center shadow shrink-0">
                             <i class="fa-solid fa-user"></i>
                         </div>
                         <div class="flex flex-col min-w-0 overflow-hidden sidebar-text">
                             <span id="sidebar-user-name" class="font-bold text-white text-sm truncate">Usuario</span>
-                            <span id="sidebar-user-role" class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5">Rol</span>
+                            <span id="sidebar-user-role" class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5 tracking-wider">Rol</span>
                         </div>
                     </div>
-                    <button id="btn-logout" class="w-full bg-rose-600 text-white p-2.5 rounded-lg hover:bg-rose-700 transition-colors flex items-center justify-start gap-3 text-sm font-bold shadow-md overflow-hidden" title="Cerrar Sesión">
-                        <i class="fa-solid fa-right-from-bracket w-6 text-center shrink-0"></i> <span class="sidebar-text truncate">Cerrar Sesión</span>
+                    <button id="btn-logout" class="nav-btn w-full bg-rose-600 text-white p-2.5 rounded-lg hover:bg-rose-700 transition-colors flex items-center justify-start gap-3 text-sm font-bold shadow-md overflow-hidden" title="Cerrar Sesión">
+                        <i class="fa-solid fa-right-from-bracket w-6 text-center shrink-0"></i> 
+                        <span class="sidebar-text truncate">Cerrar Sesión</span>
                     </button>
                 </div>
             </aside>
@@ -332,22 +331,22 @@
                                     <option value="Entrenamiento">Entrenamiento</option>
                                 </select>
                             </div>
-                            <button type="submit" class="w-full sm:w-auto bg-primary text-white px-4 py-1.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md h-[32px] flex justify-center items-center gap-2 text-xs">
+                            <button type="submit" class="w-full sm:w-auto bg-primary text-white px-4 py-1.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md h-[32px] flex justify-center items-center gap-2 text-xs shrink-0">
                                 <i class="fa-solid fa-plus"></i> Guardar
                             </button>
                         </div>
                     </form>
 
                     <div class="flex flex-col gap-5 w-full shrink-0 pb-16">
-                        <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
+                        <div class="w-full min-w-0">
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
                                 <ul id="task-list-active" class="space-y-1.5 w-full"></ul>
                             </div>
                         </div>
 
-                        <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
+                        <div class="w-full min-w-0">
+                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
                             <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-1.5 opacity-85 w-full">
                                 <ul id="task-list-completed" class="space-y-1.5 w-full"></ul>
                             </div>
@@ -361,38 +360,38 @@
                         <div class="p-3 bg-slate-800 text-white font-bold text-center text-sm shadow flex items-center justify-center gap-2 shrink-0">
                             <i class="fa-solid fa-inbox opacity-70"></i> Bandeja General (<span id="count-bandeja">0</span>)
                         </div>
-                        <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
+                        <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50 min-h-[150px]" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
                         </div>
                     </div>
 
-                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-4 w-full h-auto lg:h-full">
+                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-4 w-full h-auto lg:h-full min-h-0">
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-rose-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Urgente e Importante (<span id="count-q1">0</span>)</span>
                                 <span class="text-[9px] font-bold text-rose-600 block uppercase tracking-widest mt-0.5">Hacer Ahora</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-emerald-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Importante, No Urgente (<span id="count-q2">0</span>)</span>
                                 <span class="text-[9px] font-bold text-emerald-600 block uppercase tracking-widest mt-0.5">Planificar</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-amber-500 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Urgente, No Importante (<span id="count-q3">0</span>)</span>
                                 <span class="text-[9px] font-bold text-amber-600 block uppercase tracking-widest mt-0.5">Delegar</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-800 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
-                            <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
+                            <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">No Urgente, No Importante (<span id="count-q4">0</span>)</span>
                                 <span class="text-[9px] font-bold text-slate-500 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
                         </div>
                     </div>
                 </div>
@@ -503,6 +502,7 @@
             const overlay = document.getElementById('sidebar-overlay');
             const texts = document.querySelectorAll('.sidebar-text');
             const navBtns = document.querySelectorAll('.nav-btn');
+            const toggleIcon = document.getElementById('sidebar-toggle-icon');
             
             if (window.innerWidth < 768) {
                 // Móvil
@@ -519,10 +519,12 @@
                     sidebar.classList.replace('w-64', 'w-16');
                     texts.forEach(t => t.classList.add('hidden'));
                     navBtns.forEach(b => { b.classList.replace('justify-start', 'justify-center'); b.classList.replace('p-3', 'p-2'); });
+                    if(toggleIcon) { toggleIcon.classList.replace('fa-compress', 'fa-expand'); toggleIcon.classList.replace('pr-2', 'pr-0'); toggleIcon.parentElement.classList.replace('text-right', 'text-center'); }
                 } else {
                     sidebar.classList.replace('w-16', 'w-64');
                     texts.forEach(t => t.classList.remove('hidden'));
                     navBtns.forEach(b => { b.classList.replace('justify-center', 'justify-start'); b.classList.replace('p-2', 'p-3'); });
+                    if(toggleIcon) { toggleIcon.classList.replace('fa-expand', 'fa-compress'); toggleIcon.classList.replace('pr-0', 'pr-2'); toggleIcon.parentElement.classList.replace('text-center', 'text-right'); }
                 }
             }
         }
@@ -563,8 +565,9 @@
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
-                document.getElementById('sidebar').classList.remove('w-16');
-                document.getElementById('sidebar').classList.add('w-64');
+                // Restaurar menú a 64 por si se colapsó antes
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('w-16'); sidebar.classList.add('w-64');
                 document.querySelectorAll('.sidebar-text').forEach(t => t.classList.remove('hidden'));
             }
         }
@@ -661,8 +664,6 @@
                     document.getElementById('auth-screen').classList.add('hidden-view');
                     document.getElementById('app-screen').classList.remove('hidden-view');
                     
-                    document.getElementById('header-user-name').innerText = currentUserData.nombre;
-                    document.getElementById('header-user-role').innerText = currentUserData.rol;
                     document.getElementById('sidebar-user-name').innerText = currentUserData.nombre;
                     document.getElementById('sidebar-user-role').innerText = currentUserData.rol;
                     document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
@@ -857,7 +858,7 @@
                 }
             });
 
-            // Update Counts
+            // Update Counts in UI Matrix Titles
             document.getElementById('count-bandeja').innerText = counts.bandeja;
             document.getElementById('count-q1').innerText = counts.q1;
             document.getElementById('count-q2').innerText = counts.q2;
@@ -1011,7 +1012,6 @@
                     const u = { id: doc.id, ...doc.data() };
                     const statusColor = u.estado === 'aprobado' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
                     
-                    // Asegurar que el superadmin no pueda ser modificado o borrado por error
                     const isSuperAdmin = u.email === 'supervision.rescate@gmail.com';
                     const selectStatus = isSuperAdmin ? `<span class="text-[10px] font-bold text-emerald-700">Aprobado</span>` : `
                         <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
