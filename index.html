@@ -13,9 +13,9 @@
             theme: {
                 extend: {
                     colors: { 
-                        primary: '#0a2342', /* Azul Oscuro (Estilo Inventario) */
+                        primary: '#0a2342', /* Azul Marino Estilo Inventario */
                         primaryDark: '#07182e', 
-                        accent: '#0ea5e9', /* Azul Claro Brillante */
+                        accent: '#0ea5e9',
                         ejecutivoBg: '#f8fafc' 
                     }
                 }
@@ -35,6 +35,10 @@
         
         /* Prevenir scroll overflow global y arreglar rebote en iOS */
         html, body { height: 100%; max-width: 100vw; overflow: hidden; position: fixed; width: 100%; }
+        
+        /* Animaciones Sidebar */
+        #sidebar { transition: width 0.3s ease, transform 0.3s ease; }
+        .sidebar-text { transition: opacity 0.2s ease; }
     </style>
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col w-full h-full">
@@ -74,7 +78,7 @@
                 </div>
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
+                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -103,8 +107,7 @@
                     <select id="new-user-role" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm font-semibold">
                         <option value="lector">Lector</option>
                         <option value="editor">Editor</option>
-                        <option value="admin">Administrador</option>
-                    </select>
+                        </select>
                 </div>
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
@@ -146,18 +149,19 @@
             <form id="login-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
-                    <input type="email" id="login-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none transition" required>
+                    <input type="email" id="login-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Contraseña</label>
                     <div class="relative">
-                        <input type="password" id="login-password" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary outline-none transition" required>
+                        <input type="password" id="login-password" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" required>
                         <button type="button" onclick="togglePassword('login-password', 'icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-primary transition">
                             <i id="icon-login" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md mt-6 text-lg">Ingresar al Sistema</button>
+                <p class="text-[11px] text-center mt-3 text-slate-500">Contacte al Administrador si no tiene una cuenta.</p>
             </form>
         </div>
     </div>
@@ -184,47 +188,62 @@
                     <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_4px_#22c55e]"></div>
                     <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline">en línea</span>
                 </div>
-                <div class="text-sm text-right hidden md:block border-l border-slate-200 pl-4">
-                    <div id="user-display-name" class="font-bold text-slate-800 truncate max-w-[150px]">Usuario</div>
-                    <div id="user-role-badge" class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold tracking-wider uppercase mt-0.5 w-max ml-auto">Rol</div>
+                <div class="text-sm text-right hidden md:flex items-center border-l border-slate-200 pl-4 gap-3">
+                    <div class="flex flex-col items-end">
+                        <span id="header-user-name" class="font-bold text-slate-800 truncate max-w-[150px] text-sm">Usuario</span>
+                        <span id="header-user-role" class="text-[9px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold tracking-wider uppercase mt-0.5">Rol</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden relative w-full">
             
-            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-primary text-white shadow-xl md:shadow-none flex flex-col transition-transform duration-300 ease-in-out h-full shrink-0">
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-primary text-white shadow-2xl md:shadow-none flex flex-col h-full shrink-0">
                 
+                <div class="flex items-center justify-between p-4 border-b border-primaryDark md:hidden">
+                    <span class="font-bold tracking-widest text-sm uppercase">Menú</span>
+                    <button onclick="toggleSidebar()" class="text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <button onclick="toggleSidebar()" class="hidden md:block w-full text-right p-3 text-blue-200 hover:text-white transition">
+                    <i class="fa-solid fa-compress text-xl pr-2"></i>
+                </button>
+
                 <nav class="flex-1 p-3 space-y-2 overflow-y-auto mt-2">
-                    <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-accent text-white font-bold border-l-4 border-white transition group" id="tab-tasks">
-                        <i class="fa-solid fa-list-ul w-5 text-white group-hover:scale-110 transition-transform"></i> Pendientes
+                    <button onclick="switchTab('tasks')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg bg-accent text-white font-bold border-l-4 border-white transition group overflow-hidden" id="tab-tasks" title="Pendientes">
+                        <i class="fa-solid fa-list-ul w-6 text-center text-white group-hover:scale-110 transition-transform shrink-0"></i> 
+                        <span class="sidebar-text truncate">Pendientes</span>
                     </button>
-                    <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition group" id="tab-matrix">
-                        <i class="fa-solid fa-table-cells-large w-5 text-blue-200 group-hover:text-white transition-colors"></i> Matriz Eisenhower
+                    <button onclick="switchTab('matrix')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition group overflow-hidden" id="tab-matrix" title="Matriz Eisenhower">
+                        <i class="fa-solid fa-table-cells-large w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
+                        <span class="sidebar-text truncate">Matriz Eisenhower</span>
                     </button>
                     
-                    <div class="my-4 border-t border-blue-800 hidden-view" id="admin-divider"></div> 
+                    <div class="my-4 border-t border-primaryDark hidden-view" id="admin-divider"></div> 
 
-                    <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group" id="tab-audit">
-                        <i class="fa-solid fa-clock-rotate-left w-5 text-blue-200 group-hover:text-white transition-colors"></i> Registro Auditoría
+                    <button onclick="switchTab('audit')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-audit" title="Registro Auditoría">
+                        <i class="fa-solid fa-clock-rotate-left w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
+                        <span class="sidebar-text truncate">Registro Auditoría</span>
                     </button>
-                    <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group" id="tab-users">
-                        <i class="fa-solid fa-users-gear w-5 text-blue-200 group-hover:text-white transition-colors"></i> Adm. Usuarios
+                    <button onclick="switchTab('users')" class="w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-users" title="Administrar Accesos">
+                        <i class="fa-solid fa-users-gear w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
+                        <span class="sidebar-text truncate">Adm. Usuarios</span>
                     </button>
                 </nav>
 
-                <div class="p-4 border-t border-primaryDark bg-primaryDark flex flex-col gap-4 shrink-0">
-                    <div class="flex items-center gap-3 md:hidden">
+                <div class="p-3 sm:p-4 border-t border-primaryDark bg-primaryDark flex flex-col gap-4 shrink-0 overflow-hidden">
+                    <div class="flex items-center justify-start gap-3">
                         <div class="bg-white text-primary w-10 h-10 rounded-full flex items-center justify-center shadow shrink-0">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <div class="flex flex-col min-w-0 overflow-hidden">
-                            <span id="user-display-name-mobile" class="font-bold text-white text-sm truncate">Usuario</span>
-                            <span id="user-role-badge-mobile" class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5">Rol</span>
+                        <div class="flex flex-col min-w-0 overflow-hidden sidebar-text">
+                            <span id="sidebar-user-name" class="font-bold text-white text-sm truncate">Usuario</span>
+                            <span id="sidebar-user-role" class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5">Rol</span>
                         </div>
                     </div>
-                    <button id="btn-logout" class="w-full bg-rose-600 text-white p-2 rounded hover:bg-rose-700 transition-colors flex items-center justify-center gap-2 text-sm font-bold shadow-md">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                    <button id="btn-logout" class="w-full bg-rose-600 text-white p-2.5 rounded-lg hover:bg-rose-700 transition-colors flex items-center justify-start gap-3 text-sm font-bold shadow-md overflow-hidden" title="Cerrar Sesión">
+                        <i class="fa-solid fa-right-from-bracket w-6 text-center shrink-0"></i> <span class="sidebar-text truncate">Cerrar Sesión</span>
                     </button>
                 </div>
             </aside>
@@ -237,10 +256,10 @@
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
                             <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
                             <div class="flex gap-2 w-full md:w-auto">
-                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
+                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-accent text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-600 shadow-sm flex justify-center items-center gap-2 transition font-bold">
                                     <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar Filtrado</span>
                                 </button>
-                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
+                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition font-bold">
                                     <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar Todo</span>
                                 </button>
                             </div>
@@ -249,24 +268,24 @@
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 text-sm border-t border-slate-100 pt-3">
                             <div class="col-span-2 md:col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
-                                <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+                                <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs font-medium" onchange="renderLists()">
                                     <option value="desc">Más Nuevos</option>
                                     <option value="asc">Más Antiguos</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
-                                <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate" onchange="renderLists()">
+                                <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate font-medium" onchange="renderLists()">
                                     <option value="">Todos</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (&le; Fecha)</label>
-                                <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
+                                <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs font-medium" onchange="renderLists()">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
-                                <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+                                <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs font-medium" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="ALTA">Alta</option>
                                     <option value="MEDIA">Media</option>
@@ -275,7 +294,7 @@
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+                                <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs font-medium" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="Operativa">Operativa</option>
                                     <option value="Administrativa">Administrativa</option>
@@ -289,7 +308,7 @@
                     <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-l-4 border-l-accent items-start lg:items-end w-full shrink-0">
                         <div class="w-full lg:flex-1">
                             <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm font-medium" required>
                         </div>
                         <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full lg:w-auto mt-1 lg:mt-0 items-end">
                             <div class="flex-1 min-w-[100px]">
@@ -306,7 +325,7 @@
                             </div>
                             <div class="flex-1 min-w-[110px]">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="new-task-category" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition">
+                                <select id="new-task-category" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition font-medium">
                                     <option value="Operativa">Operativa</option>
                                     <option value="Administrativa">Admin</option>
                                     <option value="Logística">Logística</option>
@@ -368,7 +387,7 @@
                             </div>
                             <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-900 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
+                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-800 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
                             <div class="p-2 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">No Urgente, No Importante (<span id="count-q4">0</span>)</span>
                                 <span class="text-[9px] font-bold text-slate-500 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span>
@@ -405,7 +424,7 @@
                 <div id="view-users" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
                     <div class="flex justify-between items-center mb-5">
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
-                        <button onclick="openAddUserModal()" class="bg-primary text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-primaryDark transition font-bold shadow-md text-xs sm:text-sm flex items-center gap-2">
+                        <button onclick="openAddUserModal()" class="bg-emerald-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-emerald-600 transition font-bold shadow-md text-xs sm:text-sm flex items-center gap-2">
                             <i class="fa-solid fa-user-plus"></i> Nuevo
                         </button>
                     </div>
@@ -462,6 +481,7 @@
         let heartbeatInterval;
         let currentEditId = null;
         let currentEditUserId = null;
+        let isSidebarCollapsed = false;
 
         /* =========================================
            3. LÓGICA DE INTERFAZ (UI)
@@ -481,11 +501,29 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
+            const texts = document.querySelectorAll('.sidebar-text');
+            const navBtns = document.querySelectorAll('.nav-btn');
+            
             if (window.innerWidth < 768) {
+                // Móvil
                 sidebar.classList.toggle('-translate-x-full');
                 overlay.classList.toggle('hidden');
+                sidebar.classList.remove('w-16');
+                sidebar.classList.add('w-64');
+                texts.forEach(t => t.classList.remove('hidden'));
+                navBtns.forEach(b => { b.classList.remove('justify-center', 'px-2'); b.classList.add('justify-start', 'p-3'); });
             } else {
-                sidebar.classList.toggle('md:-translate-x-full');
+                // PC
+                isSidebarCollapsed = !isSidebarCollapsed;
+                if(isSidebarCollapsed) {
+                    sidebar.classList.replace('w-64', 'w-16');
+                    texts.forEach(t => t.classList.add('hidden'));
+                    navBtns.forEach(b => { b.classList.replace('justify-start', 'justify-center'); b.classList.replace('p-3', 'p-2'); });
+                } else {
+                    sidebar.classList.replace('w-16', 'w-64');
+                    texts.forEach(t => t.classList.remove('hidden'));
+                    navBtns.forEach(b => { b.classList.replace('justify-center', 'justify-start'); b.classList.replace('p-2', 'p-3'); });
+                }
             }
         }
 
@@ -525,6 +563,9 @@
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
+                document.getElementById('sidebar').classList.remove('w-16');
+                document.getElementById('sidebar').classList.add('w-64');
+                document.querySelectorAll('.sidebar-text').forEach(t => t.classList.remove('hidden'));
             }
         }
 
@@ -614,14 +655,14 @@
                 if (doc.exists) {
                     currentUserData = { id: user.uid, ...doc.data() };
                     if (currentUserData.estado !== 'aprobado') {
-                        alert("Cuenta pendiente de aprobación."); auth.signOut(); return;
+                        alert("Su cuenta se encuentra inactiva o desaprobada. Contacte al administrador."); auth.signOut(); return;
                     }
 
                     document.getElementById('auth-screen').classList.add('hidden-view');
                     document.getElementById('app-screen').classList.remove('hidden-view');
                     
-                    document.getElementById('user-display-name').innerText = currentUserData.nombre;
-                    document.getElementById('user-role-badge').innerText = currentUserData.rol;
+                    document.getElementById('header-user-name').innerText = currentUserData.nombre;
+                    document.getElementById('header-user-role').innerText = currentUserData.rol;
                     document.getElementById('sidebar-user-name').innerText = currentUserData.nombre;
                     document.getElementById('sidebar-user-role').innerText = currentUserData.rol;
                     document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
@@ -633,7 +674,7 @@
                     startPresenceSystem();
                     switchTab('tasks'); 
                 } else {
-                    alert("Solicita una cuenta primero."); auth.signOut();
+                    alert("Su usuario no existe en la base de datos."); auth.signOut();
                 }
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden-view');
@@ -651,7 +692,7 @@
                 if (email === "supervision.rescate@gmail.com") {
                     try { await auth.createUserWithEmailAndPassword(email, pass); return; } catch (e) {}
                 }
-                alert("Verifique credenciales.");
+                alert("Credenciales incorrectas o usuario no registrado. Contacte al administrador.");
             }
         });
 
@@ -738,7 +779,7 @@
 
                 // Lista Normal
                 const htmlList = `
-                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0 mb-1">
+                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0 mb-1 shadow-sm">
                         <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
                             <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
                             <div class="flex flex-col w-full min-w-0">
@@ -816,7 +857,7 @@
                 }
             });
 
-            // Update Counts in UI Matrix Titles
+            // Update Counts
             document.getElementById('count-bandeja').innerText = counts.bandeja;
             document.getElementById('count-q1').innerText = counts.q1;
             document.getElementById('count-q2').innerText = counts.q2;
@@ -936,7 +977,6 @@
             const role = document.getElementById('new-user-role').value;
 
             try {
-                // Secondary App workaround to create user without logging out the admin
                 let secApp = firebase.apps.find(a => a.name === "Secondary");
                 if(!secApp) secApp = firebase.initializeApp(firebaseConfig, "Secondary");
                 
@@ -971,33 +1011,44 @@
                     const u = { id: doc.id, ...doc.data() };
                     const statusColor = u.estado === 'aprobado' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
                     
+                    // Asegurar que el superadmin no pueda ser modificado o borrado por error
+                    const isSuperAdmin = u.email === 'supervision.rescate@gmail.com';
+                    const selectStatus = isSuperAdmin ? `<span class="text-[10px] font-bold text-emerald-700">Aprobado</span>` : `
+                        <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
+                            <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
+                        </select>
+                    `;
+                    const selectRole = isSuperAdmin ? `<span class="text-[10px] font-bold text-slate-700">Administrador</span>` : `
+                        <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[10px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
+                            <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
+                            <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
+                        </select>
+                    `;
+                    const deleteBtn = isSuperAdmin ? `` : `
+                        <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
+                            <i class="fa-solid fa-user-xmark"></i>
+                        </button>
+                    `;
+
                     usersList.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                             <td class="p-3 sm:p-4 whitespace-nowrap">
-                                <div class="font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre}</div>
+                                <div class="font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre} ${isSuperAdmin ? '<i class="fa-solid fa-crown text-amber-500 ml-1"></i>' : ''}</div>
                                 <div class="text-[10px] text-slate-500 mt-0.5">${u.email}</div>
                             </td>
                             <td class="p-3 sm:p-4 text-[11px] text-slate-600 whitespace-nowrap font-medium">${u.fechaSolicitud || '-'}</td>
                             <td class="p-3 sm:p-4 whitespace-nowrap">
                                 <div class="flex flex-col gap-1.5 w-24 sm:w-28">
-                                    <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
-                                        <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                                        <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
-                                    </select>
-                                    <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[10px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
-                                        <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
-                                        <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
-                                        <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Admin</option>
-                                    </select>
+                                    ${selectStatus}
+                                    ${selectRole}
                                 </div>
                             </td>
                             <td class="p-3 sm:p-4 text-center whitespace-nowrap">
                                 <button onclick="openEditUserModal('${u.id}', '${u.nombre}')" class="text-accent hover:text-blue-700 bg-blue-50 p-2 rounded-full shadow-sm transition mr-1" title="Editar Nombre">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
-                                <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
-                                    <i class="fa-solid fa-user-xmark"></i>
-                                </button>
+                                ${deleteBtn}
                             </td>
                         </tr>
                     `;
