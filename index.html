@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Tareas - Servicio de Emergencias MCP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,10 +13,10 @@
             theme: {
                 extend: {
                     colors: { 
-                        primary: '#1e3a8a', /* Azul Marino Ejecutivo */
+                        primary: '#1e3a8a',
                         primaryDark: '#1e40af', 
                         accent: '#3b82f6',
-                        ejecutivoBg: '#f8fafc' /* Gris/Azulado muy claro */
+                        ejecutivoBg: '#f8fafc'
                     }
                 }
             }
@@ -24,24 +24,20 @@
     </script>
     <style>
         .hidden-view { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         .dropzone { min-height: 100px; transition: background 0.3s; }
         .dropzone.dragover { background: #e0e7ff; border: 2px dashed #1e3a8a; }
         .task-card { cursor: grab; }
         .task-card:active { cursor: grabbing; }
         
-        /* Prevenir scroll overflow global y arreglar rebote en iOS */
-        html, body { height: 100%; max-width: 100vw; overflow: hidden; position: fixed; width: 100%; }
-        
-        /* Animaciones para la barra lateral */
-        #sidebar { transition: width 0.3s ease, transform 0.3s ease; }
-        .sidebar-text { transition: opacity 0.2s ease; white-space: nowrap; }
+        /* Prevenir scroll overflow global en móviles */
+        html, body { height: 100%; max-width: 100vw; overflow: hidden; }
     </style>
 </head>
-<body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col w-full h-full">
+<body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
 
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
@@ -84,74 +80,17 @@
         </div>
     </div>
 
-    <div id="add-user-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-emerald-500 p-5 relative overflow-y-auto max-h-full">
-            <button onclick="closeAddUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-plus mr-2 text-emerald-500"></i>Nuevo Usuario</h3>
-            
-            <form id="add-user-form" class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
-                    <input type="text" id="new-user-name" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Correo Electrónico</label>
-                    <input type="email" id="new-user-email" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Contraseña Inicial</label>
-                    <div class="relative">
-                        <input type="password" id="new-user-pass" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm" required minlength="6">
-                        <button type="button" onclick="togglePassword('new-user-pass', 'icon-new-pass')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-emerald-500 transition">
-                            <i id="icon-new-pass" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Rol a Asignar</label>
-                    <select id="new-user-role" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm font-semibold">
-                        <option value="lector">Lector</option>
-                        <option value="editor">Editor</option>
-                        </select>
-                </div>
-                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-                    <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-check"></i> Crear Usuario</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="edit-user-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-accent p-5 relative">
-            <button onclick="closeEditUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-user-pen mr-2 text-accent"></i>Editar Nombre</h3>
-            
-            <form id="edit-user-form" class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre Completo</label>
-                    <input type="text" id="edit-user-name" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm" required>
-                </div>
-                <p class="text-[10px] text-slate-400 italic mt-1">* El rol y el estado se modifican directamente en la tabla.</p>
-                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-                    <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="auth-screen" class="flex h-full w-full justify-center items-center bg-slate-200 p-4 relative z-50 overflow-y-auto">
-        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary">
+    <div id="auth-screen" class="flex h-full justify-center items-center bg-slate-200 p-4 relative z-50">
+        <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary overflow-y-auto max-h-full">
             <div class="text-center mb-6">
                 <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de Tareas<br>y Pendientes</h2>
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de tareas<br>y pendientes</h2>
                 <p class="text-[10px] sm:text-[11px] text-primary font-bold tracking-widest mt-2 bg-blue-50 py-1 rounded uppercase">SERVICIO DE EMERGENCIAS MCP</p>
             </div>
 
-            <form id="login-form" class="space-y-5">
+            <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700">Correo Electrónico</label>
                     <input type="email" id="login-email" class="mt-1 w-full p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" required>
@@ -165,8 +104,7 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md mt-6 text-lg">Ingresar al Sistema</button>
-                <p class="text-[11px] text-center mt-3 text-slate-500">Contacte al Administrador si no tiene una cuenta.</p>
+                <button type="submit" class="w-full bg-primary text-white p-2.5 rounded hover:bg-primaryDark transition font-bold shadow-md">Ingresar</button>
             </form>
         </div>
     </div>
@@ -175,91 +113,79 @@
         
         <div id="sidebar-overlay" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
-        <header class="bg-white border-b border-slate-200 text-slate-800 p-3 sm:p-4 flex justify-between items-center shadow-sm z-20 shrink-0 w-full">
+        <header class="bg-primary text-white p-3 sm:p-4 flex justify-between items-center shadow-md z-20 shrink-0">
             <div class="flex items-center gap-3 md:gap-4 min-w-0">
-                <button onclick="toggleSidebar()" class="text-slate-600 hover:text-primary transition shrink-0 p-1 md:hidden">
+                <button onclick="toggleSidebar()" class="text-white hover:text-blue-200 transition shrink-0">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-                <div class="bg-primary text-white w-9 h-9 rounded-full items-center justify-center hidden sm:flex shadow shrink-0">
+                <div class="bg-white text-primary w-9 h-9 rounded-full items-center justify-center hidden sm:flex shadow shrink-0">
                     <i class="fa-solid fa-list-check"></i>
                 </div>
                 <div class="flex flex-col min-w-0">
-                    <span class="text-sm sm:text-lg font-bold tracking-wide truncate leading-tight text-primary">Gestión de Tareas y Pendientes</span>
-                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 tracking-widest uppercase mt-0.5">SERVICIO DE EMERGENCIAS MCP</span>
+                    <span class="text-base sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de tareas y pendientes</span>
+                    <span class="text-[9px] sm:text-[10px] font-medium text-blue-200 tracking-widest uppercase mt-0.5">SERVICIO DE EMERGENCIAS MCP</span>
                 </div>
             </div>
-            <div class="flex items-center gap-3 sm:gap-4 shrink-0 pl-2">
-                <div class="text-[10px] sm:text-[12px] bg-slate-100 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5 border border-slate-200 text-slate-700">
-                    <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_4px_#22c55e]"></div>
-                    <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline">en línea</span>
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
+                <div class="text-[10px] sm:text-[12px] bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5 shadow-inner border border-blue-800">
+                    <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
+                    <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
+                </div>
+                <div class="text-sm text-right hidden md:block pr-2">
+                    <div id="user-display-name" class="font-bold text-white truncate max-w-[150px]">Usuario</div>
+                    <div id="user-role-badge" class="text-[10px] text-blue-200 font-semibold tracking-wider uppercase">Rol</div>
                 </div>
             </div>
         </header>
 
-        <div class="flex flex-1 overflow-hidden relative w-full">
-            
-            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-primary text-white shadow-2xl md:shadow-none flex flex-col transition-all duration-300 ease-in-out h-full shrink-0">
-                
-                <div class="flex items-center justify-between p-4 border-b border-primaryDark md:hidden shrink-0">
-                    <span class="font-bold tracking-widest text-sm uppercase sidebar-text">Menú</span>
-                    <button onclick="toggleSidebar()" class="text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-                <button onclick="toggleSidebar()" class="hidden md:block w-full text-right p-3 text-blue-200 hover:text-white transition shrink-0" title="Colapsar menú">
-                    <i id="sidebar-toggle-icon" class="fa-solid fa-compress text-xl pr-2"></i>
-                </button>
-
-                <nav class="flex-1 p-3 space-y-2 overflow-y-auto mt-1">
-                    <button onclick="switchTab('tasks')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg bg-accent text-white font-bold border-l-4 border-white transition group overflow-hidden" id="tab-tasks" title="Pendientes">
-                        <i class="fa-solid fa-list-ul w-6 text-center text-white group-hover:scale-110 transition-transform shrink-0"></i> 
-                        <span class="sidebar-text truncate">Pendientes</span>
-                    </button>
-                    <button onclick="switchTab('matrix')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition group overflow-hidden" id="tab-matrix" title="Matriz Eisenhower">
-                        <i class="fa-solid fa-table-cells-large w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
-                        <span class="sidebar-text truncate">Matriz Eisenhower</span>
-                    </button>
-                    
-                    <div class="my-4 border-t border-primaryDark hidden-view" id="admin-divider"></div> 
-
-                    <button onclick="switchTab('audit')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-audit" title="Registro Auditoría">
-                        <i class="fa-solid fa-clock-rotate-left w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
-                        <span class="sidebar-text truncate">Registro Auditoría</span>
-                    </button>
-                    <button onclick="switchTab('users')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-blue-100 hover:bg-primaryDark hover:text-white border-l-4 border-transparent transition hidden-view group overflow-hidden" id="tab-users" title="Administrar Accesos">
-                        <i class="fa-solid fa-users-gear w-6 text-center text-blue-200 group-hover:text-white transition-colors shrink-0"></i> 
-                        <span class="sidebar-text truncate">Adm. Usuarios</span>
-                    </button>
-                </nav>
-
-                <div class="p-3 sm:p-4 border-t border-primaryDark bg-primaryDark flex flex-col gap-4 shrink-0 overflow-hidden mt-auto">
-                    <div class="flex items-center justify-start gap-3">
-                        <div class="bg-white text-primary w-10 h-10 rounded-full flex items-center justify-center shadow shrink-0">
+        <div class="flex flex-1 overflow-hidden relative w-full min-h-0">
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-all duration-300 ease-in-out h-full overflow-hidden transform -translate-x-full md:translate-x-0 shrink-0">
+                <div class="w-64 flex flex-col h-full bg-white relative">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50 md:hidden flex flex-col items-center shrink-0">
+                        <div class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <div class="flex flex-col min-w-0 overflow-hidden sidebar-text">
-                            <span id="sidebar-user-name" class="font-bold text-white text-sm truncate">Usuario</span>
-                            <span id="sidebar-user-role" class="text-[10px] bg-rose-600 text-white px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5 tracking-wider">Rol</span>
-                        </div>
+                        <div id="user-display-name-mobile" class="font-bold text-slate-800 text-center break-words w-full">Usuario</div>
+                        <div id="user-role-badge-mobile" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase mt-1">Rol</div>
                     </div>
-                    <button id="btn-logout" class="nav-btn w-full bg-rose-600 text-white p-2.5 rounded-lg hover:bg-rose-700 transition-colors flex items-center justify-start gap-3 text-sm font-bold shadow-md overflow-hidden" title="Cerrar Sesión">
-                        <i class="fa-solid fa-right-from-bracket w-6 text-center shrink-0"></i> 
-                        <span class="sidebar-text truncate">Cerrar Sesión</span>
-                    </button>
+                    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+                        <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks">
+                            <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Pendientes
+                        </button>
+                        <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix">
+                            <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Matriz Eisenhower
+                        </button>
+                        
+                        <div class="my-4 border-t border-slate-100 hidden-view" id="admin-divider"></div> 
+
+                        <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
+                            <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Auditoría
+                        </button>
+                        <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
+                            <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Accesos
+                        </button>
+                    </nav>
+                    <div class="p-4 border-t border-slate-200 bg-slate-50 shrink-0 mt-auto">
+                        <button id="btn-logout" class="w-full bg-white text-rose-600 border border-slate-300 p-2.5 rounded hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition shadow-sm text-sm font-bold flex items-center justify-center gap-2" title="Cerrar Sesión">
+                            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                        </button>
+                    </div>
                 </div>
             </aside>
 
-            <main class="flex-1 relative bg-slate-50 w-full min-w-0 shadow-inner">
+            <main class="flex-1 relative overflow-hidden bg-slate-50 w-full min-w-0 shadow-inner">
                 
-                <div id="view-tasks" class="absolute inset-0 overflow-y-auto flex flex-col p-3 sm:p-5 w-full">
+                <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
                     
-                    <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-slate-200 mb-4 shrink-0 w-full">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
                             <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
                             <div class="flex gap-2 w-full md:w-auto">
-                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-accent text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-600 shadow-sm flex justify-center items-center gap-2 transition font-bold">
-                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar Filtrado</span>
+                                <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
+                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
                                 </button>
-                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition font-bold">
-                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar Todo</span>
+                                <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
+                                    <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
                                 </button>
                             </div>
                         </div>
@@ -267,24 +193,24 @@
                         <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 text-sm border-t border-slate-100 pt-3">
                             <div class="col-span-2 md:col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
-                                <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs font-medium" onchange="renderLists()">
+                                <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="desc">Más Nuevos</option>
                                     <option value="asc">Más Antiguos</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
-                                <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate font-medium" onchange="renderLists()">
+                                <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate" onchange="renderLists()">
                                     <option value="">Todos</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (&le; Fecha)</label>
-                                <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs font-medium" onchange="renderLists()">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (Menor o Igual)</label>
+                                <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
-                                <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs font-medium" onchange="renderLists()">
+                                <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="ALTA">Alta</option>
                                     <option value="MEDIA">Media</option>
@@ -293,7 +219,7 @@
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs font-medium" onchange="renderLists()">
+                                <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="Operativa">Operativa</option>
                                     <option value="Administrativa">Administrativa</option>
@@ -304,12 +230,12 @@
                         </div>
                     </div>
 
-                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-l-4 border-l-accent items-start lg:items-end w-full shrink-0">
+                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full">
                         <div class="w-full lg:flex-1">
                             <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de equipos..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm font-medium" required>
+                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
                         </div>
-                        <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full lg:w-auto mt-1 lg:mt-0 items-end">
+                        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto mt-2 lg:mt-0 items-end">
                             <div class="flex-1 min-w-[100px]">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
                                 <input type="date" id="new-task-date" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition" required>
@@ -324,28 +250,28 @@
                             </div>
                             <div class="flex-1 min-w-[110px]">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="new-task-category" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition font-medium">
+                                <select id="new-task-category" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition">
                                     <option value="Operativa">Operativa</option>
                                     <option value="Administrativa">Admin</option>
                                     <option value="Logística">Logística</option>
                                     <option value="Entrenamiento">Entrenamiento</option>
                                 </select>
                             </div>
-                            <button type="submit" class="w-full sm:w-auto bg-primary text-white px-4 py-1.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md h-[32px] flex justify-center items-center gap-2 text-xs shrink-0">
+                            <button type="submit" class="w-full sm:w-auto bg-primary text-white px-4 py-1.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md h-[32px] flex justify-center items-center gap-2 text-xs">
                                 <i class="fa-solid fa-plus"></i> Guardar
                             </button>
                         </div>
                     </form>
 
-                    <div class="flex flex-col gap-5 w-full shrink-0 pb-16">
-                        <div class="w-full min-w-0">
+                    <div class="flex flex-col gap-5 w-full">
+                        <div class="w-full">
                             <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
                                 <ul id="task-list-active" class="space-y-1.5 w-full"></ul>
                             </div>
                         </div>
 
-                        <div class="w-full min-w-0">
+                        <div class="w-full">
                             <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
                             <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-1.5 opacity-85 w-full">
                                 <ul id="task-list-completed" class="space-y-1.5 w-full"></ul>
@@ -354,49 +280,49 @@
                     </div>
                 </div>
 
-                <div id="view-matrix" class="absolute inset-0 flex-col lg:flex-row bg-slate-100 hidden-view w-full overflow-hidden">
+                <div id="view-matrix" class="hidden-view flex-col lg:flex-row h-full overflow-y-auto lg:overflow-hidden bg-slate-100 pb-6 w-full">
                     
-                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 h-[250px] lg:h-full">
+                    <div class="w-full lg:w-72 bg-white border-b border-slate-200 lg:border-b-0 lg:border-r shadow-md flex flex-col z-10 shrink-0 lg:h-full min-h-[250px] lg:min-h-0">
                         <div class="p-3 bg-slate-800 text-white font-bold text-center text-sm shadow flex items-center justify-center gap-2 shrink-0">
                             <i class="fa-solid fa-inbox opacity-70"></i> Bandeja General (<span id="count-bandeja">0</span>)
                         </div>
-                        <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50 min-h-[150px]" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
+                        <div class="flex-1 p-3 overflow-y-auto dropzone bg-slate-50" id="cuad-bandeja" ondrop="drop(event, 'bandeja')" ondragover="allowDrop(event)">
                         </div>
                     </div>
 
-                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-4 w-full h-auto lg:h-full min-h-0">
+                    <div class="flex-1 p-3 sm:p-4 grid grid-cols-1 md:grid-cols-2 grid-rows-none md:grid-rows-2 gap-3 md:gap-4 h-auto lg:h-full">
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-rose-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
                             <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Urgente e Importante (<span id="count-q1">0</span>)</span>
                                 <span class="text-[9px] font-bold text-rose-600 block uppercase tracking-widest mt-0.5">Hacer Ahora</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q1" ondrop="drop(event, 'q1')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-emerald-600 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
                             <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Importante, No Urgente (<span id="count-q2">0</span>)</span>
                                 <span class="text-[9px] font-bold text-emerald-600 block uppercase tracking-widest mt-0.5">Planificar</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q2" ondrop="drop(event, 'q2')" ondragover="allowDrop(event)"></div>
                         </div>
                         <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-amber-500 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
                             <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">Urgente, No Importante (<span id="count-q3">0</span>)</span>
                                 <span class="text-[9px] font-bold text-amber-600 block uppercase tracking-widest mt-0.5">Delegar</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q3" ondrop="drop(event, 'q3')" ondragover="allowDrop(event)"></div>
                         </div>
-                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-800 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
+                        <div class="bg-slate-50 rounded-xl shadow-sm border-t-4 border-t-slate-900 border border-slate-200 flex flex-col overflow-hidden min-h-[250px] md:min-h-0">
                             <div class="p-2.5 text-center border-b border-slate-200 bg-white shrink-0">
                                 <span class="font-bold text-slate-700 text-sm">No Urgente, No Importante (<span id="count-q4">0</span>)</span>
-                                <span class="text-[9px] font-bold text-slate-500 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span>
+                                <span class="text-[9px] font-bold text-slate-600 block uppercase tracking-widest mt-0.5">Eliminar / Posponer</span>
                             </div>
-                            <div class="flex-1 p-2.5 overflow-y-auto dropzone min-h-0" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
+                            <div class="flex-1 p-2.5 overflow-y-auto dropzone" id="cuad-q4" ondrop="drop(event, 'q4')" ondragover="allowDrop(event)"></div>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-audit" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
+                <div id="view-audit" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Eliminados y Editados)</span></h2>
                     </div>
@@ -420,12 +346,38 @@
                     </div>
                 </div>
 
-                <div id="view-users" class="absolute inset-0 overflow-y-auto p-4 sm:p-6 hidden-view w-full pb-20">
+                <div id="view-users" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
                     <div class="flex justify-between items-center mb-5">
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Control de Accesos</h2>
-                        <button onclick="openAddUserModal()" class="bg-emerald-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-emerald-600 transition font-bold shadow-md text-xs sm:text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-user-plus"></i> Nuevo
-                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-5 border-l-4 border-l-emerald-500">
+                        <h3 class="text-sm font-bold text-slate-800 mb-3"><i class="fa-solid fa-user-plus mr-2 text-emerald-600"></i>Agregar Nuevo Usuario</h3>
+                        <form id="add-user-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Nombre Completo</label>
+                                <input type="text" id="add-u-name" class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-xs" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Correo Electrónico</label>
+                                <input type="email" id="add-u-email" class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-xs" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Contraseña Inicial</label>
+                                <input type="text" id="add-u-pass" class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-xs" required minlength="6">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">Rol</label>
+                                <select id="add-u-rol" class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-xs font-bold bg-white">
+                                    <option value="lector">Lector</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 transition font-bold shadow-md h-[34px] flex justify-center items-center gap-2 text-xs">
+                                <i class="fa-solid fa-check"></i> Registrar
+                            </button>
+                        </form>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
@@ -479,8 +431,6 @@
         let allTasksData = [];
         let heartbeatInterval;
         let currentEditId = null;
-        let currentEditUserId = null;
-        let isSidebarCollapsed = false;
 
         /* =========================================
            3. LÓGICA DE INTERFAZ (UI)
@@ -500,32 +450,20 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            const texts = document.querySelectorAll('.sidebar-text');
-            const navBtns = document.querySelectorAll('.nav-btn');
-            const toggleIcon = document.getElementById('sidebar-toggle-icon');
             
-            if (window.innerWidth < 768) {
-                // Móvil
+            if (window.innerWidth >= 768) {
+                // Comportamiento para PC (Colapsar/Expandir ancho)
+                if (sidebar.classList.contains('md:w-0')) {
+                    sidebar.classList.remove('md:w-0', 'md:border-r-0');
+                    sidebar.classList.add('md:w-64');
+                } else {
+                    sidebar.classList.add('md:w-0', 'md:border-r-0');
+                    sidebar.classList.remove('md:w-64');
+                }
+            } else {
+                // Comportamiento Móvil (Desplegar/Ocultar con overlay)
                 sidebar.classList.toggle('-translate-x-full');
                 overlay.classList.toggle('hidden');
-                sidebar.classList.remove('w-16');
-                sidebar.classList.add('w-64');
-                texts.forEach(t => t.classList.remove('hidden'));
-                navBtns.forEach(b => { b.classList.remove('justify-center', 'px-2'); b.classList.add('justify-start', 'p-3'); });
-            } else {
-                // PC
-                isSidebarCollapsed = !isSidebarCollapsed;
-                if(isSidebarCollapsed) {
-                    sidebar.classList.replace('w-64', 'w-16');
-                    texts.forEach(t => t.classList.add('hidden'));
-                    navBtns.forEach(b => { b.classList.replace('justify-start', 'justify-center'); b.classList.replace('p-3', 'p-2'); });
-                    if(toggleIcon) { toggleIcon.classList.replace('fa-compress', 'fa-expand'); toggleIcon.classList.replace('pr-2', 'pr-0'); toggleIcon.parentElement.classList.replace('text-right', 'text-center'); }
-                } else {
-                    sidebar.classList.replace('w-16', 'w-64');
-                    texts.forEach(t => t.classList.remove('hidden'));
-                    navBtns.forEach(b => { b.classList.replace('justify-center', 'justify-start'); b.classList.replace('p-2', 'p-3'); });
-                    if(toggleIcon) { toggleIcon.classList.replace('fa-expand', 'fa-compress'); toggleIcon.classList.replace('pr-0', 'pr-2'); toggleIcon.parentElement.classList.replace('text-center', 'text-right'); }
-                }
             }
         }
 
@@ -535,40 +473,37 @@
                 const el = document.getElementById(`view-${v}`);
                 if (el) {
                     el.classList.add('hidden-view');
+                    if(v === 'tasks') el.classList.remove('block');
                     if(v === 'matrix') el.classList.remove('flex');
+                    if(v === 'audit' || v === 'users') el.classList.remove('block');
                 }
 
                 const btn = document.getElementById(`tab-${v}`);
                 if (btn) {
-                    btn.classList.remove('bg-accent', 'text-white', 'border-white');
-                    btn.classList.add('border-transparent', 'text-blue-100');
+                    btn.classList.remove('bg-blue-50', 'text-primary', 'border-primary');
+                    btn.classList.add('border-transparent', 'text-slate-600');
                     const icon = btn.querySelector('i');
-                    if(icon) { icon.classList.remove('text-white'); icon.classList.add('text-blue-200'); }
+                    if(icon) { icon.classList.remove('text-primary'); icon.classList.add('text-slate-400'); }
                 }
             });
 
             const activeEl = document.getElementById(`view-${tab}`);
             activeEl.classList.remove('hidden-view');
-            
-            if(tab === 'matrix') {
-                activeEl.classList.add('flex');
-            }
+            if(tab === 'tasks') activeEl.classList.add('block');
+            else if(tab === 'matrix') activeEl.classList.add('flex');
+            else activeEl.classList.add('block');
 
             const activeBtn = document.getElementById(`tab-${tab}`);
             if(activeBtn) {
-                activeBtn.classList.remove('border-transparent', 'text-blue-100');
-                activeBtn.classList.add('bg-accent', 'text-white', 'border-white');
+                activeBtn.classList.remove('border-transparent', 'text-slate-600');
+                activeBtn.classList.add('bg-blue-50', 'text-primary', 'border-primary');
                 const activeIcon = activeBtn.querySelector('i');
-                if(activeIcon) { activeIcon.classList.remove('text-blue-200'); activeIcon.classList.add('text-white'); }
+                if(activeIcon) { activeIcon.classList.remove('text-slate-400'); activeIcon.classList.add('text-primary'); }
             }
 
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
-                // Restaurar menú a 64 por si se colapsó antes
-                const sidebar = document.getElementById('sidebar');
-                sidebar.classList.remove('w-16'); sidebar.classList.add('w-64');
-                document.querySelectorAll('.sidebar-text').forEach(t => t.classList.remove('hidden'));
             }
         }
 
@@ -597,7 +532,6 @@
             }
         }
 
-        /* Modales de Tareas */
         window.openEditModal = (id) => {
             const t = allTasksData.find(x => x.id === id);
             if(!t) return;
@@ -614,25 +548,6 @@
             currentEditId = null;
         };
 
-        /* Modales de Usuarios */
-        window.openAddUserModal = () => {
-            document.getElementById('add-user-modal').classList.remove('hidden');
-        };
-        window.closeAddUserModal = () => {
-            document.getElementById('add-user-modal').classList.add('hidden');
-            document.getElementById('add-user-form').reset();
-        };
-
-        window.openEditUserModal = (id, currentName) => {
-            currentEditUserId = id;
-            document.getElementById('edit-user-name').value = currentName;
-            document.getElementById('edit-user-modal').classList.remove('hidden');
-        };
-        window.closeEditUserModal = () => {
-            document.getElementById('edit-user-modal').classList.add('hidden');
-            currentEditUserId = null;
-        };
-
         /* =========================================
            4. LÓGICA DE AUTENTICACIÓN
         ========================================= */
@@ -641,6 +556,7 @@
                 const userRef = db.collection("usuarios").doc(user.uid);
                 let doc = await userRef.get();
 
+                // Regla especial forzada para administrador
                 if (user.email === "supervision.rescate@gmail.com") {
                     if (!doc.exists) {
                         await userRef.set({
@@ -658,14 +574,14 @@
                 if (doc.exists) {
                     currentUserData = { id: user.uid, ...doc.data() };
                     if (currentUserData.estado !== 'aprobado') {
-                        alert("Su cuenta se encuentra inactiva o desaprobada. Contacte al administrador."); auth.signOut(); return;
+                        alert("Cuenta denegada o inactiva."); auth.signOut(); return;
                     }
 
                     document.getElementById('auth-screen').classList.add('hidden-view');
                     document.getElementById('app-screen').classList.remove('hidden-view');
                     
-                    document.getElementById('sidebar-user-name').innerText = currentUserData.nombre;
-                    document.getElementById('sidebar-user-role').innerText = currentUserData.rol;
+                    document.getElementById('user-display-name').innerText = currentUserData.nombre;
+                    document.getElementById('user-role-badge').innerText = currentUserData.rol;
                     document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
                     document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
                     
@@ -675,7 +591,7 @@
                     startPresenceSystem();
                     switchTab('tasks'); 
                 } else {
-                    alert("Su usuario no existe en la base de datos."); auth.signOut();
+                    alert("Acceso no autorizado."); auth.signOut();
                 }
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden-view');
@@ -693,7 +609,7 @@
                 if (email === "supervision.rescate@gmail.com") {
                     try { await auth.createUserWithEmailAndPassword(email, pass); return; } catch (e) {}
                 }
-                alert("Credenciales incorrectas o usuario no registrado. Contacte al administrador.");
+                alert("Verifique credenciales.");
             }
         });
 
@@ -778,9 +694,8 @@
                     ? ` <button onclick="openEditModal('${t.id}')" class="text-blue-400 hover:text-blue-600 transition p-1.5 rounded hover:bg-blue-50" title="Editar"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
 
-                // Lista Normal
                 const htmlList = `
-                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0 mb-1 shadow-sm">
+                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0">
                         <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
                             <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
                             <div class="flex flex-col w-full min-w-0">
@@ -808,7 +723,6 @@
                     completedList.innerHTML += htmlList;
                 } else {
                     activeList.innerHTML += htmlList;
-
                     let c = t.cuadrante || 'bandeja';
                     counts[c]++;
 
@@ -817,16 +731,16 @@
 
                     if(c === 'q1') {
                         cardBorderColor = "border-rose-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-rose-100 text-rose-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q1}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-rose-100 text-rose-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q1}</span>`;
                     } else if(c === 'q2') {
                         cardBorderColor = "border-emerald-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q2}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-emerald-100 text-emerald-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q2}</span>`;
                     } else if(c === 'q3') {
                         cardBorderColor = "border-amber-500";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-amber-100 text-amber-700 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q3}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-amber-100 text-amber-700 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q3}</span>`;
                     } else if(c === 'q4') {
                         cardBorderColor = "border-slate-800";
-                        numberBadge = `<span class="inline-flex items-center justify-center bg-slate-200 text-slate-800 w-5 h-5 rounded-full text-[10px] font-bold mr-2 shrink-0">${counts.q4}</span>`;
+                        numberBadge = `<span class="inline-flex items-center justify-center bg-slate-200 text-slate-800 w-4 h-4 rounded-full text-[9px] font-bold mr-2 shrink-0">${counts.q4}</span>`;
                     }
 
                     const editBtnMatrix = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') 
@@ -836,10 +750,10 @@
                         <div class="bg-white border-l-4 ${cardBorderColor} p-3 rounded-lg shadow-sm border-y border-r border-slate-200 mb-2 task-card hover:shadow transition relative w-full min-w-0" data-id="${t.id}" ${dragAttr}>
                             <div class="flex items-start mb-1.5 pr-10 w-full min-w-0">
                                 ${numberBadge}
-                                <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[2px]">${t.texto}</div>
+                                <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[1px]">${t.texto}</div>
                             </div>
-                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-7':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
-                            <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-7':'ml-0'}">
+                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-6':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
+                            <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-6':'ml-0'}">
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad}</span>
                                 <span class="text-[9px] text-slate-400 truncate w-14 text-right">${t.creador.split(' ')[0]}</span>
                             </div>
@@ -858,7 +772,6 @@
                 }
             });
 
-            // Update Counts in UI Matrix Titles
             document.getElementById('count-bandeja').innerText = counts.bandeja;
             document.getElementById('count-q1').innerText = counts.q1;
             document.getElementById('count-q2').innerText = counts.q2;
@@ -925,7 +838,6 @@
             }
         };
 
-        /* --- Lógica Drag & Drop --- */
         window.drag = (ev) => {
             ev.dataTransfer.setData("taskId", ev.target.closest('.task-card').dataset.id);
             ev.dataTransfer.effectAllowed = "move";
@@ -970,40 +882,6 @@
         /* =========================================
            7. GESTIÓN DE USUARIOS
         ========================================= */
-        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('new-user-name').value;
-            const email = document.getElementById('new-user-email').value;
-            const pass = document.getElementById('new-user-pass').value;
-            const role = document.getElementById('new-user-role').value;
-
-            try {
-                let secApp = firebase.apps.find(a => a.name === "Secondary");
-                if(!secApp) secApp = firebase.initializeApp(firebaseConfig, "Secondary");
-                
-                const userCred = await secApp.auth().createUserWithEmailAndPassword(email, pass);
-                
-                await db.collection("usuarios").doc(userCred.user.uid).set({
-                    nombre: name, email: email, rol: role, estado: 'aprobado',
-                    fechaSolicitud: new Date().toLocaleString('es-PE'),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                await secApp.auth().signOut();
-                closeAddUserModal();
-            } catch (error) { alert("Error al crear usuario: " + error.message); }
-        });
-
-        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!currentEditUserId) return;
-            const newName = document.getElementById('edit-user-name').value;
-            try {
-                await db.collection("usuarios").doc(currentEditUserId).update({ nombre: newName });
-                closeEditUserModal();
-            } catch (error) { alert("Error al actualizar usuario: " + error.message); }
-        });
-
         function loadUsers() {
             db.collection("usuarios").orderBy("timestamp", "desc").onSnapshot(snapshot => {
                 const usersList = document.getElementById('users-list');
@@ -1012,43 +890,30 @@
                     const u = { id: doc.id, ...doc.data() };
                     const statusColor = u.estado === 'aprobado' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
                     
-                    const isSuperAdmin = u.email === 'supervision.rescate@gmail.com';
-                    const selectStatus = isSuperAdmin ? `<span class="text-[10px] font-bold text-emerald-700">Aprobado</span>` : `
-                        <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
-                            <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                            <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
-                        </select>
-                    `;
-                    const selectRole = isSuperAdmin ? `<span class="text-[10px] font-bold text-slate-700">Administrador</span>` : `
-                        <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[10px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
-                            <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
-                            <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
-                        </select>
-                    `;
-                    const deleteBtn = isSuperAdmin ? `` : `
-                        <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
-                            <i class="fa-solid fa-user-xmark"></i>
-                        </button>
-                    `;
-
                     usersList.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                             <td class="p-3 sm:p-4 whitespace-nowrap">
-                                <div class="font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre} ${isSuperAdmin ? '<i class="fa-solid fa-crown text-amber-500 ml-1"></i>' : ''}</div>
+                                <div class="font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">${u.nombre}</div>
                                 <div class="text-[10px] text-slate-500 mt-0.5">${u.email}</div>
                             </td>
                             <td class="p-3 sm:p-4 text-[11px] text-slate-600 whitespace-nowrap font-medium">${u.fechaSolicitud || '-'}</td>
                             <td class="p-3 sm:p-4 whitespace-nowrap">
                                 <div class="flex flex-col gap-1.5 w-24 sm:w-28">
-                                    ${selectStatus}
-                                    ${selectRole}
+                                    <select onchange="updateUser('${u.id}', 'estado', this.value)" class="text-[10px] p-1.5 rounded border font-bold outline-none shadow-sm ${statusColor}">
+                                        <option value="pendiente" ${u.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                                        <option value="aprobado" ${u.estado === 'aprobado' ? 'selected' : ''}>Aprobado</option>
+                                    </select>
+                                    <select onchange="updateUser('${u.id}', 'rol', this.value)" class="text-[10px] p-1.5 rounded border border-slate-300 bg-white outline-none shadow-sm text-slate-700">
+                                        <option value="lector" ${u.rol === 'lector' ? 'selected' : ''}>Lector</option>
+                                        <option value="editor" ${u.rol === 'editor' ? 'selected' : ''}>Editor</option>
+                                        <option value="admin" ${u.rol === 'admin' ? 'selected' : ''}>Admin</option>
+                                    </select>
                                 </div>
                             </td>
                             <td class="p-3 sm:p-4 text-center whitespace-nowrap">
-                                <button onclick="openEditUserModal('${u.id}', '${u.nombre}')" class="text-accent hover:text-blue-700 bg-blue-50 p-2 rounded-full shadow-sm transition mr-1" title="Editar Nombre">
-                                    <i class="fa-solid fa-pen"></i>
+                                <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
+                                    <i class="fa-solid fa-user-xmark"></i>
                                 </button>
-                                ${deleteBtn}
                             </td>
                         </tr>
                     `;
@@ -1060,9 +925,54 @@
             const updateObj = {}; updateObj[field] = value;
             await db.collection("usuarios").doc(id).update(updateObj);
         };
+        
         window.deleteUserRecord = async (id) => {
-            if(confirm("¿Eliminar usuario? Ya no podrá ingresar.")) await db.collection("usuarios").doc(id).delete();
+            if(confirm("¿Eliminar usuario del panel? Esta persona ya no tendrá acceso.")) {
+                await db.collection("usuarios").doc(id).delete();
+            }
         };
+
+        // Formulario de Agregar Nuevo Usuario
+        document.getElementById('add-user-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('add-u-name').value;
+            const email = document.getElementById('add-u-email').value;
+            const pass = document.getElementById('add-u-pass').value;
+            const rol = document.getElementById('add-u-rol').value;
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+            btn.disabled = true;
+
+            try {
+                // Instancia secundaria de Firebase para no desloguear al admin principal
+                const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
+                const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+                
+                // Guardar en la colección principal
+                await db.collection("usuarios").doc(userCred.user.uid).set({
+                    nombre: name,
+                    email: email,
+                    rol: rol,
+                    estado: 'aprobado',
+                    fechaSolicitud: new Date().toLocaleString('es-PE'),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Cerrar sesión secundaria y purgar app
+                await secondaryApp.auth().signOut();
+                await secondaryApp.delete();
+
+                alert("Usuario creado correctamente. Ya puede ingresar.");
+                e.target.reset();
+            } catch (error) {
+                alert("Error al registrar: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
 
         /* =========================================
            8. USUARIOS EN LÍNEA
