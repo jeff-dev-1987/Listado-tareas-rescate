@@ -74,7 +74,7 @@
                 </div>
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
+                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -179,7 +179,7 @@
                     <span class="text-[9px] sm:text-[10px] font-medium text-blue-200 tracking-widest uppercase mt-0.5">SERVICIO DE EMERGENCIAS MCP</span>
                 </div>
             </div>
-            <div class="flex items-center shrink-0 pl-2">
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
                 <div class="text-[10px] sm:text-[12px] bg-primaryDark px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center gap-1.5 shadow-inner border border-blue-800">
                     <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_5px_#4ade80]"></div>
                     <span id="online-count" class="font-bold">1</span> <span class="hidden sm:inline text-blue-100">en línea</span>
@@ -189,38 +189,42 @@
 
         <div class="flex flex-1 overflow-hidden relative w-full">
             
-            <aside id="sidebar" class="absolute z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 w-64 bg-white border-r border-slate-200 shadow-2xl md:shadow-md flex flex-col transition-all duration-300 ease-in-out h-full shrink-0">
+            <aside id="sidebar" class="absolute z-40 inset-y-0 left-0 transform -translate-x-full md:translate-x-0 md:w-64 w-64 bg-white border-r border-slate-200 shadow-2xl md:shadow-none flex flex-col transition-all duration-300 ease-in-out h-full shrink-0">
                 
-                <nav class="flex-1 p-4 space-y-1 overflow-y-auto mt-2">
-                    <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks">
-                        <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Pendientes
+                <nav class="flex-1 p-3 space-y-2 overflow-y-auto mt-2">
+                    <button onclick="switchTab('tasks')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks" title="Pendientes">
+                        <i class="fa-solid fa-list-ul w-6 text-center text-primary group-hover:scale-110 transition-transform shrink-0"></i> 
+                        <span class="sidebar-text truncate">Pendientes</span>
                     </button>
-                    <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix">
-                        <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Matriz Eisenhower
+                    <button onclick="switchTab('matrix')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix" title="Matriz Eisenhower">
+                        <i class="fa-solid fa-table-cells-large w-6 text-center text-slate-400 group-hover:text-primary transition-colors shrink-0"></i> 
+                        <span class="sidebar-text truncate">Matriz Eisenhower</span>
                     </button>
                     
                     <div class="my-4 border-t border-slate-100 hidden-view" id="admin-divider"></div> 
 
-                    <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
-                        <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Auditoría
+                    <button onclick="switchTab('audit')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit" title="Registro Auditoría">
+                        <i class="fa-solid fa-clock-rotate-left w-6 text-center text-slate-400 group-hover:text-primary transition-colors shrink-0"></i> 
+                        <span class="sidebar-text truncate">Registro Auditoría</span>
                     </button>
-                    <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
-                        <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Accesos
+                    <button onclick="switchTab('users')" class="nav-btn w-full flex items-center justify-start gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users" title="Accesos">
+                        <i class="fa-solid fa-users-gear w-6 text-center text-slate-400 group-hover:text-primary transition-colors shrink-0"></i> 
+                        <span class="sidebar-text truncate">Accesos</span>
                     </button>
                 </nav>
 
-                <div class="p-4 border-t border-slate-200 bg-slate-50 mt-auto shrink-0">
-                    <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 sm:p-4 border-t border-slate-200 bg-slate-50 flex flex-col gap-3 shrink-0 overflow-hidden">
+                    <div class="flex items-center justify-start gap-3">
                         <div class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center shadow shrink-0">
                             <i class="fa-solid fa-user"></i>
                         </div>
-                        <div class="flex flex-col min-w-0 overflow-hidden">
+                        <div class="flex flex-col min-w-0 overflow-hidden sidebar-text">
                             <span id="sidebar-user-name" class="font-bold text-slate-800 text-sm truncate">Usuario</span>
                             <span id="sidebar-user-role" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase w-max mt-0.5">Rol</span>
                         </div>
                     </div>
-                    <button id="btn-logout" class="w-full bg-white border border-slate-300 text-slate-700 p-2 rounded-lg hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center justify-center gap-2 text-sm font-bold shadow-sm">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                    <button id="btn-logout" class="nav-btn w-full bg-white border border-slate-300 text-slate-700 p-2 rounded-lg hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center justify-start sm:justify-center gap-3 sm:gap-2 text-sm font-bold shadow-sm" title="Cerrar Sesión">
+                        <i class="fa-solid fa-right-from-bracket w-6 text-center sm:w-auto shrink-0"></i> <span class="sidebar-text">Cerrar Sesión</span>
                     </button>
                 </div>
             </aside>
@@ -477,13 +481,28 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            // Mobile toggle
+            const texts = document.querySelectorAll('.sidebar-text');
+            const navBtns = document.querySelectorAll('.nav-btn');
+            
             if (window.innerWidth < 768) {
+                // Modo Móvil
                 sidebar.classList.toggle('-translate-x-full');
                 overlay.classList.toggle('hidden');
+                sidebar.classList.remove('w-16');
+                sidebar.classList.add('w-64');
+                texts.forEach(t => t.classList.remove('hidden'));
+                navBtns.forEach(b => { b.classList.remove('justify-center', 'px-2'); b.classList.add('justify-start', 'p-3'); });
             } else {
-                // PC Toggle: Mover la barra con un margen negativo
-                sidebar.classList.toggle('md:-ml-64');
+                // Modo PC: Colapsar a barra de iconos
+                if(sidebar.classList.contains('md:w-64')) {
+                    sidebar.classList.replace('md:w-64', 'md:w-16');
+                    texts.forEach(t => t.classList.add('hidden'));
+                    navBtns.forEach(b => { b.classList.replace('justify-start', 'justify-center'); b.classList.replace('p-3', 'p-2'); });
+                } else {
+                    sidebar.classList.replace('md:w-16', 'md:w-64');
+                    texts.forEach(t => t.classList.remove('hidden'));
+                    navBtns.forEach(b => { b.classList.replace('justify-center', 'justify-start'); b.classList.replace('p-2', 'p-3'); });
+                }
             }
         }
 
@@ -523,6 +542,10 @@
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
+                // Restaurar tamaño para proxima apertura en móvil
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('w-16'); sidebar.classList.add('w-64');
+                document.querySelectorAll('.sidebar-text').forEach(t => t.classList.remove('hidden'));
             }
         }
 
