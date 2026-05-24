@@ -180,7 +180,7 @@
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
                         
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 mt-1">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3 mt-1">
                             <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">
                                 <i class="fa-solid fa-magnifying-glass mr-1.5 text-primary"></i> Búsqueda y Filtros
                             </h2>
@@ -194,36 +194,40 @@
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="block text-[10px] text-slate-500 font-bold uppercase tracking-wide mb-1">Buscar por palabra clave</label>
-                            <div class="relative w-full">
-                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                                    <i class="fa-solid fa-search"></i>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5 text-sm border-t border-slate-100 pt-3">
+                            
+                            <div class="col-span-2 md:col-span-3 lg:col-span-2">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Buscar por palabra</label>
+                                <div class="relative w-full mt-0.5">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-search text-[10px]"></i>
+                                    </div>
+                                    <input type="text" id="f-texto" class="w-full p-1.5 pl-8 border border-slate-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs bg-slate-50 focus:bg-white transition" placeholder="Escribe aquí..." oninput="renderLists()">
                                 </div>
-                                <input type="text" id="f-texto" class="w-full p-2.5 pl-9 border border-slate-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm bg-slate-50 focus:bg-white transition" placeholder="Escribe aquí para buscar pendientes en tiempo real..." oninput="renderLists()">
                             </div>
-                        </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5 text-sm border-t border-slate-100 pt-3">
-                            <div class="col-span-2 md:col-span-1">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Orden</label>
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Orden</label>
                                 <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="desc">Más Nuevos</option>
                                     <option value="asc">Más Antiguos</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Creador</label>
+
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Creador</label>
                                 <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate" onchange="renderLists()">
                                     <option value="">Todos</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate block">Límite (Menor o Igual)</label>
+
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Límite</label>
                                 <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
                             </div>
-                            <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
+
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Criticidad</label>
                                 <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="ALTA">Alta</option>
@@ -231,14 +235,15 @@
                                     <option value="BAJA">Baja</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
+
+                            <div class="col-span-1">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Categoría</label>
                                 <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
                                     <option value="">Todas</option>
                                     <option value="Operativa">Operativa</option>
-                                    <option value="Administrativa">Administrativa</option>
+                                    <option value="Administrativa">Admin</option>
                                     <option value="Logística">Logística</option>
-                                    <option value="Entrenamiento">Entrenamiento</option>
+                                    <option value="Entrenamiento">Entreno</option>
                                 </select>
                             </div>
                         </div>
@@ -662,7 +667,6 @@
         }
 
         function renderLists() {
-            // Se lee el texto del nuevo buscador en tiempo real
             const searchText = (document.getElementById('f-texto')?.value || '').toLowerCase();
             const sortOrder = document.getElementById('f-orden').value;
             const fCreator = document.getElementById('f-creador').value;
@@ -672,7 +676,6 @@
 
             let filtered = allTasksData.filter(t => {
                 let match = true;
-                // Filtro por contenido de texto ingresado
                 if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                 if(fCreator && t.creador !== fCreator) match = false;
                 if(fDate) { 
