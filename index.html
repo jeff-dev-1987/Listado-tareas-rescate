@@ -177,9 +177,13 @@
                 
                 <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
                     
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-4">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3">
-                            <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Lista de Pendientes</h2>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                        
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 mt-1">
+                            <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">
+                                <i class="fa-solid fa-magnifying-glass mr-1.5 text-primary"></i> Búsqueda y Filtros
+                            </h2>
                             <div class="flex gap-2 w-full md:w-auto">
                                 <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
                                     <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
@@ -187,6 +191,16 @@
                                 <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
                                     <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
                                 </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-[10px] text-slate-500 font-bold uppercase tracking-wide mb-1">Buscar por palabra clave</label>
+                            <div class="relative w-full">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-search"></i>
+                                </div>
+                                <input type="text" id="f-texto" class="w-full p-2.5 pl-9 border border-slate-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm bg-slate-50 focus:bg-white transition" placeholder="Escribe aquí para buscar pendientes en tiempo real..." oninput="renderLists()">
                             </div>
                         </div>
 
@@ -230,36 +244,43 @@
                         </div>
                     </div>
 
-                    <form id="task-form" class="mb-5 flex flex-col lg:flex-row gap-3 hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full">
-                        <div class="w-full lg:flex-1">
-                            <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Nuevo Pendiente</label>
-                            <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-1.5 mt-1 border-b-2 border-slate-200 focus:border-accent outline-none text-slate-800 bg-transparent transition text-sm" required>
-                        </div>
-                        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto mt-2 lg:mt-0 items-end">
-                            <div class="flex-1 min-w-[100px]">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
-                                <input type="date" id="new-task-date" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition" required>
+                    <form id="task-form" class="mb-5 flex flex-col hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-accent"></div>
+                        <h2 class="text-sm font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2 mt-1">
+                            <i class="fa-solid fa-circle-plus text-accent"></i> Registrar Nuevo Pendiente
+                        </h2>
+                        
+                        <div class="flex flex-col lg:flex-row gap-3 items-end w-full">
+                            <div class="w-full lg:flex-1">
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Descripción de la Tarea</label>
+                                <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg focus:border-accent focus:ring-1 focus:ring-accent outline-none text-slate-800 bg-slate-50 focus:bg-white transition text-sm" required>
                             </div>
-                            <div class="flex-1 min-w-[90px]">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
-                                <select id="new-task-crit" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs font-bold bg-slate-50 focus:bg-white transition">
-                                    <option value="ALTA" class="text-rose-600">ALTA</option>
-                                    <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
-                                    <option value="BAJA" class="text-emerald-600">BAJA</option>
-                                </select>
+                            <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto mt-2 lg:mt-0 items-end">
+                                <div class="flex-1 min-w-[100px]">
+                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
+                                    <input type="date" id="new-task-date" class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg outline-none text-xs bg-slate-50 focus:bg-white transition" required>
+                                </div>
+                                <div class="flex-1 min-w-[90px]">
+                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
+                                    <select id="new-task-crit" class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg outline-none text-xs font-bold bg-slate-50 focus:bg-white transition">
+                                        <option value="ALTA" class="text-rose-600">ALTA</option>
+                                        <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
+                                        <option value="BAJA" class="text-emerald-600">BAJA</option>
+                                    </select>
+                                </div>
+                                <div class="flex-1 min-w-[110px]">
+                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
+                                    <select id="new-task-category" class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg outline-none text-xs bg-slate-50 focus:bg-white transition">
+                                        <option value="Operativa">Operativa</option>
+                                        <option value="Administrativa">Admin</option>
+                                        <option value="Logística">Logística</option>
+                                        <option value="Entrenamiento">Entrenamiento</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full sm:w-auto bg-accent text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 transition font-bold shadow-md flex justify-center items-center gap-2 text-xs h-[38px]">
+                                    <i class="fa-solid fa-save"></i> Guardar
+                                </button>
                             </div>
-                            <div class="flex-1 min-w-[110px]">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                <select id="new-task-category" class="w-full p-1.5 mt-1 border border-slate-300 rounded outline-none text-xs bg-slate-50 focus:bg-white transition">
-                                    <option value="Operativa">Operativa</option>
-                                    <option value="Administrativa">Admin</option>
-                                    <option value="Logística">Logística</option>
-                                    <option value="Entrenamiento">Entrenamiento</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full sm:w-auto bg-primary text-white px-4 py-1.5 rounded-lg hover:bg-primaryDark transition font-bold shadow-md h-[32px] flex justify-center items-center gap-2 text-xs">
-                                <i class="fa-solid fa-plus"></i> Guardar
-                            </button>
                         </div>
                     </form>
 
@@ -452,7 +473,6 @@
             const overlay = document.getElementById('sidebar-overlay');
             
             if (window.innerWidth >= 768) {
-                // Comportamiento para PC (Colapsar/Expandir ancho)
                 if (sidebar.classList.contains('md:w-0')) {
                     sidebar.classList.remove('md:w-0', 'md:border-r-0');
                     sidebar.classList.add('md:w-64');
@@ -461,7 +481,6 @@
                     sidebar.classList.remove('md:w-64');
                 }
             } else {
-                // Comportamiento Móvil (Desplegar/Ocultar con overlay)
                 sidebar.classList.toggle('-translate-x-full');
                 overlay.classList.toggle('hidden');
             }
@@ -556,7 +575,6 @@
                 const userRef = db.collection("usuarios").doc(user.uid);
                 let doc = await userRef.get();
 
-                // Regla especial forzada para administrador
                 if (user.email === "supervision.rescate@gmail.com") {
                     if (!doc.exists) {
                         await userRef.set({
@@ -644,6 +662,8 @@
         }
 
         function renderLists() {
+            // Se lee el texto del nuevo buscador en tiempo real
+            const searchText = (document.getElementById('f-texto')?.value || '').toLowerCase();
             const sortOrder = document.getElementById('f-orden').value;
             const fCreator = document.getElementById('f-creador').value;
             const fDate = document.getElementById('f-fecha').value;
@@ -652,6 +672,8 @@
 
             let filtered = allTasksData.filter(t => {
                 let match = true;
+                // Filtro por contenido de texto ingresado
+                if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                 if(fCreator && t.creador !== fCreator) match = false;
                 if(fDate) { 
                     if(!t.fechaLimite || t.fechaLimite > fDate) match = false; 
@@ -932,7 +954,6 @@
             }
         };
 
-        // Formulario de Agregar Nuevo Usuario
         document.getElementById('add-user-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('add-u-name').value;
@@ -946,11 +967,9 @@
             btn.disabled = true;
 
             try {
-                // Instancia secundaria de Firebase para no desloguear al admin principal
                 const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
                 const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
                 
-                // Guardar en la colección principal
                 await db.collection("usuarios").doc(userCred.user.uid).set({
                     nombre: name,
                     email: email,
@@ -960,7 +979,6 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Cerrar sesión secundaria y purgar app
                 await secondaryApp.auth().signOut();
                 await secondaryApp.delete();
 
@@ -997,6 +1015,7 @@
             let sourceData = allTasksData;
 
             if (mode === 'filtered') {
+                const searchText = (document.getElementById('f-texto')?.value || '').toLowerCase();
                 const fCreator = document.getElementById('f-creador').value;
                 const fDate = document.getElementById('f-fecha').value;
                 const fCrit = document.getElementById('f-crit').value;
@@ -1004,6 +1023,7 @@
                 
                 sourceData = allTasksData.filter(t => {
                     let match = true;
+                    if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                     if(fCreator && t.creador !== fCreator) match = false;
                     if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
                     if(fCrit && t.criticidad !== fCrit) match = false;
