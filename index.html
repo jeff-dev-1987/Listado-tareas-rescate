@@ -40,10 +40,15 @@
         input[type="color"] { -webkit-appearance: none; border: none; padding: 0; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
+
+        /* Handle de Resize */
+        #sidebar-resizer { cursor: col-resize; z-index: 50; }
+        #sidebar-resizer:hover, .resizing { background-color: #3b82f6; opacity: 0.5; }
     </style>
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
 
+    <!-- Modal Editar Pendiente -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -54,11 +59,17 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Descripción de la tarea</label>
                     <textarea id="edit-task-text" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm resize-none" rows="3" required></textarea>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Mover a Lista</label>
+                        <select id="edit-task-list" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm font-semibold text-indigo-700"></select>
+                    </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">F. Límite</label>
                         <input type="date" id="edit-task-date" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm">
                     </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Criticidad</label>
                         <select id="edit-task-crit" class="w-full mt-1 p-2 border border-slate-300 rounded focus:border-accent outline-none text-sm font-semibold">
@@ -85,6 +96,7 @@
         </div>
     </div>
 
+    <!-- Modal Crear/Editar Lista -->
     <div id="list-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-primary p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeListModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -169,8 +181,12 @@
         </header>
 
         <div class="flex flex-1 overflow-hidden relative w-full min-h-0">
-            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-all duration-300 ease-in-out h-full overflow-hidden transform -translate-x-full md:translate-x-0 shrink-0">
-                <div class="w-64 flex flex-col h-full bg-white relative">
+            
+            <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-[transform] duration-300 ease-in-out h-full transform -translate-x-full md:translate-x-0 shrink-0" style="width: 280px;">
+                <!-- Drag Handle for Resizing -->
+                <div id="sidebar-resizer" class="hidden md:block absolute right-0 top-0 bottom-0 w-1.5 transition-colors"></div>
+                
+                <div class="w-full flex flex-col h-full bg-white relative overflow-hidden">
                     <div class="p-4 border-b border-slate-100 bg-slate-50 md:hidden flex flex-col items-center shrink-0">
                         <div class="bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center mb-2 shadow">
                             <i class="fa-solid fa-user"></i>
@@ -179,37 +195,42 @@
                         <div id="user-role-badge-mobile" class="text-[10px] bg-blue-100 text-primary px-2 py-0.5 rounded font-bold uppercase mt-1">Rol</div>
                     </div>
                     
-                    <nav class="p-4 space-y-1 shrink-0 border-b border-slate-100">
+                    <nav class="p-4 space-y-1 shrink-0 border-b border-slate-100 overflow-x-hidden">
                         <button onclick="switchTab('tasks')" class="w-full flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-primary font-bold border-l-4 border-primary transition group" id="tab-tasks">
-                            <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> Pendientes
+                            <i class="fa-solid fa-list-ul w-5 text-primary group-hover:scale-110 transition-transform"></i> <span class="whitespace-nowrap">Pendientes</span>
                         </button>
                         <button onclick="switchTab('matrix')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition group" id="tab-matrix">
-                            <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Matriz Eisenhower
+                            <i class="fa-solid fa-table-cells-large w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Matriz Eisenhower</span>
                         </button>
                         
                         <div class="my-2 border-t border-slate-100 hidden-view" id="admin-divider"></div> 
 
                         <button onclick="switchTab('audit')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-audit">
-                            <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Registro Auditoría
+                            <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Registro Auditoría</span>
                         </button>
                         <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
-                            <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> Accesos
+                            <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Accesos</span>
+                        </button>
+                        <button onclick="switchTab('restore')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-restore">
+                            <i class="fa-solid fa-trash-can w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Papelera</span>
                         </button>
                     </nav>
 
-                    <div class="flex-1 overflow-y-auto bg-slate-50 border-t border-slate-100">
+                    <!-- SECCIÓN DE LISTAS -->
+                    <div class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 border-t border-slate-100">
                         <div class="px-4 py-3 flex justify-between items-center bg-slate-100/50 sticky top-0 z-10 backdrop-blur-sm">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mis Listas</span>
-                            <button id="btn-add-list" onclick="openListModal()" class="text-slate-400 hover:text-primary transition hidden-view p-1" title="Nueva Lista">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas</span>
+                            <button id="btn-add-list" onclick="openListModal()" class="text-slate-400 hover:text-primary transition hidden-view p-1 shrink-0" title="Nueva Lista">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
                         </div>
                         <ul id="sidebar-lists" class="px-2 pb-4 space-y-0.5">
-                            </ul>
+                            <!-- Renderizado vía JS -->
+                        </ul>
                     </div>
 
-                    <div class="p-4 border-t border-slate-200 bg-slate-50 shrink-0 mt-auto">
-                        <button id="btn-logout" class="w-full bg-white text-rose-600 border border-slate-300 p-2.5 rounded hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition shadow-sm text-sm font-bold flex items-center justify-center gap-2" title="Cerrar Sesión">
+                    <div class="p-4 border-t border-slate-200 bg-slate-50 shrink-0 mt-auto overflow-hidden">
+                        <button id="btn-logout" class="w-full bg-white text-rose-600 border border-slate-300 p-2.5 rounded hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition shadow-sm text-sm font-bold flex items-center justify-center gap-2 whitespace-nowrap" title="Cerrar Sesión">
                             <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                         </button>
                     </div>
@@ -220,17 +241,18 @@
                 
                 <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
                     
+                    <!-- SECCIÓN DE BÚSQUEDA Y FILTROS -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
                         
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-3 mt-1">
                             <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3 flex flex-col">
                                 <div class="flex items-center"><i class="fa-solid fa-magnifying-glass mr-1.5 text-primary"></i> Búsqueda y Filtros</div>
-                                <span id="lbl-current-list-tasks" class="text-[10px] text-primary font-bold uppercase tracking-widest mt-1 bg-blue-50 w-max px-2 py-0.5 rounded border border-blue-100">Lista: PENDIENTES SUP OPERATIVA</span>
+                                <span id="lbl-current-list-tasks" class="text-[10px] text-primary font-bold uppercase tracking-widest mt-1 bg-blue-50 w-max px-2 py-0.5 rounded border border-blue-100">Cargando listas...</span>
                             </h2>
                             <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
                                 <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
-                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtrado
+                                    <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtro
                                 </button>
                                 <button onclick="exportToExcel('all')" class="flex-1 md:flex-none bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-emerald-700 shadow-sm flex justify-center items-center gap-2 transition">
                                     <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span> Todo
@@ -238,18 +260,17 @@
                             </div>
                         </div>
 
+                        <!-- Filtros Integrados -->
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5 text-sm border-t border-slate-100 pt-3">
-                            
                             <div class="col-span-2 md:col-span-3 lg:col-span-2">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Buscar por palabra</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Búsqueda Global</label>
                                 <div class="relative w-full mt-0.5">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-search text-[10px]"></i>
                                     </div>
-                                    <input type="text" id="f-texto" class="w-full p-1.5 pl-8 border border-slate-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs bg-slate-50 focus:bg-white transition" placeholder="Escribe aquí..." oninput="renderLists()">
+                                    <input type="text" id="f-texto" class="w-full p-1.5 pl-8 border border-slate-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs bg-slate-50 focus:bg-white transition" placeholder="Busca en todas las listas..." oninput="renderLists()">
                                 </div>
                             </div>
-
                             <div class="col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Orden</label>
                                 <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
@@ -257,19 +278,16 @@
                                     <option value="asc">Más Antiguos</option>
                                 </select>
                             </div>
-
                             <div class="col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Creador</label>
                                 <select id="f-creador" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs truncate" onchange="renderLists()">
                                     <option value="">Todos</option>
                                 </select>
                             </div>
-
                             <div class="col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Límite</label>
                                 <input type="date" id="f-fecha" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-slate-600 text-xs" onchange="renderLists()">
                             </div>
-
                             <div class="col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Criticidad</label>
                                 <select id="f-crit" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
@@ -279,7 +297,6 @@
                                     <option value="BAJA">Baja</option>
                                 </select>
                             </div>
-
                             <div class="col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Categoría</label>
                                 <select id="f-cat" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
@@ -293,6 +310,7 @@
                         </div>
                     </div>
 
+                    <!-- SECCIÓN DE CREACIÓN DE PENDIENTE -->
                     <form id="task-form" class="mb-5 flex flex-col hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-accent"></div>
                         <h2 class="text-sm font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2 mt-1">
@@ -335,11 +353,14 @@
 
                     <div class="flex flex-col gap-5 w-full">
                         <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-regular fa-clock text-accent"></i> Pendientes Activos</h3>
+                            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2">
+                                <i class="fa-regular fa-clock text-accent"></i> Pendientes Activos
+                                <span id="overdue-count-badge" class="hidden text-[9px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold shadow-sm transition-all ml-1 border border-rose-200"></span>
+                            </h3>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
                                 <ul id="task-list-active" class="space-y-1.5 w-full"></ul>
-                                <div id="empty-state-active" class="hidden-view p-4 text-center text-slate-400 text-sm">
-                                    No hay tareas pendientes en esta lista.
+                                <div id="empty-state-active" class="hidden-view p-4 text-center text-slate-400 text-sm font-medium">
+                                    No hay tareas en esta lista.
                                 </div>
                             </div>
                         </div>
@@ -354,12 +375,11 @@
                 </div>
 
                 <div id="view-matrix" class="hidden-view flex-col h-full overflow-hidden w-full relative">
-                    
                     <div class="bg-white px-4 py-2 border-b border-slate-200 shadow-sm shrink-0 flex items-center gap-3">
                         <i class="fa-solid fa-table-cells-large text-slate-400 text-xl"></i>
                         <div class="flex flex-col">
                             <h2 class="text-sm font-bold text-slate-800 leading-tight">Matriz Eisenhower</h2>
-                            <span id="lbl-current-list-matrix" class="text-[10px] text-primary font-bold uppercase tracking-widest">Lista: PENDIENTES SUP OPERATIVA</span>
+                            <span id="lbl-current-list-matrix" class="text-[10px] text-primary font-bold uppercase tracking-widest">Cargando listas...</span>
                         </div>
                     </div>
 
@@ -407,9 +427,8 @@
 
                 <div id="view-audit" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Eliminados y Editados)</span></h2>
+                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Modificaciones)</span></h2>
                     </div>
-
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
                         <div class="overflow-x-auto w-full">
                             <table class="w-full text-left border-collapse min-w-[700px]">
@@ -422,9 +441,51 @@
                                         <th class="p-3 sm:p-4 font-bold">Fecha</th>
                                     </tr>
                                 </thead>
-                                <tbody id="audit-list" class="text-sm divide-y divide-slate-100">
-                                    </tbody>
+                                <tbody id="audit-list" class="text-sm divide-y divide-slate-100"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- VISTA PAPELERA -->
+                <div id="view-restore" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
+                        <h2 class="text-lg font-bold text-rose-700 border-l-4 border-rose-600 pl-3">Papelera de Reciclaje</h2>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-list text-slate-400"></i> Listas Eliminadas</h3>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
+                            <div class="overflow-x-auto w-full">
+                                <table class="w-full text-left border-collapse min-w-[500px]">
+                                    <thead>
+                                        <tr class="bg-rose-50 text-rose-800 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                            <th class="p-3 font-bold">Nombre Lista</th>
+                                            <th class="p-3 font-bold">Eliminado Por</th>
+                                            <th class="p-3 font-bold text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="restore-list-listas" class="text-sm divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-list-check text-slate-400"></i> Tareas Eliminadas</h3>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
+                            <div class="overflow-x-auto w-full">
+                                <table class="w-full text-left border-collapse min-w-[600px]">
+                                    <thead>
+                                        <tr class="bg-rose-50 text-rose-800 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                                            <th class="p-3 font-bold">Tarea</th>
+                                            <th class="p-3 font-bold">Eliminado Por</th>
+                                            <th class="p-3 font-bold text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="restore-list-tareas" class="text-sm divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -511,15 +572,20 @@
            2. ESTADO GLOBAL
         ========================================= */
         let currentUserData = null;
+        
         let allTasksData = [];
-        let allListsData = [];
-        let currentListId = 'default'; // Lista principal asignada por defecto a lo actual
+        let deletedTasksData = []; // Papelera
+
+        let activeListsData = [];
+        let deletedListsData = []; // Papelera
+
+        let currentListId = null;
         let currentEditListId = null;
-        let heartbeatInterval;
         let currentEditId = null;
+        let heartbeatInterval;
 
         /* =========================================
-           3. LÓGICA DE INTERFAZ (UI)
+           3. LÓGICA DE INTERFAZ & SIDEBAR RESIZE
         ========================================= */
         function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -533,17 +599,20 @@
             }
         }
 
+        let isSidebarCollapsed = false;
+        let lastSidebarWidth = 280;
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             
             if (window.innerWidth >= 768) {
-                if (sidebar.classList.contains('md:w-0')) {
-                    sidebar.classList.remove('md:w-0', 'md:border-r-0');
-                    sidebar.classList.add('md:w-64');
+                if (!isSidebarCollapsed) {
+                    sidebar.style.width = '0px';
+                    isSidebarCollapsed = true;
                 } else {
-                    sidebar.classList.add('md:w-0', 'md:border-r-0');
-                    sidebar.classList.remove('md:w-64');
+                    sidebar.style.width = lastSidebarWidth + 'px';
+                    isSidebarCollapsed = false;
                 }
             } else {
                 sidebar.classList.toggle('-translate-x-full');
@@ -551,15 +620,43 @@
             }
         }
 
+        // --- Lógica Redimensionar Sidebar (Jalar borde) ---
+        const sidebar = document.getElementById('sidebar');
+        const resizer = document.getElementById('sidebar-resizer');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            sidebar.classList.remove('transition-[transform]'); 
+            e.preventDefault(); 
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = e.clientX;
+            if (newWidth < 200) newWidth = 200;
+            if (newWidth > 600) newWidth = 600;
+            sidebar.style.width = newWidth + 'px';
+            lastSidebarWidth = newWidth;
+        });
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = 'default';
+                sidebar.classList.add('transition-[transform]');
+            }
+        });
+
+        // Tab Switcher
         function switchTab(tab) {
-            const views = ['tasks', 'matrix', 'audit', 'users'];
+            const views = ['tasks', 'matrix', 'audit', 'users', 'restore'];
             views.forEach(v => {
                 const el = document.getElementById(`view-${v}`);
                 if (el) {
                     el.classList.add('hidden-view');
                     if(v === 'tasks') el.classList.remove('block');
                     if(v === 'matrix') el.classList.remove('flex');
-                    if(v === 'audit' || v === 'users') el.classList.remove('block');
+                    if(v === 'audit' || v === 'users' || v === 'restore') el.classList.remove('block');
                 }
 
                 const btn = document.getElementById(`tab-${v}`);
@@ -586,7 +683,7 @@
             }
 
             if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
+                sidebar.classList.add('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
             }
         }
@@ -595,6 +692,7 @@
             const taskForm = document.getElementById('task-form');
             const tabUsers = document.getElementById('tab-users');
             const tabAudit = document.getElementById('tab-audit');
+            const tabRestore = document.getElementById('tab-restore');
             const adminDivider = document.getElementById('admin-divider');
             const btnAddList = document.getElementById('btn-add-list');
             
@@ -602,18 +700,21 @@
                 taskForm.classList.add('hidden-view');
                 tabUsers.classList.add('hidden-view');
                 tabAudit.classList.add('hidden-view');
+                tabRestore.classList.add('hidden-view');
                 adminDivider.classList.add('hidden-view');
                 btnAddList.classList.add('hidden-view');
             } else if (role === 'editor') {
                 taskForm.classList.remove('hidden-view');
                 tabUsers.classList.add('hidden-view');
                 tabAudit.classList.add('hidden-view');
+                tabRestore.classList.add('hidden-view');
                 adminDivider.classList.add('hidden-view');
                 btnAddList.classList.remove('hidden-view');
             } else if (role === 'admin') {
                 taskForm.classList.remove('hidden-view');
                 tabUsers.classList.remove('hidden-view');
                 tabAudit.classList.remove('hidden-view');
+                tabRestore.classList.remove('hidden-view');
                 adminDivider.classList.remove('hidden-view');
                 btnAddList.classList.remove('hidden-view');
                 loadAuditLogs();
@@ -629,13 +730,16 @@
             document.getElementById('edit-task-date').value = t.fechaLimite || '';
             document.getElementById('edit-task-crit').value = t.criticidad || 'MEDIA';
             document.getElementById('edit-task-category').value = t.categoria || 'Operativa';
+            
+            // Llenar combo de listas para mover
+            const listSelect = document.getElementById('edit-task-list');
+            listSelect.innerHTML = activeListsData.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('');
+            listSelect.value = t.listaId || currentListId;
+
             document.getElementById('edit-modal').classList.remove('hidden');
         };
 
-        window.closeEditModal = () => {
-            document.getElementById('edit-modal').classList.add('hidden');
-            currentEditId = null;
-        };
+        window.closeEditModal = () => { document.getElementById('edit-modal').classList.add('hidden'); currentEditId = null; };
 
         window.openListModal = () => {
             currentEditListId = null;
@@ -647,7 +751,7 @@
 
         window.openEditListModal = (id) => {
             currentEditListId = id;
-            const l = allListsData.find(x => x.id === id);
+            const l = activeListsData.find(x => x.id === id);
             if(!l) return;
             document.getElementById('list-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>Editar Lista';
             document.getElementById('list-name').value = l.nombre;
@@ -655,10 +759,7 @@
             document.getElementById('list-modal').classList.remove('hidden');
         };
 
-        window.closeListModal = () => {
-            document.getElementById('list-modal').classList.add('hidden');
-            currentEditListId = null;
-        };
+        window.closeListModal = () => { document.getElementById('list-modal').classList.add('hidden'); currentEditListId = null; };
 
         /* =========================================
            4. LÓGICA DE AUTENTICACIÓN
@@ -697,8 +798,7 @@
                     document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
                     
                     applyRolePermissions(currentUserData.rol);
-                    loadLists(); // Cargar Listas Dinámicas
-                    loadTasks();
+                    loadListsAndTasks();
                     if(currentUserData.rol === 'admin') loadUsers();
                     startPresenceSystem();
                     switchTab('tasks'); 
@@ -724,18 +824,57 @@
                 alert("Verifique credenciales.");
             }
         });
-
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
 
-
         /* =========================================
-           5. GESTIÓN DE LISTAS (NUEVO)
+           5. GESTIÓN DE LISTAS Y TAREAS CON PAPELERA
         ========================================= */
-        function loadLists() {
-            db.collection("listas").orderBy("creadoEn", "asc").onSnapshot(snapshot => {
-                allListsData = [];
-                snapshot.forEach(doc => allListsData.push({ id: doc.id, ...doc.data() }));
+        function loadListsAndTasks() {
+            // 1. Cargar Listas
+            db.collection("listas").orderBy("creadoEn", "asc").onSnapshot(async snapshot => {
+                activeListsData = [];
+                deletedListsData = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if(data.eliminado) deletedListsData.push({ id: doc.id, ...data });
+                    else activeListsData.push({ id: doc.id, ...data });
+                });
+
+                if (activeListsData.length === 0 && deletedListsData.length === 0 && currentUserData.rol === 'admin') {
+                    const newListRef = await db.collection("listas").add({
+                        nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a',
+                        creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema'
+                    });
+                    activeListsData.push({ id: newListRef.id, nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a' });
+                    
+                    const tSnap = await db.collection("tareas").get();
+                    tSnap.forEach(d => { db.collection("tareas").doc(d.id).update({ listaId: newListRef.id }); });
+                }
+
+                if (!currentListId || !activeListsData.find(l => l.id === currentListId)) {
+                    currentListId = activeListsData.length > 0 ? activeListsData[0].id : null;
+                }
+
                 renderSidebarLists();
+                if (currentUserData.rol === 'admin') renderRestoreTables();
+                renderLists(); 
+            });
+
+            // 2. Cargar Tareas
+            db.collection("tareas").onSnapshot(snapshot => {
+                allTasksData = [];
+                deletedTasksData = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if(data.eliminado) deletedTasksData.push({ id: doc.id, ...data });
+                    else allTasksData.push({ id: doc.id, ...data });
+                });
+
+                updateCreatorDropdown();
+                if (currentUserData.rol === 'admin') renderRestoreTables();
+                renderLists();
             });
         }
 
@@ -743,25 +882,15 @@
             const container = document.getElementById('sidebar-lists');
             container.innerHTML = '';
             
-            // 1. Lista Principal (Retroactividad)
-            const defaultActive = currentListId === 'default' ? 'bg-blue-100 text-primary font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-200/50';
-            container.innerHTML += `
-                <li onclick="selectList('default')" class="cursor-pointer px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition ${defaultActive} mb-1">
-                    <div class="w-3 h-3 rounded-full bg-slate-800 shadow-sm shrink-0"></div>
-                    <span class="truncate flex-1 tracking-wide">PENDIENTES SUP OPERATIVA</span>
-                </li>
-            `;
-
-            // 2. Listas Dinámicas
-            allListsData.forEach(l => {
-                const active = currentListId === l.id ? 'bg-blue-100 text-primary font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-200/50';
+            activeListsData.forEach(l => {
+                const active = currentListId === l.id ? 'bg-blue-100 text-primary font-bold shadow-sm border-l-4 border-primary' : 'text-slate-600 hover:bg-slate-200/50 border-l-4 border-transparent';
                 const actionBtns = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') ? 
-                    `<button onclick="openEditListModal('${l.id}'); event.stopPropagation();" class="text-slate-400 hover:text-blue-600 p-1 rounded hover:bg-blue-100 transition" title="Editar Lista"><i class="fa-solid fa-pen text-[11px]"></i></button>
-                     <button onclick="deleteList('${l.id}'); event.stopPropagation();" class="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-rose-100 transition" title="Eliminar Lista"><i class="fa-solid fa-trash text-[11px]"></i></button>` : '';
+                    `<button onclick="openEditListModal('${l.id}'); event.stopPropagation();" class="text-slate-400 hover:text-blue-600 p-1.5 rounded hover:bg-blue-100 transition" title="Editar Lista"><i class="fa-solid fa-pen text-[11px]"></i></button>
+                     <button onclick="deleteList('${l.id}'); event.stopPropagation();" class="text-slate-400 hover:text-rose-600 p-1.5 rounded hover:bg-rose-100 transition" title="Eliminar Lista"><i class="fa-solid fa-trash text-[11px]"></i></button>` : '';
 
                 container.innerHTML += `
-                    <li onclick="selectList('${l.id}')" class="cursor-pointer px-3 py-2 rounded-lg flex items-center gap-2.5 text-sm transition group ${active}">
-                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0 border border-slate-300" style="background-color: ${l.color}"></div>
+                    <li onclick="selectList('${l.id}')" class="cursor-pointer px-3 py-2.5 rounded-r-lg flex items-center gap-2.5 text-sm transition group ${active}">
+                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0" style="background-color: ${l.color}"></div>
                         <span class="truncate flex-1 tracking-wide">${l.nombre}</span>
                         <div class="hidden lg:flex gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0">
                             ${actionBtns}
@@ -779,16 +908,16 @@
         window.selectList = (id) => {
             currentListId = id;
             renderSidebarLists();
-            renderLists(); // Refresca tareas basadas en la nueva lista seleccionada
+            renderLists();
         };
 
         function updateListTitles() {
-            let listName = 'PENDIENTES SUP OPERATIVA';
-            if (currentListId !== 'default') {
-                const found = allListsData.find(x => x.id === currentListId);
+            let listName = 'Seleccione una lista';
+            if (currentListId) {
+                const found = activeListsData.find(x => x.id === currentListId);
                 if (found) listName = found.nombre;
             }
-            document.getElementById('lbl-current-list-tasks').innerText = `Lista: ${listName}`;
+            document.getElementById('lbl-current-list-tasks').innerText = `Lista Actual: ${listName}`;
             document.getElementById('lbl-current-list-matrix').innerText = `Lista: ${listName}`;
         }
 
@@ -801,7 +930,7 @@
                 await db.collection("listas").doc(currentEditListId).update({ nombre: name, color: color });
             } else {
                 await db.collection("listas").add({
-                    nombre: name, color: color,
+                    nombre: name, color: color, eliminado: false,
                     creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                     creador: currentUserData.nombre
                 });
@@ -810,37 +939,19 @@
         });
 
         window.deleteList = async (id) => {
-            if(confirm("¿Eliminar permanentemente esta lista? ATENCIÓN: Todas sus tareas pasarán automáticamente a la lista principal PENDIENTES SUP OPERATIVA.")) {
-                
-                // Mover todas las tareas de esta lista a 'default' para no perder datos
-                const tasksToMove = allTasksData.filter(t => t.listaId === id);
-                const promises = tasksToMove.map(t => db.collection("tareas").doc(t.id).update({ listaId: 'default' }));
-                await Promise.all(promises);
-
-                // Borrar la lista
-                await db.collection("listas").doc(id).delete();
-                if(currentListId === id) selectList('default');
+            if(confirm("¿Mover esta lista a la Papelera? Podrá ser restaurada por un administrador.")) {
+                await db.collection("listas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
             }
         };
 
-
         /* =========================================
-           6. GESTIÓN DE TAREAS Y MATRIZ
+           6. GESTIÓN DE TAREAS Y FILTROS GLOBALES
         ========================================= */
         function getCritColor(crit) {
             if(crit === 'ALTA') return 'text-rose-600 bg-rose-50 border-rose-200';
             if(crit === 'MEDIA') return 'text-amber-600 bg-amber-50 border-amber-200';
             if(crit === 'BAJA') return 'text-emerald-600 bg-emerald-50 border-emerald-200';
             return 'text-slate-600 bg-slate-100 border-slate-200';
-        }
-
-        function loadTasks() {
-            db.collection("tareas").onSnapshot(snapshot => {
-                allTasksData = [];
-                snapshot.forEach(doc => allTasksData.push({ id: doc.id, ...doc.data() }));
-                updateCreatorDropdown();
-                renderLists();
-            });
         }
 
         function updateCreatorDropdown() {
@@ -860,20 +971,18 @@
             const fCrit = document.getElementById('f-crit').value;
             const fCat = document.getElementById('f-cat').value;
 
-            // Filtro Principal
+            const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
+
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 
-                // 1. Filtrar siempre por la LISTA actual
-                const tListId = t.listaId || 'default'; // Soporte retroactivo para tareas antiguas
-                if (tListId !== currentListId) match = false;
+                if (!isFiltering) {
+                    if (t.listaId !== currentListId) match = false;
+                }
 
-                // 2. Aplicar demás filtros visuales
                 if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                 if(fCreator && t.creador !== fCreator) match = false;
-                if(fDate) { 
-                    if(!t.fechaLimite || t.fechaLimite > fDate) match = false; 
-                }
+                if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
                 if(fCrit && t.criticidad !== fCrit) match = false;
                 if(fCat && t.categoria !== fCat) match = false;
                 return match;
@@ -893,12 +1002,17 @@
             const mQ3 = document.getElementById('cuad-q3');
             const mQ4 = document.getElementById('cuad-q4');
             const emptyState = document.getElementById('empty-state-active');
+            const overdueBadge = document.getElementById('overdue-count-badge'); // Badge Vencidas
 
             activeList.innerHTML = ''; completedList.innerHTML = '';
             mBandeja.innerHTML = ''; mQ1.innerHTML = ''; mQ2.innerHTML = ''; mQ3.innerHTML = ''; mQ4.innerHTML = '';
 
             let counts = { bandeja: 0, q1: 0, q2: 0, q3: 0, q4: 0 };
             let hasActiveTasks = false;
+            let overdueCount = 0; // Conteo de vencidas
+
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
             filtered.forEach(t => {
                 const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE').split(',')[0] : '...';
@@ -907,6 +1021,14 @@
                 const txtClass = t.completado ? 'line-through text-slate-400' : 'text-slate-700 font-medium';
                 const critClass = getCritColor(t.criticidad);
                 
+                // EVALUACIÓN DE TAREAS VENCIDAS
+                const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
+                if (isOverdue) overdueCount++; // Aumentar contador
+                
+                const pList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
+                const listNameUI = pList ? pList.nombre : 'Lista Desconocida';
+                const listBadge = isFiltering ? `<span class="text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded truncate max-w-[120px] font-bold shadow-sm" title="${listNameUI}"><i class="fa-solid fa-list mr-1"></i>${listNameUI}</span>` : '';
+
                 const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
                 const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
                 
@@ -914,15 +1036,28 @@
                     ? ` <button onclick="openEditModal('${t.id}')" class="text-blue-400 hover:text-blue-600 transition p-1.5 rounded hover:bg-blue-50" title="Editar"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
 
+                // Estilos dinámicos para Vencimiento
+                const listItemBg = isOverdue ? 'bg-rose-50/50 border-rose-200' : 'bg-white border-slate-100';
+                const matrixCardBg = isOverdue ? 'bg-rose-50/50' : 'bg-white';
+                
+                let dateBadgeList = `<span class="font-bold ${t.completado ? 'text-slate-400' : 'text-primary'}">Límite: ${fLimStr}</span>`;
+                let dateBadgeMatrix = `Vence: <strong class="text-slate-700">${fLimStr}</strong>`;
+
+                if (isOverdue) {
+                    dateBadgeList = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStr}</span>`;
+                    dateBadgeMatrix = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStr}</span>`;
+                }
+
                 const htmlList = `
-                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border-b border-slate-100 hover:bg-blue-50/50 transition group bg-white rounded-lg gap-2 w-full min-w-0">
+                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-b hover:bg-blue-50/50 transition group rounded-lg gap-2 w-full min-w-0 ${listItemBg}">
                         <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
                             <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
                             <div class="flex flex-col w-full min-w-0">
                                 <span class="${txtClass} break-words leading-tight text-sm">${t.texto}</span>
-                                <div class="text-[10px] text-slate-400 flex flex-wrap gap-x-2 mt-1">
+                                <div class="text-[10px] text-slate-400 flex flex-wrap gap-1.5 mt-1 items-center">
                                     <span>Gen: ${dateStr}</span> <span class="hidden sm:inline text-slate-300">|</span> 
-                                    <span class="font-bold ${t.completado ? 'text-slate-400' : 'text-primary'}">Límite: ${fLimStr}</span>
+                                    ${dateBadgeList}
+                                    ${listBadge ? `<span class="hidden sm:inline text-slate-300">|</span> ${listBadge}` : ''}
                                 </div>
                             </div>
                         </div>
@@ -968,12 +1103,13 @@
                         ? `<button onclick="openEditModal('${t.id}')" class="absolute top-2.5 right-8 text-slate-300 hover:text-blue-500 transition-colors" title="Editar"><i class="fa-solid fa-pen text-sm"></i></button>` : '';
 
                     const htmlMatrix = `
-                        <div class="bg-white border-l-4 ${cardBorderColor} p-3 rounded-lg shadow-sm border-y border-r border-slate-200 mb-2 task-card hover:shadow transition relative w-full min-w-0" data-id="${t.id}" ${dragAttr}>
-                            <div class="flex items-start mb-1.5 pr-10 w-full min-w-0">
+                        <div class="${matrixCardBg} border-l-4 ${cardBorderColor} p-3 rounded-lg shadow-sm border-y border-r border-slate-200 mb-2 task-card hover:shadow transition relative w-full min-w-0" data-id="${t.id}" ${dragAttr}>
+                            <div class="flex items-start mb-1 pr-10 w-full min-w-0">
                                 ${numberBadge}
                                 <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[1px]">${t.texto}</div>
                             </div>
-                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-6':'ml-0'}">Vence: <strong class="text-slate-700">${fLimStr}</strong></div>
+                            ${listBadge ? `<div class="mb-1.5 ml-6">${listBadge}</div>` : ''}
+                            <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-6':'ml-0'}">${dateBadgeMatrix}</div>
                             <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-6':'ml-0'}">
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad}</span>
                                 <span class="text-[9px] text-slate-400 truncate w-14 text-right">${t.creador.split(' ')[0]}</span>
@@ -993,6 +1129,14 @@
                 }
             });
 
+            // Lógica de visualización del badge de vencidas
+            if (overdueCount > 0) {
+                overdueBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${overdueCount} VENCIDA${overdueCount > 1 ? 'S' : ''}`;
+                overdueBadge.classList.remove('hidden');
+            } else {
+                overdueBadge.classList.add('hidden');
+            }
+
             if(!hasActiveTasks) {
                 emptyState.classList.remove('hidden-view');
                 emptyState.classList.add('block');
@@ -1010,6 +1154,8 @@
 
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if(!currentListId) { alert("Cree una lista primero."); return; }
+
             const text = document.getElementById('new-task-text').value;
             const date = document.getElementById('new-task-date').value;
             const crit = document.getElementById('new-task-crit').value;
@@ -1020,7 +1166,8 @@
                 fechaLimite: date, 
                 criticidad: crit, 
                 categoria: cat,
-                listaId: currentListId,  // IMPORTANTE: Asignar a la lista seleccionada
+                listaId: currentListId,
+                eliminado: false,
                 completado: false, 
                 cuadrante: 'bandeja',
                 creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1034,11 +1181,12 @@
             if(!currentEditId) return;
             const t = allTasksData.find(x => x.id === currentEditId);
             const nText = document.getElementById('edit-task-text').value;
+            const nList = document.getElementById('edit-task-list').value;
             const nDate = document.getElementById('edit-task-date').value;
             const nCrit = document.getElementById('edit-task-crit').value;
             const nCat = document.getElementById('edit-task-category').value;
 
-            if (t.texto !== nText || t.fechaLimite !== nDate || t.criticidad !== nCrit || t.categoria !== nCat) {
+            if (t.texto !== nText || t.listaId !== nList || t.fechaLimite !== nDate || t.criticidad !== nCrit || t.categoria !== nCat) {
                 await db.collection("log_eliminados").add({
                     tipo: 'Edición',
                     textoOriginal: t.texto, textoNuevo: nText,
@@ -1048,27 +1196,16 @@
             }
 
             await db.collection("tareas").doc(currentEditId).update({
-                texto: nText, fechaLimite: nDate, criticidad: nCrit, categoria: nCat
+                texto: nText, listaId: nList, fechaLimite: nDate, criticidad: nCrit, categoria: nCat
             });
             closeEditModal();
         });
 
-        window.toggleTaskStatus = async (id, status) => {
-            await db.collection("tareas").doc(id).update({ completado: status });
-        };
+        window.toggleTaskStatus = async (id, status) => { await db.collection("tareas").doc(id).update({ completado: status }); };
 
         window.deleteTask = async (id) => {
-            if(confirm("¿Eliminar permanentemente este pendiente?")) {
-                const task = allTasksData.find(t => t.id === id);
-                if(task) {
-                    await db.collection("log_eliminados").add({
-                        tipo: 'Eliminación',
-                        textoOriginal: task.texto, creadoOriginalmentePor: task.creador,
-                        accionPor: currentUserData.nombre, fechaAccion: new Date().toLocaleString('es-PE'),
-                        timestamp: Date.now()
-                    });
-                }
-                await db.collection("tareas").doc(id).delete();
+            if(confirm("¿Mover tarea a la papelera? Podrá ser restaurada.")) {
+                await db.collection("tareas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
             }
         };
 
@@ -1085,7 +1222,45 @@
         }
 
         /* =========================================
-           7. AUDITORÍA (REGISTRO EDICIÓN/ELIMINADOS)
+           7. PAPELERA (ADMIN)
+        ========================================= */
+        function renderRestoreTables() {
+            const tbodyListas = document.getElementById('restore-list-listas');
+            const tbodyTareas = document.getElementById('restore-list-tareas');
+            
+            tbodyListas.innerHTML = '';
+            deletedListsData.forEach(l => {
+                tbodyListas.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 font-medium text-slate-800"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background-color:${l.color}"></div>${l.nombre}</div></td>
+                        <td class="p-3 text-[11px] text-slate-500">${l.eliminadoPor || '-'} <br><span class="text-[9px] text-slate-400">${l.fechaEliminado || ''}</span></td>
+                        <td class="p-3 text-center"><button onclick="restoreList('${l.id}')" class="text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-3 py-1 rounded text-xs font-bold shadow-sm transition"><i class="fa-solid fa-arrow-rotate-left mr-1"></i> Restaurar</button></td>
+                    </tr>
+                `;
+            });
+
+            tbodyTareas.innerHTML = '';
+            deletedTasksData.forEach(t => {
+                const oldList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
+                const lName = oldList ? oldList.nombre : '-';
+                tbodyTareas.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3">
+                            <div class="font-medium text-slate-800 text-sm leading-snug">${t.texto}</div>
+                            <div class="text-[10px] text-slate-400 mt-1">Lista original: <span class="font-bold text-slate-500">${lName}</span></div>
+                        </td>
+                        <td class="p-3 text-[11px] text-slate-500">${t.eliminadoPor || '-'} <br><span class="text-[9px] text-slate-400">${t.fechaEliminado || ''}</span></td>
+                        <td class="p-3 text-center"><button onclick="restoreTask('${t.id}')" class="text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-3 py-1 rounded text-xs font-bold shadow-sm transition"><i class="fa-solid fa-arrow-rotate-left mr-1"></i> Restaurar</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.restoreList = async (id) => { await db.collection("listas").doc(id).update({ eliminado: false }); };
+        window.restoreTask = async (id) => { await db.collection("tareas").doc(id).update({ eliminado: false }); };
+
+        /* =========================================
+           8. AUDITORÍA (REGISTRO EDICIÓN)
         ========================================= */
         function loadAuditLogs() {
             db.collection("log_eliminados").orderBy("timestamp", "desc").onSnapshot(snapshot => {
@@ -1093,19 +1268,15 @@
                 list.innerHTML = '';
                 snapshot.forEach(doc => {
                     const l = doc.data();
-                    const isEdit = l.tipo === 'Edición';
-                    const actionBadge = isEdit ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Editado</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Eliminado</span>';
-                    
-                    const detailStr = isEdit 
-                        ? `<div class="text-[11px] leading-relaxed"><div class="line-through text-slate-400 mb-1">${l.textoOriginal}</div><div class="text-primary font-medium border-l-2 border-primary pl-2">${l.textoNuevo}</div></div>`
-                        : `<div class="text-[11px] text-slate-600 leading-tight">${l.textoOriginal}</div>`;
+                    const actionBadge = '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Editado</span>';
+                    const detailStr = `<div class="text-[11px] leading-relaxed"><div class="line-through text-slate-400 mb-1">${l.textoOriginal}</div><div class="text-primary font-medium border-l-2 border-primary pl-2">${l.textoNuevo}</div></div>`;
 
                     list.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                             <td class="p-3 sm:p-4 whitespace-nowrap">${actionBadge}</td>
                             <td class="p-3 sm:p-4 w-full min-w-[200px] max-w-[300px] break-words">${detailStr}</td>
                             <td class="p-3 sm:p-4 text-[11px] text-slate-500 whitespace-nowrap">${l.creadoOriginalmentePor || '-'}</td>
-                            <td class="p-3 sm:p-4 text-xs ${isEdit ? 'text-primary' : 'text-rose-600'} font-bold whitespace-nowrap">${l.accionPor}</td>
+                            <td class="p-3 sm:p-4 text-xs text-primary font-bold whitespace-nowrap">${l.accionPor}</td>
                             <td class="p-3 sm:p-4 text-[10px] text-slate-500 whitespace-nowrap font-medium">${l.fechaAccion}</td>
                         </tr>
                     `;
@@ -1114,7 +1285,7 @@
         }
 
         /* =========================================
-           8. GESTIÓN DE USUARIOS
+           9. GESTIÓN DE USUARIOS
         ========================================= */
         function loadUsers() {
             db.collection("usuarios").orderBy("timestamp", "desc").onSnapshot(snapshot => {
@@ -1183,29 +1354,22 @@
                 const userCred = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
                 
                 await db.collection("usuarios").doc(userCred.user.uid).set({
-                    nombre: name,
-                    email: email,
-                    rol: rol,
-                    estado: 'aprobado',
+                    nombre: name, email: email, rol: rol, estado: 'aprobado',
                     fechaSolicitud: new Date().toLocaleString('es-PE'),
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                await secondaryApp.auth().signOut();
-                await secondaryApp.delete();
-
-                alert("Usuario creado correctamente. Ya puede ingresar.");
-                e.target.reset();
+                await secondaryApp.auth().signOut(); await secondaryApp.delete();
+                alert("Usuario creado correctamente. Ya puede ingresar."); e.target.reset();
             } catch (error) {
                 alert("Error al registrar: " + error.message);
             } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+                btn.innerHTML = originalText; btn.disabled = false;
             }
         });
 
         /* =========================================
-           9. USUARIOS EN LÍNEA
+           10. USUARIOS EN LÍNEA
         ========================================= */
         function startPresenceSystem() {
             const updatePresence = () => {
@@ -1221,47 +1385,54 @@
         function stopPresenceSystem() { clearInterval(heartbeatInterval); }
 
         /* =========================================
-           10. EXPORTAR A EXCEL
+           11. EXPORTAR A EXCEL
         ========================================= */
         window.exportToExcel = (mode) => {
-            // Filtrar SIEMPRE por la lista actual primero para que el Excel solo exporte la lista que el usuario está viendo.
-            let sourceData = allTasksData.filter(t => (t.listaId || 'default') === currentListId);
+            const searchText = (document.getElementById('f-texto')?.value || '').toLowerCase();
+            const fCreator = document.getElementById('f-creador').value;
+            const fDate = document.getElementById('f-fecha').value;
+            const fCrit = document.getElementById('f-crit').value;
+            const fCat = document.getElementById('f-cat').value;
+            const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
 
-            if (mode === 'filtered') {
-                const searchText = (document.getElementById('f-texto')?.value || '').toLowerCase();
-                const fCreator = document.getElementById('f-creador').value;
-                const fDate = document.getElementById('f-fecha').value;
-                const fCrit = document.getElementById('f-crit').value;
-                const fCat = document.getElementById('f-cat').value;
-                
+            let sourceData = allTasksData;
+
+            if (mode === 'filtered' || !isFiltering) {
                 sourceData = sourceData.filter(t => {
                     let match = true;
-                    if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
-                    if(fCreator && t.creador !== fCreator) match = false;
-                    if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
-                    if(fCrit && t.criticidad !== fCrit) match = false;
-                    if(fCat && t.categoria !== fCat) match = false;
+                    if (!isFiltering && t.listaId !== currentListId) match = false; 
+                    if (isFiltering) { 
+                        if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
+                        if(fCreator && t.creador !== fCreator) match = false;
+                        if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
+                        if(fCrit && t.criticidad !== fCrit) match = false;
+                        if(fCat && t.categoria !== fCat) match = false;
+                    }
                     return match;
                 });
             }
 
-            const dataToExport = sourceData.map(t => ({
-                Pendiente: t.texto,
-                Fecha_Creacion: t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '',
-                Fecha_Limite: t.fechaLimite || 'No definida',
-                Criticidad: t.criticidad || '-',
-                Categoria: t.categoria,
-                Estado: t.completado ? 'Realizado' : 'Activo',
-                Creador: t.creador,
-                Cuadrante_Matriz: (t.cuadrante || 'Bandeja').toUpperCase()
-            }));
+            const dataToExport = sourceData.map(t => {
+                const pList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
+                return {
+                    Pendiente: t.texto,
+                    Lista: pList ? pList.nombre : 'Desconocida',
+                    Fecha_Creacion: t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '',
+                    Fecha_Limite: t.fechaLimite || 'No definida',
+                    Criticidad: t.criticidad || '-',
+                    Categoria: t.categoria,
+                    Estado: t.completado ? 'Realizado' : 'Activo',
+                    Creador: t.creador,
+                    Cuadrante_Matriz: (t.cuadrante || 'Bandeja').toUpperCase()
+                }
+            });
 
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new();
             
-            let listName = 'PENDIENTES SUP OPERATIVA';
-            if (currentListId !== 'default') {
-                const found = allListsData.find(x => x.id === currentListId);
+            let listName = 'Global';
+            if (!isFiltering && currentListId) {
+                const found = activeListsData.find(x => x.id === currentListId);
                 if (found) listName = found.nombre;
             }
             
