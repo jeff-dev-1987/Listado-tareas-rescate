@@ -107,6 +107,16 @@
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Nombre de la Lista</label>
                     <input type="text" id="list-name" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-primary outline-none text-sm" required placeholder="Ej. Proyectos Generales">
                 </div>
+                
+                <!-- Selector de Íconos -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Ícono de la Lista</label>
+                    <div id="icon-selector" class="flex flex-wrap gap-1 mt-1 max-h-28 overflow-y-auto p-1.5 border border-slate-300 rounded bg-slate-50">
+                        <!-- Renderizado vía JS -->
+                    </div>
+                    <input type="hidden" id="list-icon" value="📋">
+                </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Color de Etiqueta</label>
                     <div class="flex items-center gap-3 mt-1">
@@ -354,7 +364,7 @@
                     <div class="flex flex-col gap-5 w-full">
                         <div class="w-full">
                             <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5 flex items-center gap-2">
-                                <i class="fa-regular fa-clock text-accent"></i> Pendientes Activos
+                                <i class="fa-regular fa-clock text-accent"></i> Pendientes Activos <span id="active-count-text" class="text-slate-400 font-normal">(0)</span>
                                 <span id="overdue-count-badge" class="hidden text-[9px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold shadow-sm transition-all ml-1 border border-rose-200"></span>
                             </h3>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
@@ -366,7 +376,9 @@
                         </div>
 
                         <div class="w-full">
-                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Tareas Realizadas</h3>
+                            <h3 class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mb-2.5 flex items-center gap-2">
+                                <i class="fa-solid fa-check-double"></i> Tareas Realizadas <span id="completed-count-text" class="text-emerald-500 font-normal">(0)</span>
+                            </h3>
                             <div class="bg-slate-100 rounded-xl shadow-inner border border-slate-200 p-1.5 opacity-85 w-full min-h-[50px]">
                                 <ul id="task-list-completed" class="space-y-1.5 w-full"></ul>
                             </div>
@@ -574,15 +586,17 @@
         let currentUserData = null;
         
         let allTasksData = [];
-        let deletedTasksData = []; // Papelera
+        let deletedTasksData = []; 
 
         let activeListsData = [];
-        let deletedListsData = []; // Papelera
+        let deletedListsData = []; 
 
         let currentListId = null;
         let currentEditListId = null;
         let currentEditId = null;
         let heartbeatInterval;
+
+        const listIcons = ['📋','📁','📂','📊','🏢','🏭','🏥','🚧','🚨','🚒','🚑','🚓','🚁','✈️','🚢','🚗','🚚','🚜','💻','🖨️','📷','📹','📞','💡','🔦','🧯','🛠️','⚙️','🧰','🧲','🪜','🪖','🧤','📦','🔒','🔑'];
 
         /* =========================================
            3. LÓGICA DE INTERFAZ & SIDEBAR RESIZE
@@ -620,7 +634,6 @@
             }
         }
 
-        // --- Lógica Redimensionar Sidebar (Jalar borde) ---
         const sidebar = document.getElementById('sidebar');
         const resizer = document.getElementById('sidebar-resizer');
         let isResizing = false;
@@ -647,7 +660,6 @@
             }
         });
 
-        // Tab Switcher
         function switchTab(tab) {
             const views = ['tasks', 'matrix', 'audit', 'users', 'restore'];
             views.forEach(v => {
@@ -721,7 +733,35 @@
             }
         }
 
-        /* --- Modales --- */
+        /* --- Modales e Íconos --- */
+        function initIconSelector() {
+            const container = document.getElementById('icon-selector');
+            container.innerHTML = '';
+            listIcons.forEach(icon => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `w-8 h-8 flex items-center justify-center rounded text-lg hover:bg-blue-100 transition icon-btn`;
+                btn.innerText = icon;
+                btn.onclick = () => {
+                    document.getElementById('list-icon').value = icon;
+                    highlightIcon(icon);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function highlightIcon(iconValue) {
+            document.querySelectorAll('.icon-btn').forEach(btn => {
+                if(btn.innerText === iconValue) {
+                    btn.classList.add('bg-blue-200', 'border', 'border-blue-400', 'shadow-sm');
+                } else {
+                    btn.classList.remove('bg-blue-200', 'border', 'border-blue-400', 'shadow-sm');
+                }
+            });
+        }
+
+        initIconSelector();
+
         window.openEditModal = (id) => {
             const t = allTasksData.find(x => x.id === id);
             if(!t) return;
@@ -731,9 +771,8 @@
             document.getElementById('edit-task-crit').value = t.criticidad || 'MEDIA';
             document.getElementById('edit-task-category').value = t.categoria || 'Operativa';
             
-            // Llenar combo de listas para mover
             const listSelect = document.getElementById('edit-task-list');
-            listSelect.innerHTML = activeListsData.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('');
+            listSelect.innerHTML = activeListsData.map(l => `<option value="${l.id}">${l.icono || '📋'} ${l.nombre}</option>`).join('');
             listSelect.value = t.listaId || currentListId;
 
             document.getElementById('edit-modal').classList.remove('hidden');
@@ -746,6 +785,8 @@
             document.getElementById('list-modal-title').innerHTML = '<i class="fa-solid fa-folder-plus mr-2"></i>Nueva Lista';
             document.getElementById('list-name').value = '';
             document.getElementById('list-color').value = '#3b82f6';
+            document.getElementById('list-icon').value = '📋';
+            highlightIcon('📋');
             document.getElementById('list-modal').classList.remove('hidden');
         };
 
@@ -756,6 +797,8 @@
             document.getElementById('list-modal-title').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i>Editar Lista';
             document.getElementById('list-name').value = l.nombre;
             document.getElementById('list-color').value = l.color;
+            document.getElementById('list-icon').value = l.icono || '📋';
+            highlightIcon(l.icono || '📋');
             document.getElementById('list-modal').classList.remove('hidden');
         };
 
@@ -827,10 +870,9 @@
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
 
         /* =========================================
-           5. GESTIÓN DE LISTAS Y TAREAS CON PAPELERA
+           5. GESTIÓN DE LISTAS Y TAREAS
         ========================================= */
         function loadListsAndTasks() {
-            // 1. Cargar Listas
             db.collection("listas").orderBy("creadoEn", "asc").onSnapshot(async snapshot => {
                 activeListsData = [];
                 deletedListsData = [];
@@ -843,10 +885,10 @@
 
                 if (activeListsData.length === 0 && deletedListsData.length === 0 && currentUserData.rol === 'admin') {
                     const newListRef = await db.collection("listas").add({
-                        nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a',
+                        nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a', icono: '📋',
                         creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema'
                     });
-                    activeListsData.push({ id: newListRef.id, nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a' });
+                    activeListsData.push({ id: newListRef.id, nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a', icono: '📋' });
                     
                     const tSnap = await db.collection("tareas").get();
                     tSnap.forEach(d => { db.collection("tareas").doc(d.id).update({ listaId: newListRef.id }); });
@@ -861,7 +903,6 @@
                 renderLists(); 
             });
 
-            // 2. Cargar Tareas
             db.collection("tareas").onSnapshot(snapshot => {
                 allTasksData = [];
                 deletedTasksData = [];
@@ -890,6 +931,7 @@
 
                 container.innerHTML += `
                     <li onclick="selectList('${l.id}')" class="cursor-pointer px-3 py-2.5 rounded-r-lg flex items-center gap-2.5 text-sm transition group ${active}">
+                        <div class="text-base leading-none">${l.icono || '📋'}</div>
                         <div class="w-3 h-3 rounded-full shadow-sm shrink-0" style="background-color: ${l.color}"></div>
                         <span class="truncate flex-1 tracking-wide">${l.nombre}</span>
                         <div class="hidden lg:flex gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0">
@@ -915,7 +957,7 @@
             let listName = 'Seleccione una lista';
             if (currentListId) {
                 const found = activeListsData.find(x => x.id === currentListId);
-                if (found) listName = found.nombre;
+                if (found) listName = `${found.icono || '📋'} ${found.nombre}`;
             }
             document.getElementById('lbl-current-list-tasks').innerText = `Lista Actual: ${listName}`;
             document.getElementById('lbl-current-list-matrix').innerText = `Lista: ${listName}`;
@@ -925,12 +967,13 @@
             e.preventDefault();
             const name = document.getElementById('list-name').value;
             const color = document.getElementById('list-color').value;
+            const icon = document.getElementById('list-icon').value;
 
             if (currentEditListId) {
-                await db.collection("listas").doc(currentEditListId).update({ nombre: name, color: color });
+                await db.collection("listas").doc(currentEditListId).update({ nombre: name, color: color, icono: icon });
             } else {
                 await db.collection("listas").add({
-                    nombre: name, color: color, eliminado: false,
+                    nombre: name, color: color, icono: icon, eliminado: false,
                     creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                     creador: currentUserData.nombre
                 });
@@ -975,11 +1018,9 @@
 
             let filtered = allTasksData.filter(t => {
                 let match = true;
-                
                 if (!isFiltering) {
                     if (t.listaId !== currentListId) match = false;
                 }
-
                 if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                 if(fCreator && t.creador !== fCreator) match = false;
                 if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
@@ -1002,14 +1043,15 @@
             const mQ3 = document.getElementById('cuad-q3');
             const mQ4 = document.getElementById('cuad-q4');
             const emptyState = document.getElementById('empty-state-active');
-            const overdueBadge = document.getElementById('overdue-count-badge'); // Badge Vencidas
+            const overdueBadge = document.getElementById('overdue-count-badge');
 
             activeList.innerHTML = ''; completedList.innerHTML = '';
             mBandeja.innerHTML = ''; mQ1.innerHTML = ''; mQ2.innerHTML = ''; mQ3.innerHTML = ''; mQ4.innerHTML = '';
 
             let counts = { bandeja: 0, q1: 0, q2: 0, q3: 0, q4: 0 };
-            let hasActiveTasks = false;
-            let overdueCount = 0; // Conteo de vencidas
+            let activeCount = 0;
+            let completedCount = 0;
+            let overdueCount = 0;
 
             const today = new Date();
             const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
@@ -1021,13 +1063,12 @@
                 const txtClass = t.completado ? 'line-through text-slate-400' : 'text-slate-700 font-medium';
                 const critClass = getCritColor(t.criticidad);
                 
-                // EVALUACIÓN DE TAREAS VENCIDAS
                 const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
-                if (isOverdue) overdueCount++; // Aumentar contador
+                if (isOverdue) overdueCount++;
                 
                 const pList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
-                const listNameUI = pList ? pList.nombre : 'Lista Desconocida';
-                const listBadge = isFiltering ? `<span class="text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded truncate max-w-[120px] font-bold shadow-sm" title="${listNameUI}"><i class="fa-solid fa-list mr-1"></i>${listNameUI}</span>` : '';
+                const listNameUI = pList ? `${pList.icono || '📋'} ${pList.nombre}` : 'Lista Desconocida';
+                const listBadge = isFiltering ? `<span class="text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded truncate max-w-[150px] font-bold shadow-sm" title="${listNameUI}">${listNameUI}</span>` : '';
 
                 const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
                 const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
@@ -1036,7 +1077,6 @@
                     ? ` <button onclick="openEditModal('${t.id}')" class="text-blue-400 hover:text-blue-600 transition p-1.5 rounded hover:bg-blue-50" title="Editar"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteTask('${t.id}')" class="text-rose-400 hover:text-rose-600 transition p-1.5 rounded hover:bg-rose-50" title="Eliminar"><i class="fa-solid fa-trash"></i></button>` : '';
 
-                // Estilos dinámicos para Vencimiento
                 const listItemBg = isOverdue ? 'bg-rose-50/50 border-rose-200' : 'bg-white border-slate-100';
                 const matrixCardBg = isOverdue ? 'bg-rose-50/50' : 'bg-white';
                 
@@ -1076,9 +1116,10 @@
 
                 if(t.completado) {
                     completedList.innerHTML += htmlList;
+                    completedCount++;
                 } else {
                     activeList.innerHTML += htmlList;
-                    hasActiveTasks = true;
+                    activeCount++;
                     let c = t.cuadrante || 'bandeja';
                     counts[c]++;
 
@@ -1129,7 +1170,9 @@
                 }
             });
 
-            // Lógica de visualización del badge de vencidas
+            document.getElementById('active-count-text').innerText = `(${activeCount})`;
+            document.getElementById('completed-count-text').innerText = `(${completedCount})`;
+
             if (overdueCount > 0) {
                 overdueBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${overdueCount} VENCIDA${overdueCount > 1 ? 'S' : ''}`;
                 overdueBadge.classList.remove('hidden');
@@ -1137,7 +1180,7 @@
                 overdueBadge.classList.add('hidden');
             }
 
-            if(!hasActiveTasks) {
+            if(activeCount === 0) {
                 emptyState.classList.remove('hidden-view');
                 emptyState.classList.add('block');
             } else {
@@ -1232,7 +1275,7 @@
             deletedListsData.forEach(l => {
                 tbodyListas.innerHTML += `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="p-3 font-medium text-slate-800"><div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background-color:${l.color}"></div>${l.nombre}</div></td>
+                        <td class="p-3 font-medium text-slate-800"><div class="flex items-center gap-2">${l.icono || '📋'} <div class="w-2 h-2 rounded-full" style="background-color:${l.color}"></div>${l.nombre}</div></td>
                         <td class="p-3 text-[11px] text-slate-500">${l.eliminadoPor || '-'} <br><span class="text-[9px] text-slate-400">${l.fechaEliminado || ''}</span></td>
                         <td class="p-3 text-center"><button onclick="restoreList('${l.id}')" class="text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-3 py-1 rounded text-xs font-bold shadow-sm transition"><i class="fa-solid fa-arrow-rotate-left mr-1"></i> Restaurar</button></td>
                     </tr>
@@ -1242,7 +1285,7 @@
             tbodyTareas.innerHTML = '';
             deletedTasksData.forEach(t => {
                 const oldList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
-                const lName = oldList ? oldList.nombre : '-';
+                const lName = oldList ? `${oldList.icono || '📋'} ${oldList.nombre}` : '-';
                 tbodyTareas.innerHTML += `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                         <td class="p-3">
