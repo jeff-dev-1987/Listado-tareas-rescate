@@ -48,7 +48,6 @@
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
 
-    <!-- Modal Editar Pendiente -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -96,7 +95,6 @@
         </div>
     </div>
 
-    <!-- Modal Crear/Editar Lista -->
     <div id="list-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-primary p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeListModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -108,12 +106,10 @@
                     <input type="text" id="list-name" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-primary outline-none text-sm" required placeholder="Ej. Proyectos Generales">
                 </div>
                 
-                <!-- Selector de Íconos -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Ícono de la Lista</label>
                     <div id="icon-selector" class="flex flex-wrap gap-1 mt-1 max-h-28 overflow-y-auto p-1.5 border border-slate-300 rounded bg-slate-50">
-                        <!-- Renderizado vía JS -->
-                    </div>
+                        </div>
                     <input type="hidden" id="list-icon" value="📋">
                 </div>
 
@@ -193,7 +189,6 @@
         <div class="flex flex-1 overflow-hidden relative w-full min-h-0">
             
             <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-[transform] duration-300 ease-in-out h-full transform -translate-x-full md:translate-x-0 shrink-0" style="width: 280px;">
-                <!-- Drag Handle for Resizing -->
                 <div id="sidebar-resizer" class="hidden md:block absolute right-0 top-0 bottom-0 w-1.5 transition-colors"></div>
                 
                 <div class="w-full flex flex-col h-full bg-white relative overflow-hidden">
@@ -226,7 +221,6 @@
                         </button>
                     </nav>
 
-                    <!-- SECCIÓN DE LISTAS -->
                     <div class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 border-t border-slate-100">
                         <div class="px-4 py-3 flex justify-between items-center bg-slate-100/50 sticky top-0 z-10 backdrop-blur-sm">
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas</span>
@@ -235,8 +229,7 @@
                             </button>
                         </div>
                         <ul id="sidebar-lists" class="px-2 pb-4 space-y-0.5">
-                            <!-- Renderizado vía JS -->
-                        </ul>
+                            </ul>
                     </div>
 
                     <div class="p-4 border-t border-slate-200 bg-slate-50 shrink-0 mt-auto overflow-hidden">
@@ -251,7 +244,6 @@
                 
                 <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
                     
-                    <!-- SECCIÓN DE BÚSQUEDA Y FILTROS -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
                         
@@ -260,7 +252,10 @@
                                 <div class="flex items-center"><i class="fa-solid fa-magnifying-glass mr-1.5 text-primary"></i> Búsqueda y Filtros</div>
                                 <span id="lbl-current-list-tasks" class="text-[10px] text-primary font-bold uppercase tracking-widest mt-1 bg-blue-50 w-max px-2 py-0.5 rounded border border-blue-100">Cargando listas...</span>
                             </h2>
-                            <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0">
+                            <div class="flex gap-2 w-full md:w-auto mt-2 md:mt-0 flex-wrap justify-end">
+                                <button id="btn-filter-overdue" onclick="toggleOverdueFilter()" class="flex-1 md:flex-none bg-rose-50 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-lg text-xs hover:bg-rose-100 shadow-sm flex justify-center items-center gap-2 transition font-bold">
+                                    <i class="fa-solid fa-calendar-xmark"></i> <span class="hidden sm:inline">Vencidas</span>
+                                </button>
                                 <button onclick="exportToExcel('filtered')" class="flex-1 md:flex-none bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-blue-700 shadow-sm flex justify-center items-center gap-2 transition">
                                     <i class="fa-solid fa-filter"></i> <span class="hidden sm:inline">Exportar</span> Filtro
                                 </button>
@@ -270,7 +265,6 @@
                             </div>
                         </div>
 
-                        <!-- Filtros Integrados -->
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5 text-sm border-t border-slate-100 pt-3">
                             <div class="col-span-2 md:col-span-3 lg:col-span-2">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Búsqueda Global</label>
@@ -320,41 +314,41 @@
                         </div>
                     </div>
 
-                    <!-- SECCIÓN DE CREACIÓN DE PENDIENTE -->
-                    <form id="task-form" class="mb-5 flex flex-col hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-l-accent w-full relative overflow-hidden">
+                    <form id="task-form" class="mb-5 flex flex-col hidden-view bg-white p-4 rounded-xl shadow-sm border border-l-4 border-accent w-full relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-accent"></div>
-                        <h2 class="text-sm font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2 flex items-center gap-2 mt-1">
+                        
+                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-accent pl-3 flex items-center gap-2 mb-4 mt-1">
                             <i class="fa-solid fa-circle-plus text-accent"></i> Registrar Nuevo Pendiente
                         </h2>
                         
-                        <div class="flex flex-col lg:flex-row gap-3 items-end w-full">
+                        <div class="flex flex-col lg:flex-row gap-3 items-end w-full border-t border-slate-100 pt-3">
                             <div class="w-full lg:flex-1">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Descripción de la Tarea</label>
-                                <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg focus:border-accent focus:ring-1 focus:ring-accent outline-none text-slate-800 bg-slate-50 focus:bg-white transition text-sm" required>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Descripción de la Tarea</label>
+                                <input type="text" id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full p-2.5 mt-0.5 border border-slate-300 rounded-lg focus:border-accent focus:ring-1 focus:ring-accent outline-none text-slate-800 bg-slate-50 focus:bg-white transition text-sm" required>
                             </div>
                             <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto mt-2 lg:mt-0 items-end">
                                 <div class="flex-1 min-w-[100px]">
-                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">F. Límite</label>
-                                    <input type="date" id="new-task-date" class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg outline-none text-xs bg-slate-50 focus:bg-white transition" required>
+                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">F. Límite</label>
+                                    <input type="date" id="new-task-date" class="w-full p-2.5 mt-0.5 border border-slate-300 rounded-lg outline-none text-xs bg-slate-50 focus:bg-white transition" required>
                                 </div>
                                 <div class="flex-1 min-w-[90px]">
-                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Criticidad</label>
-                                    <select id="new-task-crit" class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg outline-none text-xs font-bold bg-slate-50 focus:bg-white transition">
+                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Criticidad</label>
+                                    <select id="new-task-crit" class="w-full p-2.5 mt-0.5 border border-slate-300 rounded-lg outline-none text-xs font-bold bg-slate-50 focus:bg-white transition">
                                         <option value="ALTA" class="text-rose-600">ALTA</option>
                                         <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
                                         <option value="BAJA" class="text-emerald-600">BAJA</option>
                                     </select>
                                 </div>
                                 <div class="flex-1 min-w-[110px]">
-                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide">Categoría</label>
-                                    <select id="new-task-category" class="w-full p-2.5 mt-1 border border-slate-300 rounded-lg outline-none text-xs bg-slate-50 focus:bg-white transition">
+                                    <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Categoría</label>
+                                    <select id="new-task-category" class="w-full p-2.5 mt-0.5 border border-slate-300 rounded-lg outline-none text-xs bg-slate-50 focus:bg-white transition">
                                         <option value="Operativa">Operativa</option>
                                         <option value="Administrativa">Admin</option>
                                         <option value="Logística">Logística</option>
                                         <option value="Entrenamiento">Entrenamiento</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="w-full sm:w-auto bg-accent text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 transition font-bold shadow-md flex justify-center items-center gap-2 text-xs h-[38px]">
+                                <button type="submit" class="w-full sm:w-auto bg-accent text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 transition font-bold shadow-md flex justify-center items-center gap-2 text-xs h-[40px]">
                                     <i class="fa-solid fa-save"></i> Guardar
                                 </button>
                             </div>
@@ -459,7 +453,6 @@
                     </div>
                 </div>
                 
-                <!-- VISTA PAPELERA -->
                 <div id="view-restore" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
                         <h2 class="text-lg font-bold text-rose-700 border-l-4 border-rose-600 pl-3">Papelera de Reciclaje</h2>
@@ -595,6 +588,7 @@
         let currentEditListId = null;
         let currentEditId = null;
         let heartbeatInterval;
+        let filterOverdueActive = false;
 
         const listIcons = ['📋','📁','📂','📊','🏢','🏭','🏥','🚧','🚨','🚒','🚑','🚓','🚁','✈️','🚢','🚗','🚚','🚜','💻','🖨️','📷','📹','📞','💡','🔦','🧯','🛠️','⚙️','🧰','🧲','🪜','🪖','🧤','📦','🔒','🔑'];
 
@@ -803,6 +797,19 @@
         };
 
         window.closeListModal = () => { document.getElementById('list-modal').classList.add('hidden'); currentEditListId = null; };
+
+        window.toggleOverdueFilter = () => {
+            filterOverdueActive = !filterOverdueActive;
+            const btn = document.getElementById('btn-filter-overdue');
+            if(filterOverdueActive) {
+                btn.classList.replace('bg-rose-50', 'bg-rose-600');
+                btn.classList.replace('text-rose-700', 'text-white');
+            } else {
+                btn.classList.replace('bg-rose-600', 'bg-rose-50');
+                btn.classList.replace('text-white', 'text-rose-700');
+            }
+            renderLists();
+        };
 
         /* =========================================
            4. LÓGICA DE AUTENTICACIÓN
@@ -1015,12 +1022,24 @@
             const fCat = document.getElementById('f-cat').value;
 
             const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
+            
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
             let filtered = allTasksData.filter(t => {
                 let match = true;
-                if (!isFiltering) {
+                
+                if (!isFiltering && !filterOverdueActive) {
                     if (t.listaId !== currentListId) match = false;
                 }
+
+                if (filterOverdueActive) {
+                    const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
+                    if (!isOverdue) match = false;
+                    
+                    if (!isFiltering && t.listaId !== currentListId) match = false;
+                }
+
                 if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                 if(fCreator && t.creador !== fCreator) match = false;
                 if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
@@ -1053,9 +1072,6 @@
             let completedCount = 0;
             let overdueCount = 0;
 
-            const today = new Date();
-            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-
             filtered.forEach(t => {
                 const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE').split(',')[0] : '...';
                 const fLimStr = t.fechaLimite ? t.fechaLimite : 'Sin límite';
@@ -1068,7 +1084,7 @@
                 
                 const pList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
                 const listNameUI = pList ? `${pList.icono || '📋'} ${pList.nombre}` : 'Lista Desconocida';
-                const listBadge = isFiltering ? `<span class="text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded truncate max-w-[150px] font-bold shadow-sm" title="${listNameUI}">${listNameUI}</span>` : '';
+                const listBadge = isFiltering || filterOverdueActive ? `<span class="text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded truncate max-w-[150px] font-bold shadow-sm" title="${listNameUI}">${listNameUI}</span>` : '';
 
                 const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
                 const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
@@ -1438,12 +1454,22 @@
             const fCat = document.getElementById('f-cat').value;
             const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
 
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
             let sourceData = allTasksData;
 
-            if (mode === 'filtered' || !isFiltering) {
+            if (mode === 'filtered' || filterOverdueActive || isFiltering) {
                 sourceData = sourceData.filter(t => {
                     let match = true;
-                    if (!isFiltering && t.listaId !== currentListId) match = false; 
+                    if (!isFiltering && !filterOverdueActive && t.listaId !== currentListId) match = false; 
+                    
+                    if (filterOverdueActive) {
+                        const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
+                        if (!isOverdue) match = false;
+                        if (!isFiltering && t.listaId !== currentListId) match = false;
+                    }
+
                     if (isFiltering) { 
                         if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
                         if(fCreator && t.creador !== fCreator) match = false;
@@ -1453,6 +1479,9 @@
                     }
                     return match;
                 });
+            } else {
+                // If 'all' mode and no filters applied, only export current list tasks
+                sourceData = sourceData.filter(t => t.listaId === currentListId);
             }
 
             const dataToExport = sourceData.map(t => {
