@@ -48,6 +48,37 @@
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
 
+    <div id="comment-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-emerald-500 p-5 relative">
+            <button onclick="closeCommentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-emerald-600 mb-2"><i class="fa-solid fa-check-circle mr-2"></i>Finalizar Tarea</h3>
+            <p class="text-xs text-slate-500 mb-4">¿Deseas agregar un comentario o reporte de cierre? (Opcional)</p>
+            <textarea id="task-completion-comment" class="w-full p-2.5 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm resize-none" rows="3" placeholder="Ej. Extintores revisados y recargados..."></textarea>
+            <div class="flex justify-end gap-3 mt-5">
+                <button type="button" onclick="closeCommentModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+                <button type="button" onclick="confirmTaskCompletion()" class="px-5 py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition shadow text-sm font-bold">Completar Tarea</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-lists-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary p-5 relative flex flex-col max-h-[80vh]">
+            <button onclick="closeAssignListsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-primary mb-1"><i class="fa-solid fa-user-lock mr-2"></i>Asignar Accesos a Listas</h3>
+            <p id="assign-user-name" class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-4 border-b pb-2">Usuario:</p>
+            
+            <form id="assign-lists-form" class="flex flex-col flex-1 min-h-0">
+                <p class="text-[11px] text-slate-600 mb-2">Selecciona las listas que este usuario podrá visualizar y gestionar:</p>
+                <div id="assign-lists-container" class="flex-1 overflow-y-auto border border-slate-200 rounded bg-slate-50 p-2 mb-4 space-y-1">
+                    </div>
+                <div class="flex justify-end gap-3 pt-2 shrink-0">
+                    <button type="button" onclick="closeAssignListsModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-primary text-white rounded hover:bg-primaryDark transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Accesos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -214,7 +245,7 @@
                             <i class="fa-solid fa-clock-rotate-left w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Registro Auditoría</span>
                         </button>
                         <button onclick="switchTab('users')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-users">
-                            <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Accesos</span>
+                            <i class="fa-solid fa-users-gear w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Accesos y Permisos</span>
                         </button>
                         <button onclick="switchTab('restore')" class="w-full flex items-center gap-3 p-3 rounded-lg text-slate-600 hover:bg-slate-50 border-l-4 border-transparent hover:text-primary transition hidden-view group" id="tab-restore">
                             <i class="fa-solid fa-trash-can w-5 text-slate-400 group-hover:text-primary transition-colors"></i> <span class="whitespace-nowrap">Papelera</span>
@@ -223,7 +254,7 @@
 
                     <div class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 border-t border-slate-100">
                         <div class="px-4 py-3 flex justify-between items-center bg-slate-100/50 sticky top-0 z-10 backdrop-blur-sm">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas Asignadas</span>
                             <button id="btn-add-list" onclick="openListModal()" class="text-slate-400 hover:text-primary transition hidden-view p-1 shrink-0" title="Nueva Lista">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -267,12 +298,12 @@
 
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5 text-sm border-t border-slate-100 pt-3">
                             <div class="col-span-2 md:col-span-3 lg:col-span-2">
-                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Búsqueda Global</label>
+                                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Buscar por palabra</label>
                                 <div class="relative w-full mt-0.5">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-slate-400">
                                         <i class="fa-solid fa-search text-[10px]"></i>
                                     </div>
-                                    <input type="text" id="f-texto" class="w-full p-1.5 pl-8 border border-slate-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs bg-slate-50 focus:bg-white transition" placeholder="Busca en todas las listas..." oninput="renderLists()">
+                                    <input type="text" id="f-texto" class="w-full p-1.5 pl-8 border border-slate-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none text-xs bg-slate-50 focus:bg-white transition" placeholder="Buscar en lista seleccionada..." oninput="renderLists()">
                                 </div>
                             </div>
                             <div class="col-span-1">
@@ -364,7 +395,7 @@
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 w-full">
                                 <ul id="task-list-active" class="space-y-1.5 w-full"></ul>
                                 <div id="empty-state-active" class="hidden-view p-4 text-center text-slate-400 text-sm font-medium">
-                                    No hay tareas en esta lista.
+                                    No hay tareas en esta vista.
                                 </div>
                             </div>
                         </div>
@@ -531,12 +562,13 @@
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse min-w-[600px]">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
                                 <thead>
                                     <tr class="bg-slate-800 text-white uppercase text-[10px] tracking-wider">
                                         <th class="p-4 font-bold">Nombre / Correo</th>
                                         <th class="p-4 font-bold">Fecha Solicitud</th>
                                         <th class="p-4 font-bold">Estado / Rol</th>
+                                        <th class="p-4 font-bold text-center">Permisos Listas</th>
                                         <th class="p-4 font-bold text-center">Acciones</th>
                                     </tr>
                                 </thead>
@@ -577,18 +609,30 @@
            2. ESTADO GLOBAL
         ========================================= */
         let currentUserData = null;
+        let userUnsubscribe = null;
         
         let allTasksData = [];
         let deletedTasksData = []; 
 
-        let activeListsData = [];
-        let deletedListsData = []; 
+        let rawListsData = []; // Todas las listas en base de datos
+        let rawTasksData = []; // Todas las tareas
+        let activeListsData = []; // Listas que el usuario PUEDE ver
+        let deletedListsData = []; // Listas eliminadas (admin)
 
         let currentListId = null;
         let currentEditListId = null;
         let currentEditId = null;
+        
+        let pendingCompletionTaskId = null;
+        let pendingCompletionCheckbox = null;
+
+        let assignUserId = null;
+
         let heartbeatInterval;
         let filterOverdueActive = false;
+        
+        let listsUnsubscribe = null;
+        let tasksUnsubscribe = null;
 
         const listIcons = ['📋','📁','📂','📊','🏢','🏭','🏥','🚧','🚨','🚒','🚑','🚓','🚁','✈️','🚢','🚗','🚚','🚜','💻','🖨️','📷','📹','📞','💡','🔦','🧯','🛠️','⚙️','🧰','🧲','🪜','🪖','🧤','📦','🔒','🔑'];
 
@@ -715,7 +759,7 @@
                 tabAudit.classList.add('hidden-view');
                 tabRestore.classList.add('hidden-view');
                 adminDivider.classList.add('hidden-view');
-                btnAddList.classList.remove('hidden-view');
+                btnAddList.classList.remove('hidden-view'); // Editores pueden crear listas (se les asigna auto)
             } else if (role === 'admin') {
                 taskForm.classList.remove('hidden-view');
                 tabUsers.classList.remove('hidden-view');
@@ -811,54 +855,131 @@
             renderLists();
         };
 
+        window.closeCommentModal = () => {
+            document.getElementById('comment-modal').classList.add('hidden');
+            pendingCompletionTaskId = null;
+            if(pendingCompletionCheckbox) pendingCompletionCheckbox.checked = false; // Revertir visualmente
+            pendingCompletionCheckbox = null;
+        };
+
+        window.confirmTaskCompletion = async () => {
+            if(!pendingCompletionTaskId) return;
+            const comment = document.getElementById('task-completion-comment').value.trim();
+            const updateData = { completado: true };
+            if (comment) updateData.comentarioCierre = comment;
+            
+            await db.collection("tareas").doc(pendingCompletionTaskId).update(updateData);
+            
+            // Ya no revertimos, se actualiza via firebase snapshot
+            document.getElementById('comment-modal').classList.add('hidden');
+            pendingCompletionTaskId = null;
+            pendingCompletionCheckbox = null;
+        };
+
+        window.openAssignListsModal = async (uid, userName) => {
+            assignUserId = uid;
+            document.getElementById('assign-user-name').innerText = 'Usuario: ' + userName;
+            
+            const uDoc = await db.collection("usuarios").doc(uid).get();
+            const asignadas = uDoc.data().listasAsignadas || [];
+            
+            const container = document.getElementById('assign-lists-container');
+            container.innerHTML = '';
+            
+            const systemActiveLists = rawListsData.filter(l => !l.eliminado);
+            
+            if(systemActiveLists.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-500 p-2 text-center">No hay listas creadas.</p>';
+            } else {
+                systemActiveLists.forEach(l => {
+                    const isChecked = asignadas.includes(l.id) ? 'checked' : '';
+                    container.innerHTML += `
+                        <label class="flex items-center gap-3 p-2 hover:bg-white border-b border-slate-100 cursor-pointer text-sm transition">
+                            <input type="checkbox" value="${l.id}" class="assign-cb w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary" ${isChecked}>
+                            <div class="flex items-center gap-2">
+                                <span>${l.icono || '📋'}</span>
+                                <div class="w-3 h-3 rounded-full" style="background-color: ${l.color}"></div>
+                                <span class="font-medium text-slate-700">${l.nombre}</span>
+                            </div>
+                        </label>
+                    `;
+                });
+            }
+            document.getElementById('assign-lists-modal').classList.remove('hidden');
+        };
+
+        window.closeAssignListsModal = () => {
+            document.getElementById('assign-lists-modal').classList.add('hidden');
+            assignUserId = null;
+        };
+
+        document.getElementById('assign-lists-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cbs = document.querySelectorAll('.assign-cb');
+            const selected = Array.from(cbs).filter(cb => cb.checked).map(cb => cb.value);
+            
+            await db.collection("usuarios").doc(assignUserId).update({ listasAsignadas: selected });
+            closeAssignListsModal();
+            alert("Accesos actualizados exitosamente.");
+        });
+
         /* =========================================
            4. LÓGICA DE AUTENTICACIÓN
         ========================================= */
         auth.onAuthStateChanged(async (user) => {
             if (user) {
+                if (userUnsubscribe) userUnsubscribe();
                 const userRef = db.collection("usuarios").doc(user.uid);
-                let doc = await userRef.get();
-
+                
+                // Forzar creacion admin si es el primer ingreso del correo maestro
+                let initDoc = await userRef.get();
                 if (user.email === "supervision.rescate@gmail.com") {
-                    if (!doc.exists) {
-                        await userRef.set({
-                            nombre: "Administrador Principal", email: user.email,
-                            rol: 'admin', estado: 'aprobado',
-                            fechaSolicitud: new Date().toLocaleString('es-PE'),
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    } else if (doc.data().rol !== 'admin' || doc.data().estado !== 'aprobado') {
-                        await userRef.update({ rol: 'admin', estado: 'aprobado' });
+                    if (!initDoc.exists || initDoc.data().rol !== 'admin' || initDoc.data().estado !== 'aprobado') {
+                        await userRef.set({ nombre: "Administrador Principal", email: user.email, rol: 'admin', estado: 'aprobado', fechaSolicitud: new Date().toLocaleString('es-PE'), timestamp: firebase.firestore.FieldValue.serverTimestamp() }, {merge: true});
                     }
-                    doc = await userRef.get();
                 }
 
-                if (doc.exists) {
-                    currentUserData = { id: user.uid, ...doc.data() };
-                    if (currentUserData.estado !== 'aprobado') {
-                        alert("Cuenta denegada o inactiva."); auth.signOut(); return;
-                    }
+                userUnsubscribe = userRef.onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.estado !== 'aprobado') {
+                            alert("Cuenta denegada o inactiva."); auth.signOut(); return;
+                        }
 
-                    document.getElementById('auth-screen').classList.add('hidden-view');
-                    document.getElementById('app-screen').classList.remove('hidden-view');
-                    
-                    document.getElementById('user-display-name').innerText = currentUserData.nombre;
-                    document.getElementById('user-role-badge').innerText = currentUserData.rol;
-                    document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
-                    document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
-                    
-                    applyRolePermissions(currentUserData.rol);
-                    loadListsAndTasks();
-                    if(currentUserData.rol === 'admin') loadUsers();
-                    startPresenceSystem();
-                    switchTab('tasks'); 
-                } else {
-                    alert("Acceso no autorizado."); auth.signOut();
-                }
+                        const isFirstLoad = !currentUserData;
+                        currentUserData = { id: user.uid, ...data };
+
+                        document.getElementById('user-display-name').innerText = currentUserData.nombre;
+                        document.getElementById('user-role-badge').innerText = currentUserData.rol;
+                        document.getElementById('user-display-name-mobile').innerText = currentUserData.nombre;
+                        document.getElementById('user-role-badge-mobile').innerText = currentUserData.rol;
+                        
+                        applyRolePermissions(currentUserData.rol);
+                        
+                        if (isFirstLoad) {
+                            document.getElementById('auth-screen').classList.add('hidden-view');
+                            document.getElementById('app-screen').classList.remove('hidden-view');
+                            loadDataListeners();
+                            if(currentUserData.rol === 'admin') loadUsers();
+                            startPresenceSystem();
+                            switchTab('tasks'); 
+                        } else {
+                            processData(); // Si cambian permisos en vivo, repinta
+                        }
+                    } else {
+                        alert("Acceso no autorizado."); auth.signOut();
+                    }
+                });
+
             } else {
+                if (userUnsubscribe) { userUnsubscribe(); userUnsubscribe = null; }
+                if (listsUnsubscribe) { listsUnsubscribe(); listsUnsubscribe = null; }
+                if (tasksUnsubscribe) { tasksUnsubscribe(); tasksUnsubscribe = null; }
+                
                 document.getElementById('auth-screen').classList.remove('hidden-view');
                 document.getElementById('app-screen').classList.add('hidden-view');
                 stopPresenceSystem();
+                currentUserData = null;
             }
         });
 
@@ -877,59 +998,96 @@
         document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
 
         /* =========================================
-           5. GESTIÓN DE LISTAS Y TAREAS
+           5. GESTIÓN DE DATOS (LISTAS Y TAREAS)
         ========================================= */
-        function loadListsAndTasks() {
-            db.collection("listas").orderBy("creadoEn", "asc").onSnapshot(async snapshot => {
-                activeListsData = [];
-                deletedListsData = [];
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if(data.eliminado) deletedListsData.push({ id: doc.id, ...data });
-                    else activeListsData.push({ id: doc.id, ...data });
-                });
+        function loadDataListeners() {
+            if (listsUnsubscribe) listsUnsubscribe();
+            if (tasksUnsubscribe) tasksUnsubscribe();
 
-                if (activeListsData.length === 0 && deletedListsData.length === 0 && currentUserData.rol === 'admin') {
-                    const newListRef = await db.collection("listas").add({
-                        nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a', icono: '📋',
-                        creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema'
-                    });
-                    activeListsData.push({ id: newListRef.id, nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a', icono: '📋' });
-                    
-                    const tSnap = await db.collection("tareas").get();
-                    tSnap.forEach(d => { db.collection("tareas").doc(d.id).update({ listaId: newListRef.id }); });
-                }
-
-                if (!currentListId || !activeListsData.find(l => l.id === currentListId)) {
-                    currentListId = activeListsData.length > 0 ? activeListsData[0].id : null;
-                }
-
-                renderSidebarLists();
-                if (currentUserData.rol === 'admin') renderRestoreTables();
-                renderLists(); 
+            listsUnsubscribe = db.collection("listas").orderBy("creadoEn", "asc").onSnapshot(snapshot => {
+                rawListsData = [];
+                snapshot.forEach(doc => rawListsData.push({ id: doc.id, ...doc.data() }));
+                checkMigrationAndProcess();
             });
 
-            db.collection("tareas").onSnapshot(snapshot => {
-                allTasksData = [];
-                deletedTasksData = [];
-                
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if(data.eliminado) deletedTasksData.push({ id: doc.id, ...data });
-                    else allTasksData.push({ id: doc.id, ...data });
-                });
-
-                updateCreatorDropdown();
-                if (currentUserData.rol === 'admin') renderRestoreTables();
-                renderLists();
+            tasksUnsubscribe = db.collection("tareas").onSnapshot(snapshot => {
+                rawTasksData = [];
+                snapshot.forEach(doc => rawTasksData.push({ id: doc.id, ...doc.data() }));
+                processData();
             });
+        }
+
+        let migrationRun = false;
+        async function checkMigrationAndProcess() {
+            if (currentUserData.rol === 'admin' && rawListsData.length === 0 && !migrationRun) {
+                migrationRun = true;
+                const newListRef = await db.collection("listas").add({
+                    nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a', icono: '📋', eliminado: false,
+                    creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema'
+                });
+                
+                // Migrar tareas huérfanas
+                const tSnap = await db.collection("tareas").get();
+                const batch = db.batch();
+                tSnap.forEach(d => { batch.update(d.ref, { listaId: newListRef.id }); });
+                await batch.commit();
+            } else {
+                processData();
+            }
+        }
+
+        function processData() {
+            if (!currentUserData) return;
+
+            activeListsData = [];
+            deletedListsData = [];
+
+            // 1. Filtrar Listas según Permisos (Rol o asignación)
+            rawListsData.forEach(l => {
+                let hasAccess = false;
+                if (currentUserData.rol === 'admin') hasAccess = true;
+                else if (currentUserData.listasAsignadas && currentUserData.listasAsignadas.includes(l.id)) hasAccess = true;
+
+                if (hasAccess) {
+                    if (l.eliminado) deletedListsData.push(l);
+                    else activeListsData.push(l);
+                }
+            });
+
+            // 2. Filtrar Tareas según Listas permitidas
+            allTasksData = [];
+            deletedTasksData = [];
+
+            rawTasksData.forEach(t => {
+                let hasAccess = false;
+                if (currentUserData.rol === 'admin') hasAccess = true;
+                else if (currentUserData.listasAsignadas && currentUserData.listasAsignadas.includes(t.listaId)) hasAccess = true;
+
+                if (hasAccess) {
+                    if (t.eliminado) deletedTasksData.push(t);
+                    else allTasksData.push(t);
+                }
+            });
+
+            // Asegurar un currentList válido
+            if (!currentListId || !activeListsData.find(l => l.id === currentListId)) {
+                currentListId = activeListsData.length > 0 ? activeListsData[0].id : null;
+            }
+
+            renderSidebarLists();
+            if (currentUserData.rol === 'admin') renderRestoreTables();
+            updateCreatorDropdown();
+            renderLists();
         }
 
         function renderSidebarLists() {
             const container = document.getElementById('sidebar-lists');
             container.innerHTML = '';
             
+            if (activeListsData.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 p-3 italic">No tienes listas asignadas.</p>';
+            }
+
             activeListsData.forEach(l => {
                 const active = currentListId === l.id ? 'bg-blue-100 text-primary font-bold shadow-sm border-l-4 border-primary' : 'text-slate-600 hover:bg-slate-200/50 border-l-4 border-transparent';
                 const actionBtns = (currentUserData.rol === 'admin' || currentUserData.rol === 'editor') ? 
@@ -965,6 +1123,8 @@
             if (currentListId) {
                 const found = activeListsData.find(x => x.id === currentListId);
                 if (found) listName = `${found.icono || '📋'} ${found.nombre}`;
+            } else if (activeListsData.length === 0) {
+                listName = 'Sin listas asignadas';
             }
             document.getElementById('lbl-current-list-tasks').innerText = `Lista Actual: ${listName}`;
             document.getElementById('lbl-current-list-matrix').innerText = `Lista: ${listName}`;
@@ -979,11 +1139,18 @@
             if (currentEditListId) {
                 await db.collection("listas").doc(currentEditListId).update({ nombre: name, color: color, icono: icon });
             } else {
-                await db.collection("listas").add({
+                const newListRef = await db.collection("listas").add({
                     nombre: name, color: color, icono: icon, eliminado: false,
                     creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                     creador: currentUserData.nombre
                 });
+                
+                // Si lo crea un Editor, asignarselo automaticamente
+                if (currentUserData.rol !== 'admin') {
+                    const asigArr = currentUserData.listasAsignadas || [];
+                    asigArr.push(newListRef.id);
+                    await db.collection("usuarios").doc(currentUserData.id).update({ listasAsignadas: asigArr });
+                }
             }
             closeListModal();
         });
@@ -995,7 +1162,7 @@
         };
 
         /* =========================================
-           6. GESTIÓN DE TAREAS Y FILTROS GLOBALES
+           6. GESTIÓN DE TAREAS Y FILTROS ESTRICTOS
         ========================================= */
         function getCritColor(crit) {
             if(crit === 'ALTA') return 'text-rose-600 bg-rose-50 border-rose-200';
@@ -1021,23 +1188,18 @@
             const fCrit = document.getElementById('f-crit').value;
             const fCat = document.getElementById('f-cat').value;
 
-            const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
-            
             const today = new Date();
             const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 
-                if (!isFiltering && !filterOverdueActive) {
-                    if (t.listaId !== currentListId) match = false;
-                }
+                // REGLA: Filtros y Buscador SIEMPRE respetan la lista actual seleccionada
+                if (t.listaId !== currentListId) match = false;
 
                 if (filterOverdueActive) {
                     const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
                     if (!isOverdue) match = false;
-                    
-                    if (!isFiltering && t.listaId !== currentListId) match = false;
                 }
 
                 if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
@@ -1045,6 +1207,7 @@
                 if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
                 if(fCrit && t.criticidad !== fCrit) match = false;
                 if(fCat && t.categoria !== fCat) match = false;
+                
                 return match;
             });
 
@@ -1082,10 +1245,6 @@
                 const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
                 if (isOverdue) overdueCount++;
                 
-                const pList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
-                const listNameUI = pList ? `${pList.icono || '📋'} ${pList.nombre}` : 'Lista Desconocida';
-                const listBadge = isFiltering || filterOverdueActive ? `<span class="text-[9px] bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded truncate max-w-[150px] font-bold shadow-sm" title="${listNameUI}">${listNameUI}</span>` : '';
-
                 const disableCheck = currentUserData.rol === 'lector' ? 'disabled' : '';
                 const dragAttr = (currentUserData.rol !== 'lector' && !t.completado) ? 'draggable="true" ondragstart="drag(event)"' : '';
                 
@@ -1104,17 +1263,20 @@
                     dateBadgeMatrix = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStr}</span>`;
                 }
 
+                // Render de comentario de cierre si existe
+                const commentHTML = t.comentarioCierre ? `<div class="text-[10px] text-emerald-700 bg-emerald-50 p-2 mt-2 rounded border border-emerald-100 flex items-start gap-1.5"><i class="fa-solid fa-comment-dots mt-0.5"></i> <span class="leading-tight">${t.comentarioCierre}</span></div>` : '';
+
                 const htmlList = `
                     <li class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-b hover:bg-blue-50/50 transition group rounded-lg gap-2 w-full min-w-0 ${listItemBg}">
                         <div class="flex items-start gap-2.5 w-full sm:w-2/3 min-w-0">
-                            <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
+                            <input type="checkbox" ${isChecked} ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked, this)" class="w-4 h-4 mt-0.5 text-primary border-slate-300 rounded cursor-pointer shrink-0 transition">
                             <div class="flex flex-col w-full min-w-0">
                                 <span class="${txtClass} break-words leading-tight text-sm">${t.texto}</span>
                                 <div class="text-[10px] text-slate-400 flex flex-wrap gap-1.5 mt-1 items-center">
                                     <span>Gen: ${dateStr}</span> <span class="hidden sm:inline text-slate-300">|</span> 
                                     ${dateBadgeList}
-                                    ${listBadge ? `<span class="hidden sm:inline text-slate-300">|</span> ${listBadge}` : ''}
                                 </div>
+                                ${commentHTML}
                             </div>
                         </div>
                         <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 pt-2 sm:pt-0 shrink-0 border-t sm:border-t-0 border-slate-100 mt-1 sm:mt-0">
@@ -1165,16 +1327,13 @@
                                 ${numberBadge}
                                 <div class="font-medium text-slate-800 text-[13px] leading-snug break-words flex-1 min-w-0 pt-[1px]">${t.texto}</div>
                             </div>
-                            ${listBadge ? `<div class="mb-1.5 ml-6">${listBadge}</div>` : ''}
                             <div class="text-[10px] text-slate-500 mb-1.5 ${c!=='bandeja'?'ml-6':'ml-0'}">${dateBadgeMatrix}</div>
                             <div class="flex justify-between items-center mt-2 border-t border-slate-100 pt-2 ${c!=='bandeja'?'ml-6':'ml-0'}">
                                 <span class="text-[9px] border px-1.5 py-0.5 rounded font-bold ${critClass}">${t.criticidad}</span>
                                 <span class="text-[9px] text-slate-400 truncate w-14 text-right">${t.creador.split(' ')[0]}</span>
                             </div>
                             ${editBtnMatrix}
-                            <button ${disableCheck} onclick="toggleTaskStatus('${t.id}', true)" class="absolute top-2 right-2 text-slate-300 hover:text-emerald-500 transition-colors" title="Marcar Realizado">
-                                <i class="fa-solid fa-circle-check text-lg"></i>
-                            </button>
+                            <input type="checkbox" ${disableCheck} onchange="toggleTaskStatus('${t.id}', this.checked, this)" class="absolute top-2 right-2 w-4 h-4 text-emerald-500 border-slate-300 rounded cursor-pointer transition" title="Marcar Realizado">
                         </div>
                     `;
 
@@ -1260,7 +1419,17 @@
             closeEditModal();
         });
 
-        window.toggleTaskStatus = async (id, status) => { await db.collection("tareas").doc(id).update({ completado: status }); };
+        window.toggleTaskStatus = async (id, status, checkboxEl) => { 
+            if (status) {
+                checkboxEl.checked = false; // Detener visual temporalmente
+                pendingCompletionTaskId = id;
+                pendingCompletionCheckbox = checkboxEl;
+                document.getElementById('task-completion-comment').value = '';
+                document.getElementById('comment-modal').classList.remove('hidden');
+            } else {
+                await db.collection("tareas").doc(id).update({ completado: false, comentarioCierre: firebase.firestore.FieldValue.delete() }); 
+            }
+        };
 
         window.deleteTask = async (id) => {
             if(confirm("¿Mover tarea a la papelera? Podrá ser restaurada.")) {
@@ -1354,6 +1523,12 @@
                     const u = { id: doc.id, ...doc.data() };
                     const statusColor = u.estado === 'aprobado' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
                     
+                    const assignListBtn = (u.rol !== 'admin') ? `
+                        <button onclick="openAssignListsModal('${u.id}', '${u.nombre}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded shadow-sm transition mt-1 flex items-center justify-center gap-1 w-full text-[10px] font-bold" title="Asignar Listas">
+                            <i class="fa-solid fa-list-check"></i> Accesos
+                        </button>
+                    ` : '<span class="text-[9px] text-slate-400 italic">Acceso Total</span>';
+
                     usersList.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
                             <td class="p-3 sm:p-4 whitespace-nowrap">
@@ -1374,7 +1549,10 @@
                                     </select>
                                 </div>
                             </td>
-                            <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+                            <td class="p-3 sm:p-4 text-center whitespace-nowrap align-middle">
+                                ${assignListBtn}
+                            </td>
+                            <td class="p-3 sm:p-4 text-center whitespace-nowrap align-middle">
                                 <button onclick="deleteUserRecord('${u.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 p-2 rounded-full shadow-sm transition" title="Eliminar Registro">
                                     <i class="fa-solid fa-user-xmark"></i>
                                 </button>
@@ -1415,6 +1593,7 @@
                 await db.collection("usuarios").doc(userCred.user.uid).set({
                     nombre: name, email: email, rol: rol, estado: 'aprobado',
                     fechaSolicitud: new Date().toLocaleString('es-PE'),
+                    listasAsignadas: [],
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -1452,40 +1631,33 @@
             const fDate = document.getElementById('f-fecha').value;
             const fCrit = document.getElementById('f-crit').value;
             const fCat = document.getElementById('f-cat').value;
+            
             const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
-
             const today = new Date();
             const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
-            let sourceData = allTasksData;
+            let sourceData = allTasksData.filter(t => t.listaId === currentListId);
 
-            if (mode === 'filtered' || filterOverdueActive || isFiltering) {
+            if (mode === 'filtered') {
                 sourceData = sourceData.filter(t => {
                     let match = true;
-                    if (!isFiltering && !filterOverdueActive && t.listaId !== currentListId) match = false; 
-                    
                     if (filterOverdueActive) {
                         const isOverdue = !t.completado && t.fechaLimite && t.fechaLimite < todayStr;
                         if (!isOverdue) match = false;
-                        if (!isFiltering && t.listaId !== currentListId) match = false;
                     }
-
-                    if (isFiltering) { 
-                        if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
-                        if(fCreator && t.creador !== fCreator) match = false;
-                        if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
-                        if(fCrit && t.criticidad !== fCrit) match = false;
-                        if(fCat && t.categoria !== fCat) match = false;
-                    }
+                    if(searchText && !t.texto.toLowerCase().includes(searchText)) match = false;
+                    if(fCreator && t.creador !== fCreator) match = false;
+                    if(fDate) { if(!t.fechaLimite || t.fechaLimite > fDate) match = false; }
+                    if(fCrit && t.criticidad !== fCrit) match = false;
+                    if(fCat && t.categoria !== fCat) match = false;
                     return match;
                 });
-            } else {
-                // If 'all' mode and no filters applied, only export current list tasks
-                sourceData = sourceData.filter(t => t.listaId === currentListId);
+            } else if (filterOverdueActive && mode === 'all') { // Si se quiere exportar TODO pero el filtro vencidas está visualmente encendido, lo ignoramos para 'all' o lo respetamos? Generalmente 'Exportar Todo' ignora los filtros locales.
+                // Ignorar filtros en modo 'all'
             }
 
             const dataToExport = sourceData.map(t => {
-                const pList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
+                const pList = activeListsData.find(l => l.id === t.listaId);
                 return {
                     Pendiente: t.texto,
                     Lista: pList ? pList.nombre : 'Desconocida',
@@ -1494,6 +1666,7 @@
                     Criticidad: t.criticidad || '-',
                     Categoria: t.categoria,
                     Estado: t.completado ? 'Realizado' : 'Activo',
+                    Comentario_Cierre: t.comentarioCierre || '-',
                     Creador: t.creador,
                     Cuadrante_Matriz: (t.cuadrante || 'Bandeja').toUpperCase()
                 }
@@ -1502,8 +1675,8 @@
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new();
             
-            let listName = 'Global';
-            if (!isFiltering && currentListId) {
+            let listName = 'Desconocida';
+            if (currentListId) {
                 const found = activeListsData.find(x => x.id === currentListId);
                 if (found) listName = found.nombre;
             }
