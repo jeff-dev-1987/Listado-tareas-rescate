@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Tareas - Servicio de Emergencias MCP</title>
+    <title>Gestión de Tareas - MCP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -166,7 +166,7 @@
                     <i class="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
                 <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-tight">Gestión de tareas<br>y pendientes</h2>
-                <p class="text-[10px] sm:text-[11px] text-primary font-bold tracking-widest mt-2 bg-blue-50 py-1 rounded uppercase">SERVICIO DE EMERGENCIAS MCP</p>
+                <p class="text-[9px] sm:text-[10px] text-primary font-bold tracking-widest mt-2 bg-blue-50 py-1.5 px-2 rounded uppercase text-center leading-tight">PROTECCIÓN EMPRESARIAL, SERVICIO DE EMERGENCIAS Y RESCATE MCP</p>
             </div>
 
             <form id="login-form" class="space-y-4">
@@ -200,9 +200,9 @@
                 <div class="bg-white text-primary w-9 h-9 rounded-full items-center justify-center hidden sm:flex shadow shrink-0">
                     <i class="fa-solid fa-list-check"></i>
                 </div>
-                <div class="flex flex-col min-w-0">
+                <div class="flex flex-col min-w-0 w-full sm:w-auto">
                     <span class="text-base sm:text-lg font-bold tracking-wide truncate leading-tight">Gestión de tareas y pendientes</span>
-                    <span class="text-[9px] sm:text-[10px] font-medium text-blue-200 tracking-widest uppercase mt-0.5">SERVICIO DE EMERGENCIAS MCP</span>
+                    <span class="text-[8px] sm:text-[9px] font-medium text-blue-200 tracking-widest uppercase mt-0.5 leading-tight truncate">PROTECCIÓN EMPRESARIAL, SERVICIO DE EMERGENCIAS Y RESCATE MCP</span>
                 </div>
             </div>
             <div class="flex items-center gap-2 sm:gap-4 shrink-0 pl-2">
@@ -254,7 +254,7 @@
 
                     <div class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 border-t border-slate-100">
                         <div class="px-4 py-3 flex justify-between items-center bg-slate-100/50 sticky top-0 z-10 backdrop-blur-sm">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas Asignadas</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas</span>
                             <button id="btn-add-list" onclick="openListModal()" class="text-slate-400 hover:text-primary transition hidden-view p-1 shrink-0" title="Nueva Lista">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -463,19 +463,41 @@
                 </div>
 
                 <div id="view-audit" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Modificaciones)</span></h2>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-2 border-b border-slate-200 pb-4">
+                        <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Modificaciones y Eliminados)</span></h2>
                     </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase tracking-wide mb-1">Filtrar por Lista</label>
+                                <select id="f-audit-list" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none text-xs" onchange="renderAuditLogs()">
+                                    <option value="">Todas las listas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase tracking-wide mb-1">Desde Fecha</label>
+                                <input type="date" id="f-audit-date-start" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none text-xs" onchange="renderAuditLogs()">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-500 font-bold uppercase tracking-wide mb-1">Hasta Fecha</label>
+                                <input type="date" id="f-audit-date-end" class="w-full p-2 border border-slate-300 rounded focus:border-primary outline-none text-xs" onchange="renderAuditLogs()">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse min-w-[700px]">
+                            <table class="w-full text-left border-collapse min-w-[800px]">
                                 <thead>
                                     <tr class="bg-slate-100 text-slate-600 uppercase text-[10px] tracking-wider border-b border-slate-200">
                                         <th class="p-3 sm:p-4 font-bold w-20">Acción</th>
+                                        <th class="p-3 sm:p-4 font-bold">Lista Afectada</th>
                                         <th class="p-3 sm:p-4 font-bold">Detalle del Registro</th>
                                         <th class="p-3 sm:p-4 font-bold">Autor Orig.</th>
-                                        <th class="p-3 sm:p-4 font-bold text-primary">Modificado Por</th>
-                                        <th class="p-3 sm:p-4 font-bold">Fecha</th>
+                                        <th class="p-3 sm:p-4 font-bold text-primary">Acción Por</th>
+                                        <th class="p-3 sm:p-4 font-bold">Fecha / Hora</th>
                                     </tr>
                                 </thead>
                                 <tbody id="audit-list" class="text-sm divide-y divide-slate-100"></tbody>
@@ -562,7 +584,7 @@
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
                         <div class="overflow-x-auto w-full">
-                            <table class="w-full text-left border-collapse min-w-[700px]">
+                            <table class="w-full text-left border-collapse min-w-[800px]">
                                 <thead>
                                     <tr class="bg-slate-800 text-white uppercase text-[10px] tracking-wider">
                                         <th class="p-4 font-bold">Nombre / Correo</th>
@@ -614,10 +636,11 @@
         let allTasksData = [];
         let deletedTasksData = []; 
 
-        let rawListsData = []; // Todas las listas en base de datos
-        let rawTasksData = []; // Todas las tareas
-        let activeListsData = []; // Listas que el usuario PUEDE ver
-        let deletedListsData = []; // Listas eliminadas (admin)
+        let rawListsData = []; 
+        let rawTasksData = []; 
+        let activeListsData = []; 
+        let deletedListsData = []; 
+        let allAuditLogsData = []; // Para filtros
 
         let currentListId = null;
         let currentEditListId = null;
@@ -759,7 +782,7 @@
                 tabAudit.classList.add('hidden-view');
                 tabRestore.classList.add('hidden-view');
                 adminDivider.classList.add('hidden-view');
-                btnAddList.classList.remove('hidden-view'); // Editores pueden crear listas (se les asigna auto)
+                btnAddList.classList.remove('hidden-view');
             } else if (role === 'admin') {
                 taskForm.classList.remove('hidden-view');
                 tabUsers.classList.remove('hidden-view');
@@ -858,7 +881,7 @@
         window.closeCommentModal = () => {
             document.getElementById('comment-modal').classList.add('hidden');
             pendingCompletionTaskId = null;
-            if(pendingCompletionCheckbox) pendingCompletionCheckbox.checked = false; // Revertir visualmente
+            if(pendingCompletionCheckbox) pendingCompletionCheckbox.checked = false; 
             pendingCompletionCheckbox = null;
         };
 
@@ -870,7 +893,6 @@
             
             await db.collection("tareas").doc(pendingCompletionTaskId).update(updateData);
             
-            // Ya no revertimos, se actualiza via firebase snapshot
             document.getElementById('comment-modal').classList.add('hidden');
             pendingCompletionTaskId = null;
             pendingCompletionCheckbox = null;
@@ -931,7 +953,6 @@
                 if (userUnsubscribe) userUnsubscribe();
                 const userRef = db.collection("usuarios").doc(user.uid);
                 
-                // Forzar creacion admin si es el primer ingreso del correo maestro
                 let initDoc = await userRef.get();
                 if (user.email === "supervision.rescate@gmail.com") {
                     if (!initDoc.exists || initDoc.data().rol !== 'admin' || initDoc.data().estado !== 'aprobado') {
@@ -964,7 +985,7 @@
                             startPresenceSystem();
                             switchTab('tasks'); 
                         } else {
-                            processData(); // Si cambian permisos en vivo, repinta
+                            processData();
                         }
                     } else {
                         alert("Acceso no autorizado."); auth.signOut();
@@ -1026,7 +1047,6 @@
                     creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema'
                 });
                 
-                // Migrar tareas huérfanas
                 const tSnap = await db.collection("tareas").get();
                 const batch = db.batch();
                 tSnap.forEach(d => { batch.update(d.ref, { listaId: newListRef.id }); });
@@ -1042,7 +1062,6 @@
             activeListsData = [];
             deletedListsData = [];
 
-            // 1. Filtrar Listas según Permisos (Rol o asignación)
             rawListsData.forEach(l => {
                 let hasAccess = false;
                 if (currentUserData.rol === 'admin') hasAccess = true;
@@ -1054,7 +1073,6 @@
                 }
             });
 
-            // 2. Filtrar Tareas según Listas permitidas
             allTasksData = [];
             deletedTasksData = [];
 
@@ -1069,7 +1087,6 @@
                 }
             });
 
-            // Asegurar un currentList válido
             if (!currentListId || !activeListsData.find(l => l.id === currentListId)) {
                 currentListId = activeListsData.length > 0 ? activeListsData[0].id : null;
             }
@@ -1145,7 +1162,6 @@
                     creador: currentUserData.nombre
                 });
                 
-                // Si lo crea un Editor, asignarselo automaticamente
                 if (currentUserData.rol !== 'admin') {
                     const asigArr = currentUserData.listasAsignadas || [];
                     asigArr.push(newListRef.id);
@@ -1158,6 +1174,14 @@
         window.deleteList = async (id) => {
             if(confirm("¿Mover esta lista a la Papelera? Podrá ser restaurada por un administrador.")) {
                 await db.collection("listas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
+                
+                // Mover a papelera las tareas contenidas (lógico)
+                const tasksInList = allTasksData.filter(t => t.listaId === id);
+                const batch = db.batch();
+                tasksInList.forEach(t => {
+                    batch.update(db.collection("tareas").doc(t.id), { eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
+                });
+                await batch.commit();
             }
         };
 
@@ -1194,7 +1218,6 @@
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 
-                // REGLA: Filtros y Buscador SIEMPRE respetan la lista actual seleccionada
                 if (t.listaId !== currentListId) match = false;
 
                 if (filterOverdueActive) {
@@ -1263,7 +1286,6 @@
                     dateBadgeMatrix = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStr}</span>`;
                 }
 
-                // Render de comentario de cierre si existe
                 const commentHTML = t.comentarioCierre ? `<div class="text-[10px] text-emerald-700 bg-emerald-50 p-2 mt-2 rounded border border-emerald-100 flex items-start gap-1.5"><i class="fa-solid fa-comment-dots mt-0.5"></i> <span class="leading-tight">${t.comentarioCierre}</span></div>` : '';
 
                 const htmlList = `
@@ -1405,9 +1427,14 @@
             const nCat = document.getElementById('edit-task-category').value;
 
             if (t.texto !== nText || t.listaId !== nList || t.fechaLimite !== nDate || t.criticidad !== nCrit || t.categoria !== nCat) {
+                
+                const pList = rawListsData.find(l => l.id === t.listaId);
+                const lName = pList ? pList.nombre : 'Desconocida';
+
                 await db.collection("log_eliminados").add({
                     tipo: 'Edición',
                     textoOriginal: t.texto, textoNuevo: nText,
+                    listaNombre: lName, listaId: t.listaId,
                     creadoOriginalmentePor: t.creador, accionPor: currentUserData.nombre,
                     fechaAccion: new Date().toLocaleString('es-PE'), timestamp: Date.now()
                 });
@@ -1421,7 +1448,7 @@
 
         window.toggleTaskStatus = async (id, status, checkboxEl) => { 
             if (status) {
-                checkboxEl.checked = false; // Detener visual temporalmente
+                checkboxEl.checked = false; 
                 pendingCompletionTaskId = id;
                 pendingCompletionCheckbox = checkboxEl;
                 document.getElementById('task-completion-comment').value = '';
@@ -1433,6 +1460,20 @@
 
         window.deleteTask = async (id) => {
             if(confirm("¿Mover tarea a la papelera? Podrá ser restaurada.")) {
+                
+                const task = allTasksData.find(t => t.id === id);
+                if(task) {
+                    const pList = rawListsData.find(l => l.id === task.listaId);
+                    const lName = pList ? pList.nombre : 'Desconocida';
+                    
+                    await db.collection("log_eliminados").add({
+                        tipo: 'Eliminación',
+                        textoOriginal: task.texto,
+                        listaNombre: lName, listaId: task.listaId,
+                        creadoOriginalmentePor: task.creador, accionPor: currentUserData.nombre,
+                        fechaAccion: new Date().toLocaleString('es-PE'), timestamp: Date.now()
+                    });
+                }
                 await db.collection("tareas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
             }
         };
@@ -1469,7 +1510,7 @@
 
             tbodyTareas.innerHTML = '';
             deletedTasksData.forEach(t => {
-                const oldList = activeListsData.find(l => l.id === t.listaId) || deletedListsData.find(l => l.id === t.listaId);
+                const oldList = rawListsData.find(l => l.id === t.listaId);
                 const lName = oldList ? `${oldList.icono || '📋'} ${oldList.nombre}` : '-';
                 tbodyTareas.innerHTML += `
                     <tr class="hover:bg-slate-50 transition border-b border-slate-100">
@@ -1484,31 +1525,92 @@
             });
         }
 
-        window.restoreList = async (id) => { await db.collection("listas").doc(id).update({ eliminado: false }); };
-        window.restoreTask = async (id) => { await db.collection("tareas").doc(id).update({ eliminado: false }); };
+        window.restoreList = async (id) => { 
+            await db.collection("listas").doc(id).update({ eliminado: false }); 
+            // Restaurar tareas que pertenecen a esa lista automáticamente
+            const tasksInList = rawTasksData.filter(t => t.listaId === id && t.eliminado);
+            const batch = db.batch();
+            tasksInList.forEach(t => {
+                batch.update(db.collection("tareas").doc(t.id), { eliminado: false });
+            });
+            if(tasksInList.length > 0) await batch.commit();
+        };
+
+        window.restoreTask = async (id) => { 
+            // Validar si la lista de esta tarea no está en la papelera
+            const t = rawTasksData.find(x => x.id === id);
+            if (t) {
+                const pList = rawListsData.find(l => l.id === t.listaId);
+                if (pList && pList.eliminado) {
+                    alert("La lista original de esta tarea está en la papelera. Restaura la lista primero.");
+                    return;
+                }
+            }
+            await db.collection("tareas").doc(id).update({ eliminado: false }); 
+        };
 
         /* =========================================
-           8. AUDITORÍA (REGISTRO EDICIÓN)
+           8. AUDITORÍA (REGISTRO EDICIÓN/ELIMINADOS)
         ========================================= */
+        window.renderAuditLogs = () => {
+            const fList = document.getElementById('f-audit-list').value;
+            const fStart = document.getElementById('f-audit-date-start').value;
+            const fEnd = document.getElementById('f-audit-date-end').value;
+
+            let startTs = fStart ? new Date(fStart + 'T00:00:00').getTime() : 0;
+            let endTs = fEnd ? new Date(fEnd + 'T23:59:59').getTime() : Infinity;
+
+            let filtered = allAuditLogsData.filter(l => {
+                let match = true;
+                let lName = l.listaNombre || 'Desconocida';
+                if (fList && lName !== fList) match = false;
+                if (l.timestamp < startTs || l.timestamp > endTs) match = false;
+                return match;
+            });
+
+            const tbody = document.getElementById('audit-list');
+            tbody.innerHTML = '';
+            
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500 text-sm">No hay registros que coincidan con los filtros.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(l => {
+                const actionBadge = l.tipo === 'Edición' ? '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Editado</span>' : '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Eliminado</span>';
+                const detailStr = l.tipo === 'Edición'
+                    ? `<div class="text-[11px] leading-relaxed"><div class="line-through text-slate-400 mb-1">${l.textoOriginal}</div><div class="text-primary font-medium border-l-2 border-primary pl-2">${l.textoNuevo}</div></div>`
+                    : `<div class="text-[11px] text-slate-600 leading-tight">${l.textoOriginal}</div>`;
+                const lName = l.listaNombre || 'Desconocida';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-3 sm:p-4 whitespace-nowrap">${actionBadge}</td>
+                        <td class="p-3 sm:p-4 whitespace-nowrap text-[11px] font-bold text-slate-600">${lName}</td>
+                        <td class="p-3 sm:p-4 w-full min-w-[200px] max-w-[300px] break-words">${detailStr}</td>
+                        <td class="p-3 sm:p-4 text-[11px] text-slate-500 whitespace-nowrap">${l.creadoOriginalmentePor || '-'}</td>
+                        <td class="p-3 sm:p-4 text-xs ${l.tipo === 'Edición' ? 'text-primary' : 'text-rose-600'} font-bold whitespace-nowrap">${l.accionPor}</td>
+                        <td class="p-3 sm:p-4 text-[10px] text-slate-500 whitespace-nowrap font-medium">${l.fechaAccion}</td>
+                    </tr>
+                `;
+            });
+        };
+
         function loadAuditLogs() {
             db.collection("log_eliminados").orderBy("timestamp", "desc").onSnapshot(snapshot => {
-                const list = document.getElementById('audit-list');
-                list.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const l = doc.data();
-                    const actionBadge = '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">Editado</span>';
-                    const detailStr = `<div class="text-[11px] leading-relaxed"><div class="line-through text-slate-400 mb-1">${l.textoOriginal}</div><div class="text-primary font-medium border-l-2 border-primary pl-2">${l.textoNuevo}</div></div>`;
-
-                    list.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                            <td class="p-3 sm:p-4 whitespace-nowrap">${actionBadge}</td>
-                            <td class="p-3 sm:p-4 w-full min-w-[200px] max-w-[300px] break-words">${detailStr}</td>
-                            <td class="p-3 sm:p-4 text-[11px] text-slate-500 whitespace-nowrap">${l.creadoOriginalmentePor || '-'}</td>
-                            <td class="p-3 sm:p-4 text-xs text-primary font-bold whitespace-nowrap">${l.accionPor}</td>
-                            <td class="p-3 sm:p-4 text-[10px] text-slate-500 whitespace-nowrap font-medium">${l.fechaAccion}</td>
-                        </tr>
-                    `;
+                allAuditLogsData = [];
+                snapshot.forEach(doc => allAuditLogsData.push({ id: doc.id, ...doc.data() }));
+                
+                const select = document.getElementById('f-audit-list');
+                const currentVal = select.value;
+                const listNames = [...new Set(allAuditLogsData.map(l => l.listaNombre || 'Desconocida'))].sort();
+                let options = '<option value="">Todas las listas</option>';
+                listNames.forEach(name => {
+                    options += `<option value="${name}" ${name === currentVal ? 'selected' : ''}>${name}</option>`;
                 });
+                select.innerHTML = options;
+                
+                renderAuditLogs();
             });
         }
 
@@ -1524,7 +1626,7 @@
                     const statusColor = u.estado === 'aprobado' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200';
                     
                     const assignListBtn = (u.rol !== 'admin') ? `
-                        <button onclick="openAssignListsModal('${u.id}', '${u.nombre}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded shadow-sm transition mt-1 flex items-center justify-center gap-1 w-full text-[10px] font-bold" title="Asignar Listas">
+                        <button onclick="openAssignListsModal('${u.id}', '${u.nombre}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded shadow-sm transition flex items-center justify-center gap-1 w-full text-[10px] font-bold" title="Asignar Listas">
                             <i class="fa-solid fa-list-check"></i> Accesos
                         </button>
                     ` : '<span class="text-[9px] text-slate-400 italic">Acceso Total</span>';
@@ -1632,7 +1734,6 @@
             const fCrit = document.getElementById('f-crit').value;
             const fCat = document.getElementById('f-cat').value;
             
-            const isFiltering = searchText !== '' || fCreator !== '' || fDate !== '' || fCrit !== '' || fCat !== '';
             const today = new Date();
             const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
@@ -1652,8 +1753,6 @@
                     if(fCat && t.categoria !== fCat) match = false;
                     return match;
                 });
-            } else if (filterOverdueActive && mode === 'all') { // Si se quiere exportar TODO pero el filtro vencidas está visualmente encendido, lo ignoramos para 'all' o lo respetamos? Generalmente 'Exportar Todo' ignora los filtros locales.
-                // Ignorar filtros en modo 'all'
             }
 
             const dataToExport = sourceData.map(t => {
