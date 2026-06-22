@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-PE">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -254,7 +254,7 @@
 
                     <div class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 border-t border-slate-100">
                         <div class="px-4 py-3 flex justify-between items-center bg-slate-100/50 sticky top-0 z-10 backdrop-blur-sm">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas Asignadas</span>
                             <button id="btn-add-list" onclick="openListModal()" class="text-slate-400 hover:text-primary transition hidden-view p-1 shrink-0" title="Nueva Lista">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -660,7 +660,7 @@
         const listIcons = ['📋','📁','📂','📊','🏢','🏭','🏥','🚧','🚨','🚒','🚑','🚓','🚁','✈️','🚢','🚗','🚚','🚜','💻','🖨️','📷','📹','📞','💡','🔦','🧯','🛠️','⚙️','🧰','🧲','🪜','🪖','🧤','📦','🔒','🔑'];
 
         /* =========================================
-           3. LÓGICA DE INTERFAZ & SIDEBAR RESIZE
+           3. LÓGICA DE INTERFAZ Y FORMATEO
         ========================================= */
         function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -672,6 +672,33 @@
                 input.type = "password";
                 icon.classList.replace("fa-eye-slash", "fa-eye");
             }
+        }
+
+        /* --- Formateo de Fechas --- */
+        function formatDateToDDMMYYYY(dateString) {
+            if (!dateString) return '';
+            if (dateString.includes('-')) {
+                const parts = dateString.split('-');
+                if(parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return dateString;
+        }
+
+        function formatTimestampToDDMMYYYY(timestampMillis) {
+            if (!timestampMillis) return '';
+            const d = new Date(timestampMillis);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month}/${d.getFullYear()}`;
+        }
+
+        function formatDateTimeToDDMMYYYYHHMM(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
         }
 
         let isSidebarCollapsed = false;
@@ -956,7 +983,7 @@
                 let initDoc = await userRef.get();
                 if (user.email === "supervision.rescate@gmail.com") {
                     if (!initDoc.exists || initDoc.data().rol !== 'admin' || initDoc.data().estado !== 'aprobado') {
-                        await userRef.set({ nombre: "Administrador Principal", email: user.email, rol: 'admin', estado: 'aprobado', fechaSolicitud: new Date().toLocaleString('es-PE'), timestamp: firebase.firestore.FieldValue.serverTimestamp() }, {merge: true});
+                        await userRef.set({ nombre: "Administrador Principal", email: user.email, rol: 'admin', estado: 'aprobado', fechaSolicitud: formatDateTimeToDDMMYYYYHHMM(new Date()), timestamp: firebase.firestore.FieldValue.serverTimestamp() }, {merge: true});
                     }
                 }
 
@@ -1173,13 +1200,12 @@
 
         window.deleteList = async (id) => {
             if(confirm("¿Mover esta lista a la Papelera? Podrá ser restaurada por un administrador.")) {
-                await db.collection("listas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
+                await db.collection("listas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: formatDateTimeToDDMMYYYYHHMM(new Date()) });
                 
-                // Mover a papelera las tareas contenidas (lógico)
                 const tasksInList = allTasksData.filter(t => t.listaId === id);
                 const batch = db.batch();
                 tasksInList.forEach(t => {
-                    batch.update(db.collection("tareas").doc(t.id), { eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
+                    batch.update(db.collection("tareas").doc(t.id), { eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: formatDateTimeToDDMMYYYYHHMM(new Date()) });
                 });
                 await batch.commit();
             }
@@ -1259,8 +1285,8 @@
             let overdueCount = 0;
 
             filtered.forEach(t => {
-                const dateStr = t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE').split(',')[0] : '...';
-                const fLimStr = t.fechaLimite ? t.fechaLimite : 'Sin límite';
+                const dateStr = t.creadoEn ? formatTimestampToDDMMYYYY(t.creadoEn.toMillis()) : '...';
+                const fLimStrUI = t.fechaLimite ? formatDateToDDMMYYYY(t.fechaLimite) : 'Sin límite';
                 const isChecked = t.completado ? 'checked' : '';
                 const txtClass = t.completado ? 'line-through text-slate-400' : 'text-slate-700 font-medium';
                 const critClass = getCritColor(t.criticidad);
@@ -1278,12 +1304,12 @@
                 const listItemBg = isOverdue ? 'bg-rose-50/50 border-rose-200' : 'bg-white border-slate-100';
                 const matrixCardBg = isOverdue ? 'bg-rose-50/50' : 'bg-white';
                 
-                let dateBadgeList = `<span class="font-bold ${t.completado ? 'text-slate-400' : 'text-primary'}">Límite: ${fLimStr}</span>`;
-                let dateBadgeMatrix = `Vence: <strong class="text-slate-700">${fLimStr}</strong>`;
+                let dateBadgeList = `<span class="font-bold ${t.completado ? 'text-slate-400' : 'text-primary'}">Límite: ${fLimStrUI}</span>`;
+                let dateBadgeMatrix = `Vence: <strong class="text-slate-700">${fLimStrUI}</strong>`;
 
                 if (isOverdue) {
-                    dateBadgeList = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStr}</span>`;
-                    dateBadgeMatrix = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStr}</span>`;
+                    dateBadgeList = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStrUI}</span>`;
+                    dateBadgeMatrix = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStrUI}</span>`;
                 }
 
                 const commentHTML = t.comentarioCierre ? `<div class="text-[10px] text-emerald-700 bg-emerald-50 p-2 mt-2 rounded border border-emerald-100 flex items-start gap-1.5"><i class="fa-solid fa-comment-dots mt-0.5"></i> <span class="leading-tight">${t.comentarioCierre}</span></div>` : '';
@@ -1436,7 +1462,7 @@
                     textoOriginal: t.texto, textoNuevo: nText,
                     listaNombre: lName, listaId: t.listaId,
                     creadoOriginalmentePor: t.creador, accionPor: currentUserData.nombre,
-                    fechaAccion: new Date().toLocaleString('es-PE'), timestamp: Date.now()
+                    fechaAccion: formatDateTimeToDDMMYYYYHHMM(new Date()), timestamp: Date.now()
                 });
             }
 
@@ -1471,10 +1497,10 @@
                         textoOriginal: task.texto,
                         listaNombre: lName, listaId: task.listaId,
                         creadoOriginalmentePor: task.creador, accionPor: currentUserData.nombre,
-                        fechaAccion: new Date().toLocaleString('es-PE'), timestamp: Date.now()
+                        fechaAccion: formatDateTimeToDDMMYYYYHHMM(new Date()), timestamp: Date.now()
                     });
                 }
-                await db.collection("tareas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: new Date().toLocaleString('es-PE') });
+                await db.collection("tareas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: formatDateTimeToDDMMYYYYHHMM(new Date()) });
             }
         };
 
@@ -1527,7 +1553,6 @@
 
         window.restoreList = async (id) => { 
             await db.collection("listas").doc(id).update({ eliminado: false }); 
-            // Restaurar tareas que pertenecen a esa lista automáticamente
             const tasksInList = rawTasksData.filter(t => t.listaId === id && t.eliminado);
             const batch = db.batch();
             tasksInList.forEach(t => {
@@ -1537,7 +1562,6 @@
         };
 
         window.restoreTask = async (id) => { 
-            // Validar si la lista de esta tarea no está en la papelera
             const t = rawTasksData.find(x => x.id === id);
             if (t) {
                 const pList = rawListsData.find(l => l.id === t.listaId);
@@ -1557,14 +1581,17 @@
             const fStart = document.getElementById('f-audit-date-start').value;
             const fEnd = document.getElementById('f-audit-date-end').value;
 
+            // Tratamiento de fechas para poder buscar en rango correctamente
             let startTs = fStart ? new Date(fStart + 'T00:00:00').getTime() : 0;
             let endTs = fEnd ? new Date(fEnd + 'T23:59:59').getTime() : Infinity;
 
             let filtered = allAuditLogsData.filter(l => {
                 let match = true;
                 let lName = l.listaNombre || 'Desconocida';
+                
                 if (fList && lName !== fList) match = false;
                 if (l.timestamp < startTs || l.timestamp > endTs) match = false;
+                
                 return match;
             });
 
@@ -1694,7 +1721,7 @@
                 
                 await db.collection("usuarios").doc(userCred.user.uid).set({
                     nombre: name, email: email, rol: rol, estado: 'aprobado',
-                    fechaSolicitud: new Date().toLocaleString('es-PE'),
+                    fechaSolicitud: formatDateTimeToDDMMYYYYHHMM(new Date()),
                     listasAsignadas: [],
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -1760,8 +1787,8 @@
                 return {
                     Pendiente: t.texto,
                     Lista: pList ? pList.nombre : 'Desconocida',
-                    Fecha_Creacion: t.creadoEn ? new Date(t.creadoEn.toMillis()).toLocaleString('es-PE') : '',
-                    Fecha_Limite: t.fechaLimite || 'No definida',
+                    Fecha_Creacion: t.creadoEn ? formatTimestampToDDMMYYYY(t.creadoEn.toMillis()) : '',
+                    Fecha_Limite: t.fechaLimite ? formatDateToDDMMYYYY(t.fechaLimite) : 'No definida',
                     Criticidad: t.criticidad || '-',
                     Categoria: t.categoria,
                     Estado: t.completado ? 'Realizado' : 'Activo',
