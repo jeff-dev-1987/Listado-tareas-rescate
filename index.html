@@ -48,47 +48,6 @@
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
 
-    <div id="new-task-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
-            <button onclick="closeNewTaskModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-circle-plus text-accent"></i> Registrar Nuevo Pendiente</h3>
-            
-            <form id="task-form" class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Descripción de la Tarea</label>
-                    <textarea id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm resize-none" rows="3" required></textarea>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">F. Límite</label>
-                        <input type="date" id="new-task-date" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm" required>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Criticidad</label>
-                        <select id="new-task-crit" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm font-semibold">
-                            <option value="ALTA" class="text-rose-600">ALTA</option>
-                            <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
-                            <option value="BAJA" class="text-emerald-600">BAJA</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Categoría</label>
-                    <select id="new-task-category" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm">
-                        <option value="Operativa">Operativa</option>
-                        <option value="Administrativa">Administrativa</option>
-                        <option value="Logística">Logística</option>
-                        <option value="Entrenamiento">Entrenamiento</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
-                    <button type="button" onclick="closeNewTaskModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div id="comment-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-emerald-500 p-5 relative">
             <button onclick="closeCommentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -162,6 +121,47 @@
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
                     <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="new-task-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
+            <button onclick="closeNewTaskModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-circle-plus text-accent"></i> Registrar Nuevo Pendiente</h3>
+            
+            <form id="task-form" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Descripción de la Tarea</label>
+                    <textarea id="new-task-text" placeholder="Ej. Revisión de extintores área norte..." class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm resize-none" rows="3" required></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">F. Límite</label>
+                        <input type="date" id="new-task-date" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm" required>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Criticidad</label>
+                        <select id="new-task-crit" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm font-semibold">
+                            <option value="ALTA" class="text-rose-600">ALTA</option>
+                            <option value="MEDIA" class="text-amber-500" selected>MEDIA</option>
+                            <option value="BAJA" class="text-emerald-600">BAJA</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Categoría</label>
+                    <select id="new-task-category" class="w-full mt-1 p-2.5 border border-slate-300 rounded focus:border-accent outline-none text-sm">
+                        <option value="Operativa">Operativa</option>
+                        <option value="Administrativa">Administrativa</option>
+                        <option value="Logística">Logística</option>
+                        <option value="Entrenamiento">Entrenamiento</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeNewTaskModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-accent text-white rounded hover:bg-blue-600 transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar</button>
                 </div>
             </form>
         </div>
@@ -356,6 +356,7 @@
                             <div class="col-span-1">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Orden</label>
                                 <select id="f-orden" class="w-full p-1.5 border border-slate-300 rounded focus:border-primary outline-none mt-0.5 text-xs" onchange="renderLists()">
+                                    <option value="venc-asc">Más Próximos</option>
                                     <option value="desc">Más Nuevos</option>
                                     <option value="asc">Más Antiguos</option>
                                 </select>
@@ -795,7 +796,7 @@
         }
 
         function applyRolePermissions(role) {
-            const taskForm = document.getElementById('btn-open-new-task'); // Ahora es el botón
+            const taskForm = document.getElementById('btn-open-new-task'); 
             const tabUsers = document.getElementById('tab-users');
             const tabAudit = document.getElementById('tab-audit');
             const tabRestore = document.getElementById('tab-restore');
@@ -1193,7 +1194,6 @@
             document.getElementById('lbl-current-list-matrix').innerText = `Lista: ${listName}`;
         }
 
-        // Manejador del form del modal de Crear Tarea
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!currentListId) { alert("Cree una lista primero."); return; }
@@ -1270,7 +1270,10 @@
         function updateCreatorDropdown() {
             const select = document.getElementById('f-creador');
             const currentVal = select.value;
-            const creators = [...new Set(allTasksData.map(t => t.creador))].sort();
+            
+            const currentListTasks = allTasksData.filter(t => t.listaId === currentListId);
+            const creators = [...new Set(currentListTasks.map(t => t.creador))].sort();
+            
             let options = '<option value="">Todos</option>';
             creators.forEach(c => { options += `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${c.split(' ')[0]}</option>`; });
             select.innerHTML = options;
@@ -1290,6 +1293,7 @@
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 
+                // REGLA: SIEMPRE respetar la lista actual (incluso en búsquedas)
                 if (t.listaId !== currentListId) match = false;
 
                 if (filterOverdueActive) {
@@ -1307,9 +1311,18 @@
             });
 
             filtered.sort((a, b) => {
-                let dA = a.creadoEn ? a.creadoEn.toMillis() : 0;
-                let dB = b.creadoEn ? b.creadoEn.toMillis() : 0;
-                return sortOrder === 'desc' ? dB - dA : dA - dB;
+                if (sortOrder === 'venc-asc') {
+                    let dateA = a.fechaLimite ? new Date(a.fechaLimite + 'T00:00:00').getTime() : Infinity;
+                    let dateB = b.fechaLimite ? new Date(b.fechaLimite + 'T00:00:00').getTime() : Infinity;
+                    if (dateA !== dateB) return dateA - dateB;
+                    let cA = a.creadoEn ? a.creadoEn.toMillis() : 0;
+                    let cB = b.creadoEn ? b.creadoEn.toMillis() : 0;
+                    return cB - cA;
+                } else {
+                    let dA = a.creadoEn ? a.creadoEn.toMillis() : 0;
+                    let dB = b.creadoEn ? b.creadoEn.toMillis() : 0;
+                    return sortOrder === 'desc' ? dB - dA : dA - dB;
+                }
             });
 
             const activeList = document.getElementById('task-list-active');
@@ -1603,7 +1616,6 @@
             const fStart = document.getElementById('f-audit-date-start').value;
             const fEnd = document.getElementById('f-audit-date-end').value;
 
-            // Tratamiento de fechas para poder buscar en rango correctamente
             let startTs = fStart ? new Date(fStart + 'T00:00:00').getTime() : 0;
             let endTs = fEnd ? new Date(fEnd + 'T23:59:59').getTime() : Infinity;
 
