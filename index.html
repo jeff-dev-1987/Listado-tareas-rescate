@@ -48,6 +48,7 @@
 </head>
 <body class="bg-ejecutivoBg text-slate-800 font-sans relative flex flex-col">
 
+    <!-- Modal Comentario al Completar Tarea -->
     <div id="comment-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-emerald-500 p-5 relative">
             <button onclick="closeCommentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -61,6 +62,7 @@
         </div>
     </div>
 
+    <!-- Modal Asignar Permisos de Listas a Usuario -->
     <div id="assign-lists-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[70] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary p-5 relative flex flex-col max-h-[80vh]">
             <button onclick="closeAssignListsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -70,7 +72,8 @@
             <form id="assign-lists-form" class="flex flex-col flex-1 min-h-0">
                 <p class="text-[11px] text-slate-600 mb-2">Selecciona las listas que este usuario podrá visualizar y gestionar:</p>
                 <div id="assign-lists-container" class="flex-1 overflow-y-auto border border-slate-200 rounded bg-slate-50 p-2 mb-4 space-y-1">
-                    </div>
+                    <!-- Checkboxes generados vía JS -->
+                </div>
                 <div class="flex justify-end gap-3 pt-2 shrink-0">
                     <button type="button" onclick="closeAssignListsModal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition text-sm font-bold">Cancelar</button>
                     <button type="submit" class="px-5 py-2 bg-primary text-white rounded hover:bg-primaryDark transition shadow text-sm font-bold flex items-center gap-2"><i class="fa-solid fa-save"></i> Guardar Accesos</button>
@@ -79,6 +82,7 @@
         </div>
     </div>
 
+    <!-- Modal Editar Pendiente -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -126,6 +130,7 @@
         </div>
     </div>
 
+    <!-- Modal Registrar Nuevo Pendiente -->
     <div id="new-task-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-accent p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeNewTaskModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -167,6 +172,7 @@
         </div>
     </div>
 
+    <!-- Modal Crear/Editar Lista -->
     <div id="list-modal" class="hidden fixed inset-0 bg-slate-900 bg-opacity-60 z-[60] flex justify-center items-center p-4 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-primary p-5 relative overflow-y-auto max-h-full">
             <button onclick="closeListModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition text-xl"><i class="fa-solid fa-xmark"></i></button>
@@ -181,7 +187,8 @@
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wide">Ícono de la Lista</label>
                     <div id="icon-selector" class="flex flex-wrap gap-1 mt-1 max-h-28 overflow-y-auto p-1.5 border border-slate-300 rounded bg-slate-50">
-                        </div>
+                        <!-- Renderizado vía JS -->
+                    </div>
                     <input type="hidden" id="list-icon" value="📋">
                 </div>
 
@@ -200,6 +207,7 @@
         </div>
     </div>
 
+    <!-- Login Auth Screen -->
     <div id="auth-screen" class="flex h-full justify-center items-center bg-slate-200 p-4 relative z-50">
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-md border-t-4 border-primary overflow-y-auto max-h-full">
             <div class="text-center mb-6">
@@ -229,6 +237,7 @@
         </div>
     </div>
 
+    <!-- MAIN APP SCREEN -->
     <div id="app-screen" class="hidden-view h-full flex flex-col relative w-full overflow-hidden">
         
         <div id="sidebar-overlay" class="hidden fixed inset-0 bg-slate-900 bg-opacity-50 z-30 md:hidden backdrop-blur-sm" onclick="toggleSidebar()"></div>
@@ -261,6 +270,7 @@
         <div class="flex flex-1 overflow-hidden relative w-full min-h-0">
             
             <aside id="sidebar" class="absolute md:relative z-40 inset-y-0 left-0 bg-white border-r border-slate-200 shadow-xl md:shadow-none flex flex-col transition-[transform] duration-300 ease-in-out h-full transform -translate-x-full md:translate-x-0 shrink-0" style="width: 280px;">
+                <!-- Drag Handle for Resizing -->
                 <div id="sidebar-resizer" class="hidden md:block absolute right-0 top-0 bottom-0 w-1.5 transition-colors"></div>
                 
                 <div class="w-full flex flex-col h-full bg-white relative overflow-hidden">
@@ -293,6 +303,7 @@
                         </button>
                     </nav>
 
+                    <!-- SECCIÓN DE LISTAS -->
                     <div class="flex-1 overflow-y-auto overflow-x-hidden bg-slate-50 border-t border-slate-100">
                         <div class="px-4 py-3 flex justify-between items-center bg-slate-100/50 sticky top-0 z-10 backdrop-blur-sm">
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">Mis Listas Asignadas</span>
@@ -301,7 +312,8 @@
                             </button>
                         </div>
                         <ul id="sidebar-lists" class="px-2 pb-4 space-y-0.5">
-                            </ul>
+                            <!-- Renderizado vía JS -->
+                        </ul>
                     </div>
 
                     <div class="p-4 border-t border-slate-200 bg-slate-50 shrink-0 mt-auto overflow-hidden">
@@ -316,12 +328,14 @@
                 
                 <div id="view-tasks" class="h-full w-full overflow-y-auto p-3 sm:p-5 pb-20">
                     
+                    <!-- Botón Flotante para crear tarea (Visible solo para Admin/Editor) -->
                     <div class="flex justify-end mb-4">
                         <button id="btn-open-new-task" onclick="openNewTaskModal()" class="w-full sm:w-auto bg-accent text-white px-5 py-2.5 rounded-lg hover:bg-blue-600 transition font-bold shadow-md flex justify-center items-center gap-2 text-sm hidden-view">
                             <i class="fa-solid fa-circle-plus"></i> Registrar Nuevo Pendiente
                         </button>
                     </div>
 
+                    <!-- SECCIÓN DE BÚSQUEDA Y FILTROS -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
                         
@@ -343,6 +357,7 @@
                             </div>
                         </div>
 
+                        <!-- Filtros Integrados -->
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2.5 text-sm border-t border-slate-100 pt-3">
                             <div class="col-span-2 md:col-span-3 lg:col-span-2">
                                 <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wide block truncate">Buscar por palabra</label>
@@ -474,6 +489,7 @@
                         <h2 class="text-lg font-bold text-slate-800 border-l-4 border-primary pl-3">Registro de Auditoría <span class="text-[11px] font-normal text-slate-500 block sm:inline sm:ml-2 uppercase tracking-wider">(Modificaciones y Eliminados)</span></h2>
                     </div>
 
+                    <!-- Panel de Filtros de Auditoría -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -513,6 +529,7 @@
                     </div>
                 </div>
                 
+                <!-- VISTA PAPELERA -->
                 <div id="view-restore" class="hidden-view p-4 sm:p-6 h-full overflow-y-auto w-full block">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
                         <h2 class="text-lg font-bold text-rose-700 border-l-4 border-rose-600 pl-3">Papelera de Reciclaje</h2>
@@ -828,6 +845,65 @@
             }
         }
 
+        /* --- Drag and Drop Sidebar Lists --- */
+        window.dragList = (ev, id) => {
+            ev.dataTransfer.setData("listId", id);
+            setTimeout(() => ev.target.classList.add('opacity-50'), 0);
+        };
+        window.dragEndList = (ev) => {
+            ev.target.classList.remove('opacity-50');
+            document.querySelectorAll('#sidebar-lists li').forEach(li => {
+                li.classList.remove('border-primary');
+                li.classList.add('border-transparent');
+            });
+        };
+        window.allowDropList = (ev) => {
+            ev.preventDefault();
+            ev.dataTransfer.dropEffect = "move";
+        };
+        window.dragEnterList = (ev) => {
+            ev.preventDefault();
+            const li = ev.target.closest('li');
+            if(li) {
+                li.classList.remove('border-transparent');
+                li.classList.add('border-primary');
+            }
+        };
+        window.dragLeaveList = (ev) => {
+            const li = ev.target.closest('li');
+            if(li && !li.contains(ev.relatedTarget)) {
+                li.classList.remove('border-primary');
+                li.classList.add('border-transparent');
+            }
+        };
+        window.dropList = async (ev, targetId) => {
+            ev.preventDefault();
+            const li = ev.target.closest('li');
+            if(li) {
+                li.classList.remove('border-primary');
+                li.classList.add('border-transparent');
+            }
+
+            const draggedId = ev.dataTransfer.getData("listId");
+            if (!draggedId || draggedId === targetId) return;
+
+            const draggedIndex = activeListsData.findIndex(l => l.id === draggedId);
+            const targetIndex = activeListsData.findIndex(l => l.id === targetId);
+            
+            if (draggedIndex > -1 && targetIndex > -1) {
+                const item = activeListsData.splice(draggedIndex, 1)[0];
+                activeListsData.splice(targetIndex, 0, item);
+                renderSidebarLists(); 
+                
+                const batch = db.batch();
+                activeListsData.forEach((l, index) => {
+                    l.orden = index;
+                    batch.update(db.collection("listas").doc(l.id), { orden: index });
+                });
+                await batch.commit();
+            }
+        };
+
         /* --- Modales e Íconos --- */
         function initIconSelector() {
             const container = document.getElementById('icon-selector');
@@ -935,7 +1011,10 @@
         window.confirmTaskCompletion = async () => {
             if(!pendingCompletionTaskId) return;
             const comment = document.getElementById('task-completion-comment').value.trim();
-            const updateData = { completado: true };
+            const updateData = { 
+                completado: true,
+                fechaCompletado: firebase.firestore.FieldValue.serverTimestamp()
+            };
             if (comment) updateData.comentarioCierre = comment;
             
             await db.collection("tareas").doc(pendingCompletionTaskId).update(updateData);
@@ -1072,7 +1151,7 @@
             if (listsUnsubscribe) listsUnsubscribe();
             if (tasksUnsubscribe) tasksUnsubscribe();
 
-            listsUnsubscribe = db.collection("listas").orderBy("creadoEn", "asc").onSnapshot(snapshot => {
+            listsUnsubscribe = db.collection("listas").onSnapshot(snapshot => {
                 rawListsData = [];
                 snapshot.forEach(doc => rawListsData.push({ id: doc.id, ...doc.data() }));
                 checkMigrationAndProcess();
@@ -1091,7 +1170,8 @@
                 migrationRun = true;
                 const newListRef = await db.collection("listas").add({
                     nombre: 'PENDIENTES SUP OPERATIVA', color: '#1e3a8a', icono: '📋', eliminado: false,
-                    creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema'
+                    creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creador: 'Sistema',
+                    orden: 0
                 });
                 
                 const tSnap = await db.collection("tareas").get();
@@ -1118,6 +1198,16 @@
                     if (l.eliminado) deletedListsData.push(l);
                     else activeListsData.push(l);
                 }
+            });
+
+            // Ordenamiento por el campo arrastrado 'orden'
+            activeListsData.sort((a, b) => {
+                let oA = typeof a.orden === 'number' ? a.orden : 99999;
+                let oB = typeof b.orden === 'number' ? b.orden : 99999;
+                if(oA !== oB) return oA - oB;
+                let dA = a.creadoEn ? a.creadoEn.toMillis() : 0;
+                let dB = b.creadoEn ? b.creadoEn.toMillis() : 0;
+                return dA - dB;
             });
 
             allTasksData = [];
@@ -1158,11 +1248,13 @@
                     `<button onclick="openEditListModal('${l.id}'); event.stopPropagation();" class="text-slate-400 hover:text-blue-600 p-1.5 rounded hover:bg-blue-100 transition" title="Editar Lista"><i class="fa-solid fa-pen text-[11px]"></i></button>
                      <button onclick="deleteList('${l.id}'); event.stopPropagation();" class="text-slate-400 hover:text-rose-600 p-1.5 rounded hover:bg-rose-100 transition" title="Eliminar Lista"><i class="fa-solid fa-trash text-[11px]"></i></button>` : '';
 
+                const dragProps = currentUserData.rol === 'admin' ? `draggable="true" ondragstart="dragList(event, '${l.id}')" ondragend="dragEndList(event)" ondragover="allowDropList(event)" ondragenter="dragEnterList(event)" ondragleave="dragLeaveList(event)" ondrop="dropList(event, '${l.id}')"` : '';
+
                 container.innerHTML += `
-                    <li onclick="selectList('${l.id}')" class="cursor-pointer px-3 py-2.5 rounded-r-lg flex items-center gap-2.5 text-sm transition group ${active}">
-                        <div class="text-base leading-none">${l.icono || '📋'}</div>
-                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0" style="background-color: ${l.color}"></div>
-                        <span class="truncate flex-1 tracking-wide">${l.nombre}</span>
+                    <li ${dragProps} onclick="selectList('${l.id}')" class="list-item-drag cursor-pointer px-3 py-2.5 rounded-r-lg flex items-center gap-2.5 text-sm transition-all duration-200 group ${active}">
+                        <div class="text-base leading-none pointer-events-none">${l.icono || '📋'}</div>
+                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0 pointer-events-none" style="background-color: ${l.color}"></div>
+                        <span class="truncate flex-1 tracking-wide pointer-events-none">${l.nombre}</span>
                         <div class="hidden lg:flex gap-0.5 opacity-0 group-hover:opacity-100 transition shrink-0">
                             ${actionBtns}
                         </div>
@@ -1230,7 +1322,7 @@
                 await db.collection("listas").doc(currentEditListId).update({ nombre: name, color: color, icono: icon });
             } else {
                 const newListRef = await db.collection("listas").add({
-                    nombre: name, color: color, icono: icon, eliminado: false,
+                    nombre: name, color: color, icono: icon, eliminado: false, orden: activeListsData.length,
                     creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                     creador: currentUserData.nombre
                 });
@@ -1293,7 +1385,6 @@
             let filtered = allTasksData.filter(t => {
                 let match = true;
                 
-                // REGLA: SIEMPRE respetar la lista actual (incluso en búsquedas)
                 if (t.listaId !== currentListId) match = false;
 
                 if (filterOverdueActive) {
@@ -1346,6 +1437,8 @@
             filtered.forEach(t => {
                 const dateStr = t.creadoEn ? formatTimestampToDDMMYYYY(t.creadoEn.toMillis()) : '...';
                 const fLimStrUI = t.fechaLimite ? formatDateToDDMMYYYY(t.fechaLimite) : 'Sin límite';
+                const fCompStrUI = t.fechaCompletado ? formatTimestampToDDMMYYYY(t.fechaCompletado.toMillis()) : '';
+
                 const isChecked = t.completado ? 'checked' : '';
                 const txtClass = t.completado ? 'line-through text-slate-400' : 'text-slate-700 font-medium';
                 const critClass = getCritColor(t.criticidad);
@@ -1369,6 +1462,10 @@
                 if (isOverdue) {
                     dateBadgeList = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStrUI}</span>`;
                     dateBadgeMatrix = `<span class="font-bold text-rose-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Venció: ${fLimStrUI}</span>`;
+                }
+
+                if (t.completado && fCompStrUI) {
+                    dateBadgeList += `<span class="hidden sm:inline text-slate-300">|</span> <span class="font-bold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Cerrado: ${fCompStrUI}</span>`;
                 }
 
                 const commentHTML = t.comentarioCierre ? `<div class="text-[10px] text-emerald-700 bg-emerald-50 p-2 mt-2 rounded border border-emerald-100 flex items-start gap-1.5"><i class="fa-solid fa-comment-dots mt-0.5"></i> <span class="leading-tight">${t.comentarioCierre}</span></div>` : '';
@@ -1515,7 +1612,11 @@
                 document.getElementById('task-completion-comment').value = '';
                 document.getElementById('comment-modal').classList.remove('hidden');
             } else {
-                await db.collection("tareas").doc(id).update({ completado: false, comentarioCierre: firebase.firestore.FieldValue.delete() }); 
+                await db.collection("tareas").doc(id).update({ 
+                    completado: false, 
+                    comentarioCierre: firebase.firestore.FieldValue.delete(),
+                    fechaCompletado: firebase.firestore.FieldValue.delete()
+                }); 
             }
         };
 
@@ -1538,18 +1639,6 @@
                 await db.collection("tareas").doc(id).update({ eliminado: true, eliminadoPor: currentUserData.nombre, fechaEliminado: formatDateTimeToDDMMYYYYHHMM(new Date()) });
             }
         };
-
-        window.drag = (ev) => {
-            ev.dataTransfer.setData("taskId", ev.target.closest('.task-card').dataset.id);
-            ev.dataTransfer.effectAllowed = "move";
-        }
-        window.allowDrop = (ev) => { ev.preventDefault(); ev.dataTransfer.dropEffect = "move"; }
-        window.drop = async (ev, cuadrante) => {
-            ev.preventDefault();
-            if (currentUserData.rol === 'lector') return;
-            const id = ev.dataTransfer.getData("taskId");
-            if(id) await db.collection("tareas").doc(id).update({ cuadrante: cuadrante });
-        }
 
         /* =========================================
            7. PAPELERA (ADMIN)
